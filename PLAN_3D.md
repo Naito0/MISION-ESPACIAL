@@ -120,7 +120,18 @@ Al final de cada fase: `npm test`, `npm run build`, prueba en el navegador y un 
 7. **Datos científicos:** solo se usan los de `destinos.json` y `misiones_reales.json` (fuentes NASA). Los consumos de oxígeno, agua y comida quedan marcados "aproximado/verificar".
 8. **Pedido anterior sin terminar** ("Juego divertido" 3 a 7): hay que decidir si se abandona o se completa en el modo clásico.
 
-## 9. Decisiones que necesito del equipo antes de empezar
+## 9. Registro de avance
+
+| Fase | Estado | Cómo se comprobó |
+|---|---|---|
+| 0 Auditoría | ✔ Hecha | 22/22 pruebas, build correcto |
+| 1 Motor | ✔ Hecha | Build con dos páginas; escena 3D con sombras, niebla, menú ESC y calidad, sin errores en el navegador |
+| 2 Astronauta | ✔ Hecha | Teclas reales en el navegador: camina, corre, salta (sube ~0,7 m y vuelve a apoyarse), se detiene contra la pared (z = −19,45) y contra una caja (z = −2,65); la cámara gira y no atraviesa paredes |
+| 3 Base espacial | Pendiente | — |
+
+Nota de rendimiento: en el navegador de prueba (sin GPU, render por software) va a 20-45 FPS en calidad Media; con una GPU real debería ir mucho más rápido.
+
+## 10. Decisiones que necesito del equipo antes de empezar
 
 1. ¿Aprueban **Three.js** (única dependencia nueva)?
 2. ¿Qué fase tiene que estar lista para la demo? Mi recomendación: fases 1 a 3 (caminar por la base 3D) es lo realista para mostrar.
