@@ -84,7 +84,9 @@ export default class EscenaInforme extends Phaser.Scene {
     const resumen = estado.simulacion ? estado.simulacion.resumen : null;
     const L = estado.lanzamiento;
 
-    const requisitos = evaluarRequisitos({ mision, lanzamiento: L, aterrizaje: estado.aterrizaje, resumen, presupuesto: estado.presupuesto });
+    const requisitos = evaluarRequisitos({
+      mision, lanzamiento: L, aterrizaje: estado.aterrizaje, resumen, presupuesto: estado.presupuesto, soporte: a.soporte
+    });
     const puntaje = calcularPuntaje({
       requisitos, resumen, mision, lanzamiento: L, presupuesto: estado.presupuesto,
       modoEquipo: esEquipo(), metasRoles: L.metas, config: CONFIG
@@ -93,6 +95,7 @@ export default class EscenaInforme extends Phaser.Scene {
       mision, destino: destinoActual(), orbita: orbitaActual(), cohete: coheteActual(),
       coheteBarato: L.coheteBaratoId ? buscarCohete(L.coheteBaratoId) : null,
       diseno: a.diseno, ambiente: a.ambiente, lanzamiento: L, aterrizaje: estado.aterrizaje,
+      viaje: estado.viaje, soporte: a.soporte,
       resumen, metasRoles: L.metas, modoEquipo: esEquipo(), presupuesto: estado.presupuesto, config: CONFIG
     });
 

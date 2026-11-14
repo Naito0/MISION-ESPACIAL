@@ -5,7 +5,7 @@
     { "nombre": "Requisitos", "explicacion": "Qué debe lograr la misión" },
     { "nombre": "Compensaciones", "explicacion": "Probar y comparar diseños A y B" },
     { "nombre": "Diseño puntual", "explicacion": "Órbita, cohete y diseño final" },
-    { "nombre": "Lanzamiento", "explicacion": "¡Despegue!" },
+    { "nombre": "Lanzamiento y viaje", "explicacion": "Despegue y travesía con averías" },
     { "nombre": "Operación", "explicacion": "Simular y evaluar resultados" }
   ],
   "niveles": {
@@ -16,16 +16,18 @@
       "factorPresupuesto": 1.0,
       "eventos": 1,
       "ayudas": true,
-      "reintentarAterrizaje": true
+      "reintentarAterrizaje": true,
+      "segundosMinijuego": 25
     },
     "2": {
       "nombre": "Nivel 2 · Misión",
-      "descripcion": "Una misión con un objetivo (Tierra, Luna o Marte). Componentes simples y avanzados, 2 eventos y consejos en pantalla.",
+      "descripcion": "Una misión con un objetivo: Tierra, Luna, Marte o una expedición tripulada con soporte vital. Componentes simples y avanzados, 2 eventos y consejos en pantalla.",
       "nivelesComponentes": ["simple", "avanzado"],
       "factorPresupuesto": 1.0,
       "eventos": 2,
       "ayudas": true,
-      "reintentarAterrizaje": false
+      "reintentarAterrizaje": false,
+      "segundosMinijuego": 18
     },
     "3": {
       "nombre": "Nivel 3 · Varios objetivos",
@@ -34,7 +36,8 @@
       "factorPresupuesto": 0.9,
       "eventos": 3,
       "ayudas": false,
-      "reintentarAterrizaje": false
+      "reintentarAterrizaje": false,
+      "segundosMinijuego": 14
     }
   },
   "barras": {

@@ -15,6 +15,7 @@
         "factorSolar": 1.0,
         "factorComunicacion": 1.0,
         "alcanceRequerido": 1,
+        "diasViaje": 1, "averiasViaje": 1,
         "frenadoAtmosferico": 0
       }
     },
@@ -32,6 +33,7 @@
         "factorSolar": 1.0,
         "factorComunicacion": 0.6,
         "alcanceRequerido": 2,
+        "diasViaje": 4, "averiasViaje": 2,
         "frenadoAtmosferico": 0
       }
     },
@@ -49,6 +51,7 @@
         "factorSolar": 0.43,
         "factorComunicacion": 0.15,
         "alcanceRequerido": 3,
+        "diasViaje": 210, "averiasViaje": 3,
         "frenadoAtmosferico": 0.0004,
         "_nota": "factorSolar: Marte recibe ~43% de la luz solar que la Tierra. frenadoAtmosferico es k en a = k·v² (solo se usa si una misión aterriza en Marte)."
       }

@@ -55,11 +55,33 @@ export function generarExplicaciones(c) {
   const ins = L.insercion;
   if (!ins.ok) {
     mal(`Para entrar en ${orbita.nombre.toLowerCase()} hacían falta ${ins.necesario} kg de combustible ` +
-      `(${pct(orbita.factorCombustible)} de la masa de la nave), pero solo había ${d.combustible} kg. ` +
+      `(${pct(orbita.factorCombustible)} de la masa de la nave), pero solo había ${r1(ins.disponible ?? d.combustible)} kg. ` +
       (mision.aterriza ? 'La nave llegó sin combustible para frenar el descenso.' : 'La nave no pudo quedarse en órbita y se perdió la misión.') +
       ' Hacía falta más combustible, una nave más liviana o una órbita más fácil de alcanzar.');
   } else if (ins.necesario > 0) {
     info(`Entrar en la órbita gastó ${ins.gastado} kg de combustible (quedaron ${r1(ins.quedan)} kg).`);
+  }
+
+  // ---------- Travesía: averías y minijuegos de reparación ----------
+  const V = c.viaje;
+  if (V) {
+    for (const a of V.averias) {
+      if (a.resultado === 'mitigada') bien(`Viaje · ${a.nombre}: ${a.texto} El diseño evitó la avería.`);
+      else if (a.resultado === 'reparada') bien(`Viaje · ${a.nombre}: ${a.texto} La reparación rápida del equipo salvó la misión.`);
+      else mal(`Viaje · ${a.nombre}: ${a.texto} ${a.explicacion}`);
+    }
+    if (V.perdidaCombustible > 0) {
+      info(`Por las averías del viaje se perdió el ${pct(V.perdidaCombustible)} del combustible antes de llegar.`);
+    }
+  }
+
+  // ---------- Soporte vital (misiones tripuladas) ----------
+  const S = c.soporte;
+  if (mision.tripulada && S) {
+    const t = `Soporte vital: ${mision.tripulantes} astronautas × ${S.diasMision} días (ida, ${mision.diasSuperficie} días en la superficie` +
+      `${V && V.diasExtra ? `, ${V.diasExtra} día(s) de demora` : ''} y vuelta) = ${S.necesario} días-persona; la nave llevaba ${S.disponible}.`;
+    if (S.suficiente) bien(`${t} La tripulación volvió a salvo.`);
+    else mal(`${t} ¡No alcanzó! La tripulación tuvo que volver antes de tiempo. Más suministros (o reciclaje de aire y agua) habrían dado margen.`);
   }
 
   // ---------- Aterrizaje ----------

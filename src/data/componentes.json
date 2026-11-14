@@ -1,8 +1,9 @@
 {
-  "_comentario": "Componentes por disciplina de ingeniería (como en el Mission Design Lab). costo en M$, masa en kg, energia en W (+ genera, − consume), datos en GB/día, valorCientifico en puntos por mes. nivel: 'simple' o 'avanzado'. escala: 'cubesat' o 'normal' (cada misión usa una). confiabilidad: 'probado' (probado en vuelo) o 'nuevo' (más riesgo de falla). efectos: protecciones contra eventos. segmento: segmento de la misión que decide esa categoría en el modo equipo.",
+  "_comentario": "Componentes por disciplina de ingeniería (como en el Mission Design Lab). costo en M$, masa en kg, energia en W (+ genera, − consume), datos en GB/día, valorCientifico en puntos por mes. nivel: 'simple' o 'avanzado'. escala: 'cubesat' o 'normal' (cada misión usa una). confiabilidad: 'probado' (probado en vuelo) o 'nuevo' (más riesgo de falla). efectos: protecciones contra eventos. segmento: segmento de una misión de la NASA al que pertenece (informativo; qué rol decide cada categoría está en roles.json). porQueImporta: tarjeta educativa de la categoría. soloTripulada: solo aparece en misiones con tripulación.",
   "categorias": [
     {
       "id": "estructura", "nombre": "Estructura", "disciplina": "Estructura", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "Si la estructura no aguanta la masa, la nave se rompe en el lanzamiento. Una más fuerte pesa más, y más masa exige un cohete más caro y más combustible.",
       "ayuda": "El esqueleto de la nave: define cuánto peso aguanta y cuánto dura.",
       "opciones": [
         { "id": "cs_chasis3u", "escala": "cubesat", "nombre": "Chasis CubeSat 3U", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 1.0, "energia": 0,
@@ -24,6 +25,7 @@
     },
     {
       "id": "paneles", "nombre": "Paneles solares", "disciplina": "Energía", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "Sin energía no funciona nada. Más paneles dan más energía, pero suman masa y costo; lejos del Sol (Marte) rinden menos.",
       "ayuda": "Convierten la luz del Sol en electricidad. Lejos del Sol o a la sombra rinden menos.",
       "opciones": [
         { "id": "cs_pan_cuerpo", "escala": "cubesat", "nombre": "Paneles en el cuerpo", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": 7, "mesesDesarrollo": 3, "aproximado": true,
@@ -42,6 +44,7 @@
     },
     {
       "id": "baterias", "nombre": "Baterías", "disciplina": "Energía", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "Cada vuelta a la órbita pasa por la sombra: sin batería suficiente, los instrumentos se apagan justo ahí.",
       "ayuda": "Guardan energía para cuando la nave pasa por la sombra.",
       "opciones": [
         { "id": "cs_bat20", "escala": "cubesat", "nombre": "Batería 20 Wh", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": 0, "capacidadWh": 20, "mesesDesarrollo": 2, "aproximado": true,
@@ -59,6 +62,7 @@
     },
     {
       "id": "propulsion", "nombre": "Propulsión", "disciplina": "Propulsión", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "Más combustible permite entrar en órbitas difíciles y aterrizar con calma, pero cada kg extra hay que lanzarlo, y eso cuesta.",
       "ayuda": "Motor + combustible para entrar en órbita, mantenerse en ella y (si hace falta) aterrizar.",
       "opciones": [
         { "id": "cs_sin_prop", "escala": "cubesat", "nombre": "Sin propulsión", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0, "energia": 0, "combustible": 0, "empuje": 0, "consumo": 0, "bonusVidaMeses": 0, "mesesDesarrollo": 0, "aproximado": true,
@@ -75,6 +79,7 @@
     },
     {
       "id": "termica", "nombre": "Control térmico", "disciplina": "Térmica", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "En el espacio se pasa de +120 °C al sol a -150 °C a la sombra. Sin control térmico, la electrónica falla y la nave dura menos.",
       "ayuda": "Mantiene la temperatura: en el espacio hace muchísimo frío a la sombra y calor al sol.",
       "opciones": [
         { "id": "cs_cinta", "escala": "cubesat", "nombre": "Pintura y cinta térmica", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0.05, "energia": 0, "factorVida": 0.9, "mesesDesarrollo": 1, "aproximado": true,
@@ -91,6 +96,7 @@
     },
     {
       "id": "avionica", "nombre": "Aviónica", "disciplina": "Aviónica (computadora y software)", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "La computadora guarda los datos hasta que se pueden enviar. Poca memoria = datos perdidos cuando la antena no da abasto.",
       "ayuda": "La computadora y el software de vuelo: controlan la nave y guardan los datos hasta enviarlos.",
       "opciones": [
         { "id": "cs_obc", "escala": "cubesat", "nombre": "Computadora CubeSat", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -1.5, "almacenamientoGB": 8, "mesesDesarrollo": 3, "aproximado": true,
@@ -108,6 +114,7 @@
     },
     {
       "id": "actitud", "nombre": "Control de actitud", "disciplina": "Control de actitud", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "porQueImporta": "Si la nave no apunta bien, las fotos salen movidas y los datos valen menos. Apuntar mejor cuesta energía y dinero.",
       "ayuda": "Mantiene la nave apuntando hacia donde debe. Mejor puntería = mejores datos.",
       "opciones": [
         { "id": "cs_magnet", "escala": "cubesat", "nombre": "Imanes (magnetorquers)", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.2, "energia": -1, "precision": 0.7, "mesesDesarrollo": 2, "aproximado": true,
@@ -124,6 +131,7 @@
     },
     {
       "id": "antena", "nombre": "Antena", "disciplina": "Comunicaciones", "segmento": "terrestre", "obligatoria": true, "multiple": false,
+      "porQueImporta": "De nada sirve la mejor ciencia si no llega a la Tierra. Una antena mejor envía más datos, pero pesa y gasta energía.",
       "ayuda": "Envía los datos a la Tierra. Más lejos = señal más débil.",
       "opciones": [
         { "id": "cs_uhf", "escala": "cubesat", "nombre": "Antena UHF", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -2, "tasa": 0.1, "alcance": 1, "mesesDesarrollo": 2, "aproximado": true,
@@ -140,6 +148,7 @@
     },
     {
       "id": "estaciones", "nombre": "Estaciones terrenas", "disciplina": "Comunicaciones", "segmento": "terrestre", "obligatoria": true, "multiple": false,
+      "porQueImporta": "La nave solo puede enviar datos cuando ve una antena en tierra. Más estaciones = más contacto, pero cuestan.",
       "ayuda": "Las antenas en tierra que reciben los datos. Más estaciones repartidas por el mundo = más tiempo de contacto.",
       "opciones": [
         { "id": "cs_est_uni", "escala": "cubesat", "nombre": "Estación universitaria", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0, "energia": 0, "factorContacto": 0.5, "mesesDesarrollo": 2, "aproximado": true,
@@ -156,6 +165,7 @@
     },
     {
       "id": "instrumentos", "nombre": "Instrumentos científicos", "disciplina": "Instrumentos", "segmento": "usuario", "obligatoria": false, "multiple": true,
+      "porQueImporta": "Agregar un segundo instrumento puede duplicar los puntos científicos, pero también exige más energía, más datos, más masa y quizás un cohete más caro.",
       "ayuda": "Hacen la ciencia. Más instrumentos = más valor, pero también más masa, energía, datos y costo. Los que no sirven para el objetivo aparecen desactivados.",
       "opciones": [
         { "id": "cs_camara", "escala": "cubesat", "nombre": "Cámara CubeSat", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": -2, "datos": 0.3, "valorCientifico": 4, "mesesDesarrollo": 3, "aproximado": true,
@@ -176,6 +186,19 @@
           "tooltip": "Detecta hidrógeno bajo el suelo, una pista de hielo de agua. Casi no genera datos." },
         { "id": "radar", "escala": "normal", "nombre": "Radar", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 35, "masa": 40, "energia": -80, "datos": 5, "valorCientifico": 20, "mesesDesarrollo": 16, "aproximado": true,
           "tooltip": "Ve a través de nubes, humo, polvo y bajo la superficie. Pesado y muy gastador de energía." }
+      ]
+    },
+    {
+      "id": "soporte", "nombre": "Soporte vital", "disciplina": "Soporte vital (tripulación)", "segmento": "espacial", "obligatoria": false, "multiple": false, "soloTripulada": true,
+      "porQueImporta": "Cada astronauta necesita por día unos 0,8 kg de oxígeno y casi 2 kg de comida y agua. Si los suministros no alcanzan para la ida, la estadía y la vuelta, la tripulación no regresa a salvo.",
+      "ayuda": "Cabina, oxígeno, agua y comida para la tripulación. Se mide en días-persona (1 persona durante 1 día).",
+      "opciones": [
+        { "id": "sv_basico", "escala": "normal", "nombre": "Cabina + 30 días-persona", "nivel": "simple", "confiabilidad": "probado", "costo": 60, "masa": 300, "energia": -40, "diasPersona": 30, "mesesDesarrollo": 12, "aproximado": true,
+          "tooltip": "Justo lo necesario para 2 astronautas en una misión corta. Cualquier demora es peligrosa." },
+        { "id": "sv_reserva", "escala": "normal", "nombre": "Cabina + 45 días-persona", "nivel": "simple", "confiabilidad": "probado", "costo": 75, "masa": 360, "energia": -40, "diasPersona": 45, "mesesDesarrollo": 12, "aproximado": true,
+          "tooltip": "50% de reserva: permite resolver averías sin poner en riesgo a la tripulación, pero pesa 60 kg más." },
+        { "id": "sv_reciclaje", "escala": "normal", "nombre": "Cabina con reciclaje de aire y agua", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 120, "masa": 340, "energia": -90, "diasPersona": 60, "mesesDesarrollo": 18, "aproximado": true,
+          "tooltip": "Recicla aire y agua como en una estación espacial: 60 días-persona con poca masa, pero es caro, nuevo y gasta mucha energía." }
       ]
     }
   ]

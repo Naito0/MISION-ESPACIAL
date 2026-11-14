@@ -33,6 +33,11 @@ export default class EscenaRequisitos extends Phaser.Scene {
         ? `• Aterrizar en ${d.nombre} (gravedad ${d.gravedad} m/s²): necesitas un motor con empuje mayor que el peso y combustible para frenar.`
         : `• Trabajar desde una órbita de ${d.nombre}. Opciones: ${orbitas}.`,
       `• Comunicarse desde ${NOMBRE_ALCANCE[d.juego.alcanceRequerido]}: la antena debe tener ese alcance.`,
+      ...(m.tripulada ? [
+        `• Mantener con vida a ${m.tripulantes} astronautas: ${d.juego.diasViaje} días de ida, ${m.diasSuperficie} en la superficie y ${d.juego.diasViaje} de vuelta = ` +
+        `${m.tripulantes * (2 * d.juego.diasViaje + m.diasSuperficie)} días-persona de oxígeno, agua y comida (sin contar demoras).`
+      ] : []),
+      `• Superar las averías del viaje (${d.juego.diasViaje} día(s) de travesía): o el diseño las evita, o el equipo las repara a tiempo.`,
       `• Costar como máximo ${estado.presupuesto} M$ (nave + cohete).`,
       `• Estar lista en ${m.plazoMeses} meses de desarrollo.`,
       '',

@@ -89,6 +89,38 @@
       "inspiradoEn": "Misiones reales de búsqueda de agua en el polo sur lunar (aproximado)."
     },
     {
+      "id": "luna_tripulada",
+      "nivel": 2,
+      "nombre": "Expedición tripulada a la Luna",
+      "tipoNave": "Módulo tripulado",
+      "escala": "normal",
+      "destino": "luna",
+      "aterriza": true,
+      "tripulada": true,
+      "tripulantes": 2,
+      "diasSuperficie": 7,
+      "resumen": "Dos astronautas viajan a la Luna, aterrizan, analizan muestras del suelo durante una semana y vuelven a casa. Hay que mantenerlos con vida: oxígeno, agua y comida para todo el viaje.",
+      "presupuesto": 520,
+      "plazoMeses": 24,
+      "duracionMeses": 1,
+      "requisitos": { "datosMinimosGB": 5, "vidaMinMeses": 1 },
+      "orbitaSugerida": "luna_alta",
+      "superficie": {
+        "factorSolar": 1.0, "eclipse": 0.1, "horasSombra": 2, "contacto": 0.8, "factorDatos": 1.0, "factorVida": 1.0,
+        "_nota": "Se aterriza de día en una zona ecuatorial: mucho sol y buena vista de la Tierra."
+      },
+      "objetivos": [
+        { "id": "muestras", "nombre": "Analizar muestras del suelo",
+          "descripcion": "Recolectar y analizar rocas y polvo lunar para entender cómo se formó la Luna.",
+          "instrumentos": { "espectrometro": 2, "detector_neutrones": 1.5, "cam_simple": 1, "cam_alta": 1, "radar": 1 }, "valorMinimo": 20 }
+      ],
+      "incompatibles": { "termometro": "En una expedición corta de día, la cámara infrarroja aporta poco al análisis de muestras." },
+      "valorReferencia": 50,
+      "metaValorMensual": 25,
+      "misionesReales": ["apollo11", "apollo17"],
+      "inspiradoEn": "Las misiones Apolo que llevaron astronautas a la Luna (aproximado)."
+    },
+    {
       "id": "marte_mapa",
       "nivel": 2,
       "nombre": "Cartógrafo de Marte",

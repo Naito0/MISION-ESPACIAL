@@ -8,7 +8,7 @@ const limitar = (x, min, max) => Math.max(min, Math.min(max, x));
 
 /**
  * Lista de requisitos con ok/no ok.
- * p = { mision, lanzamiento, aterrizaje, resumen, presupuesto }
+ * p = { mision, lanzamiento, aterrizaje, resumen, presupuesto, soporte (solo si es tripulada) }
  */
 export function evaluarRequisitos(p) {
   const { mision, lanzamiento, aterrizaje, resumen, presupuesto } = p;
@@ -30,6 +30,11 @@ export function evaluarRequisitos(p) {
     { id: 'vida', ok: meses >= req.vidaMinMeses,
       texto: `Funcionar al menos ${req.vidaMinMeses} meses (funcionó ${meses})` }
   );
+  // Misión tripulada: la tripulación debe volver a salvo
+  if (mision.tripulada && p.soporte) {
+    lista.push({ id: 'tripulacion', ok: p.soporte.suficiente && !!(aterrizaje && aterrizaje.exito),
+      texto: `La tripulación vuelve a salvo (soporte vital ${p.soporte.disponible}/${p.soporte.necesario} días-persona)` });
+  }
   // Un requisito por cada objetivo científico
   for (const obj of mision.objetivos) {
     const valor = resumen ? resumen.valorObjetivos[obj.id] || 0 : 0;
@@ -78,7 +83,7 @@ export function calcularPuntaje(p) {
     const metas = p.metasRoles || [];
     const ok = metas.filter((m) => m.ok).length;
     categorias.push({
-      id: 'colaboracion', nombre: 'Colaboración (metas de segmento)',
+      id: 'colaboracion', nombre: 'Colaboración (metas de cada rol)',
       puntos: metas.length ? Math.round(cfg.maxColaboracion * ok / metas.length) : 0,
       max: cfg.maxColaboracion
     });

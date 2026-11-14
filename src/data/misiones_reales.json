@@ -14,6 +14,18 @@
       "verificar": ["fuente"]
     },
     {
+      "id": "apollo11", "nombre": "Apolo 11", "lanzamiento": 1969, "destino": "luna", "tipo": "Misión tripulada",
+      "descripcion": "Primera vez que personas caminaron sobre la Luna. Los astronautas recolectaron muestras de rocas y suelo y volvieron a la Tierra.",
+      "fuente": "https://www.nasa.gov/mission/apollo-11/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "apollo17", "nombre": "Apolo 17", "lanzamiento": 1972, "destino": "luna", "tipo": "Misión tripulada",
+      "descripcion": "Última misión Apolo a la Luna; llevó al primer geólogo a la superficie y trajo la mayor cantidad de muestras del programa.",
+      "fuente": "https://www.nasa.gov/mission/apollo-17/",
+      "verificar": ["fuente", "descripcion"]
+    },
+    {
       "id": "lcross", "nombre": "LCROSS", "lanzamiento": 2009, "destino": "luna", "tipo": "Impactador",
       "descripcion": "Hizo chocar la etapa superior de su cohete contra el cráter Cabeus, cerca del polo sur lunar, y detectó agua en la nube de material que se levantó.",
       "fuente": "https://science.nasa.gov/mission/lcross/",

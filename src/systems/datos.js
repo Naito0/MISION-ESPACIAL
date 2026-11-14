@@ -21,6 +21,7 @@ export const ORBITAS = orbitasJson.orbitas;
 export const MISIONES = misionesJson.misiones;
 export const MISIONES_REALES = misionesRealesJson.misiones;
 export const EVENTOS = eventosJson.eventos;
+export const AVERIAS_VIAJE = eventosJson.averiasViaje;
 export const ROLES = rolesJson.roles;
 export const CONFIG = configJson;
 

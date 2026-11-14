@@ -9,6 +9,7 @@ import { CONFIG, EVENTOS } from '../systems/datos.js';
 import { estado, analizarDiseno, misionActual, destinoActual, orbitaActual, nivel } from '../systems/estadoMision.js';
 import { sortearEventos } from '../systems/eventos.js';
 import { simularMision } from '../systems/simulacion.js';
+import { aplicarDaniosAlDiseno } from '../systems/averias.js';
 import { ANCHO, COLORES, texto, titulo, panel, boton, barra, ventana, estrellas, barraFases } from '../ui/ui.js';
 
 const LINEA = { x0: 60, x1: 1220, y: 610 };
@@ -31,7 +32,8 @@ export default class EscenaSimulacion extends Phaser.Scene {
       const a = analizarDiseno();
       const eventos = sortearEventos(EVENTOS, nivel().eventos, mision.duracionMeses, a.diseno.riesgo, CONFIG.riesgo.multiplicadorFallas);
       estado.simulacion = simularMision({
-        diseno: a.diseno, ambiente: a.ambiente, vidaEsperada: a.vidaEsperada,
+        diseno: aplicarDaniosAlDiseno(a.diseno, estado.viaje), // las averías no reparadas del viaje cuentan
+        ambiente: a.ambiente, vidaEsperada: a.vidaEsperada,
         duracionMeses: mision.duracionMeses, eventos, insercionOk: estado.lanzamiento.insercion.ok,
         objetivos: mision.objetivos, diasPorMes: CONFIG.simulacion.diasPorMes
       });
@@ -85,7 +87,7 @@ export default class EscenaSimulacion extends Phaser.Scene {
       ventana(this, {
         tituloTexto: 'La nave no llegó a operar',
         cuerpo: `Para entrar en ${orbitaActual().nombre} hacían falta ${estado.lanzamiento.insercion.necesario} kg de combustible ` +
-          `y solo había ${analizarDiseno().diseno.combustible} kg. Revisa el informe para ver qué cambiar.`,
+          `y solo había ${Math.round(estado.lanzamiento.insercion.disponible * 10) / 10} kg. Revisa el informe para ver qué cambiar.`,
         colorFondo: 0x3a1620, colorTitulo: COLORES.mal, textoBoton: 'Ver informe', alCerrar: () => this.scene.start('Informe')
       });
       return;

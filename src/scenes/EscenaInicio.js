@@ -70,7 +70,7 @@ export default class EscenaInicio extends Phaser.Scene {
     if (o.modo === 'individual') {
       this.textoModo.setText(
         'Juegas tú solo y decides todo el diseño.\n\n' +
-        'Verás las metas de los 4 segmentos de una misión (lanzamiento, espacial, terrestre y usuario) como consejos: ' +
+        'Verás las metas de los 4 roles del equipo (Comandante, Ingeniero, Científico/médico y Comunicaciones) como consejos: ' +
         'muchas veces chocan entre sí y tendrás que buscar un equilibrio.'
       );
     } else {
@@ -78,7 +78,7 @@ export default class EscenaInicio extends Phaser.Scene {
         .map((j) => `Jugador ${j.jugador}: ${j.roles.map((id) => ROLES.find((r) => r.id === id).nombre).join(' + ')}`)
         .join('\n');
       this.textoModo.setText(
-        `Juegan ${o.numJugadores} personas en esta computadora, por turnos. Cada uno maneja un segmento de la misión ` +
+        `Juegan ${o.numJugadores} personas en esta computadora, por turnos. Cada uno tiene un rol con su parte de la nave ` +
         'y solo cambia su parte. El presupuesto es compartido: ¡negocien! Antes de lanzar, todos deben aprobar el diseño.\n\n' + reparto
       );
     }

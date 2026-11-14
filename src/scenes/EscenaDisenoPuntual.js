@@ -1,6 +1,6 @@
 // =============================================================
 // FASE 4 — DISEÑO PUNTUAL: órbita (con diagrama 2D), cohete, lista final
-// de equipos con masa, energía y costo, y aprobación de los segmentos.
+// de equipos con masa, energía y costo, y aprobación de cada rol.
 // El juego verifica que la masa y la órbita sean compatibles con el cohete
 // y explica por qué no.
 // =============================================================
@@ -68,7 +68,7 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
     this.textoTurno = texto(this, 440, 655, '', { tam: 13, ancho: 400, color: COLORES.aviso });
     this.botonesAprobar = [];
     if (esEquipo()) {
-      texto(this, 875, 470, 'Aprobar diseño (cada segmento, en su turno):', { tam: 13, negrita: true });
+      texto(this, 875, 470, 'Aprobar diseño (cada rol, en su turno):', { tam: 13, negrita: true });
       this.botonesAprobar = ROLES.map((r, i) =>
         boton(this, 970 + (i % 2) * 190, 515 + Math.floor(i / 2) * 50, 182, 44, '', () => this.aprobar(r.id), { tam: 12 })
       );
@@ -208,7 +208,8 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
       (a.retraso ? ` + retraso ${a.retraso}` : '') + ` = ${a.costoTotal} de ${estado.presupuesto} M$\n` +
       `Datos: genera ${a.operativo.datosGeneradosDia.toFixed(2)} / envía ${a.operativo.capacidadEnvioDia.toFixed(2)} GB/día\n` +
       `Vida esperada: ${a.vidaEsperada} meses (se piden ${a.mision.requisitos.vidaMinMeses})\n` +
-      `Riesgo de falla: ${Math.round(a.diseno.riesgo * 100)}% · Valor científico: ${a.valorMes.toFixed(1)}/mes`
+      `Riesgo de falla: ${Math.round(a.diseno.riesgo * 100)}% · Valor científico: ${a.valorMes.toFixed(1)}/mes` +
+      (a.soporte ? `\nSoporte vital: lleva ${a.soporte.disponible} de ${a.soporte.necesario} días-persona necesarios` : '')
     );
     this.textoProblemas.setText(
       [...r.bloqueos.map((t) => `✖ ${t}`), ...r.avisos.map((t) => `⚠ ${t}`)].slice(0, 6).join('\n') || '✔ ¡Todo listo para lanzar!'
@@ -218,7 +219,7 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
     // Turno y aprobaciones
     if (esEquipo()) {
       const misRoles = rolesDelJugadorActual().map((x) => x.id);
-      this.textoTurno.setText(`${textoTurno()}. ${editable ? 'Tú eliges órbita y cohete.' : 'La órbita y el cohete los elige el Segmento de lanzamiento.'}`);
+      this.textoTurno.setText(`${textoTurno()}. ${editable ? 'Tú eliges órbita y cohete.' : 'La órbita y el cohete los elige el Comandante / Piloto.'}`);
       ROLES.forEach((rol, i) => {
         const meta = a.metas.find((m) => m.rolId === rol.id);
         const b = this.botonesAprobar[i];

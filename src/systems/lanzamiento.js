@@ -29,7 +29,7 @@ export function coheteMasBarato(cohetes, orbita, masaTotal) {
 export function calcularInsercion(masaTotal, combustible, orbita) {
   const necesario = Math.round(masaTotal * orbita.factorCombustible);
   const gastado = Math.min(necesario, combustible);
-  return { necesario, gastado, quedan: combustible - gastado, ok: combustible >= necesario };
+  return { disponible: combustible, necesario, gastado, quedan: combustible - gastado, ok: combustible >= necesario };
 }
 
 /** Costo extra por cada mes de desarrollo que supera el plazo. */

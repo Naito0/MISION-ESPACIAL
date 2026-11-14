@@ -15,6 +15,7 @@ import {
 } from './recursos.js';
 import { coheteMasBarato, costoRetraso } from './lanzamiento.js';
 import { asignarRoles, evaluarMetas } from './roles.js';
+import { calcularSoporte } from './soporteVital.js';
 
 // Único objeto de estado: import { estado } from '../systems/estadoMision.js'
 export const estado = {};
@@ -44,6 +45,7 @@ export function nuevaPartida({ modo, numJugadores, nivelId }) {
 function resultadosVacios() {
   return {
     lanzamiento: null,  // lo que se decidió al lanzar (masa, costos, inserción, metas...)
+    viaje: null,        // averías de la travesía y sus daños (ver systems/averias.js)
     aterrizaje: null,   // resultado del minijuego
     simulacion: null,   // { pasos, resumen } de simularMision()
     resultado: null     // puntaje y explicaciones del informe
@@ -83,7 +85,27 @@ export const esEquipo = () => estado.modo === 'equipo';
 /** Opciones de una categoría que se pueden usar en esta misión y este nivel. */
 export function opcionesDisponibles(categoria) {
   const m = misionActual();
+  if (categoria.soloTripulada && !m.tripulada) return [];
   return categoria.opciones.filter((o) => o.escala === m.escala && nivel().nivelesComponentes.includes(o.nivel));
+}
+
+/** Categorías que se muestran en el diseño (soporte vital solo si hay tripulación). */
+export function categoriasVisibles() {
+  return CATEGORIAS.filter((c) => opcionesDisponibles(c).length > 0);
+}
+
+/** Soporte vital de la misión actual (null si no es tripulada). */
+export function soporteDe(diseno) {
+  const m = misionActual();
+  if (!m.tripulada) return null;
+  return calcularSoporte({
+    tripulantes: m.tripulantes,
+    diasViaje: destinoActual().juego.diasViaje,
+    diasSuperficie: m.diasSuperficie,
+    diasExtra: estado.viaje ? estado.viaje.diasExtra : 0,
+    diasPersona: diseno.diasPersona,
+    perdidos: estado.viaje ? estado.viaje.soportePerdido : 0
+  });
 }
 
 /**
@@ -99,6 +121,8 @@ export function analizarDiseno(config = {}) {
   const coheteElegido = buscarCohete(config.coheteId === undefined ? estado.coheteId : config.coheteId);
 
   const diseno = calcularDiseno(seleccion, CATEGORIAS, CONFIG.riesgo);
+  if (mision.tripulada && !diseno.diasPersona) diseno.faltantes.push('Soporte vital');
+  const soporte = soporteDe(diseno);
   const ambiente = ambienteDe(mision, destino, orbita);
   const operativo = balanceOperativo(diseno, ambiente);
   const valor = valorPorObjetivo(diseno, ambiente, mision.objetivos, operativo.fraccionOperacion);
@@ -118,15 +142,16 @@ export function analizarDiseno(config = {}) {
     diseno, operativo, costoTotal, presupuesto: estado.presupuesto,
     plazoMeses: mision.plazoMeses, vidaEsperada: vida, vidaMinMeses: mision.requisitos.vidaMinMeses,
     alcanceRequerido: ambiente.alcanceRequerido, riesgoMaximo: CONFIG.riesgo.maximoAceptable,
-    umbralAmarillo: CONFIG.barras.amarillo
+    umbralAmarillo: CONFIG.barras.amarillo, diasViaje: destino.juego.diasViaje, soporte
   });
 
   const metas = evaluarMetas(ROLES, {
-    margenes, valorMes: valor.total, metaValorMensual: mision.metaValorMensual, operativo
+    margenes, valorMes: valor.total, metaValorMensual: mision.metaValorMensual, operativo,
+    costoTotal, presupuesto: estado.presupuesto, soporte
   });
 
   return {
-    mision, destino, orbita, diseno, ambiente, operativo, valorMes: valor.total, valorObjetivos: valor.porObjetivo,
+    mision, destino, orbita, diseno, ambiente, operativo, soporte, valorMes: valor.total, valorObjetivos: valor.porObjetivo,
     cohete, coheteBarato: barato, capacidadCohete, costoCohete, retraso, costoTotal,
     vidaEsperada: vida, margenes, barras, metas
   };
@@ -177,7 +202,15 @@ export function pasarTurno() {
   estado.jugadorActual = (estado.jugadorActual + 1) % estado.numJugadores;
 }
 
-/** Texto tipo "Turno del Jugador 2: Segmento espacial". */
+/** Nombre del jugador que lidera las reparaciones (modo equipo), o null. */
+export function liderReparaciones() {
+  if (!esEquipo()) return null;
+  const rol = ROLES.find((r) => r.lideraReparaciones);
+  const j = estado.asignacion.find((a) => a.roles.includes(rol.id));
+  return `Jugador ${j.jugador} (${rol.nombre})`;
+}
+
+/** Texto tipo "Turno del Jugador 2: Ingeniero de sistemas". */
 export function textoTurno() {
   const a = estado.asignacion[estado.jugadorActual];
   return `Turno del Jugador ${a.jugador}: ${a.roles.map((id) => buscarRol(id).nombre).join(', ')}`;

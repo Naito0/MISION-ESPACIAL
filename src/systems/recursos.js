@@ -42,6 +42,7 @@ export function calcularDiseno(seleccion, categorias, riesgoCfg = { probado: 0.0
   const actitud = de('actitud');
   const propulsion = de('propulsion');
   const termica = de('termica');
+  const soporte = de('soporte');
   const instrumentos = comps.filter((c) => c.categoria === 'instrumentos');
 
   // Qué falta para poder lanzar
@@ -84,6 +85,7 @@ export function calcularDiseno(seleccion, categorias, riesgoCfg = { probado: 0.0
       id: i.id, nombre: i.nombre, datos: i.datos, valorCientifico: i.valorCientifico, energia: -i.energia
     })),
     datosDia: suma('datos', instrumentos),
+    diasPersona: soporte ? soporte.diasPersona : 0, // soporte vital (solo misiones tripuladas)
     faltantes
   };
 }
@@ -201,7 +203,7 @@ export function construirBarras(a) {
     const ratio = limite > 0 ? usado / limite : usado > 0 ? 2 : 0;
     return { id, nombre, usado, limite, ratio, texto, ayuda, nivel: nivelBarra(ratio, a.umbralAmarillo) };
   };
-  return [
+  const lista = [
     barra('masa', 'Masa', d.masaTotal, d.capacidadMasa,
       `${d.masaTotal} / ${d.capacidadMasa} kg que aguanta la estructura`,
       'La nave pesa demasiado para su estructura: elige una más fuerte o quita peso (combustible, instrumentos).'),
@@ -221,8 +223,8 @@ export function construirBarras(a) {
     barra('comunicaciones', 'Comunicaciones', op.enlaceOk ? 1 : 2, 2,
       `alcance hasta ${NOMBRE_ALCANCE[d.alcanceAntena] || '—'} (necesitas ${NOMBRE_ALCANCE[a.alcanceRequerido]}) · contacto ${Math.round(op.contactoReal * 100)}%`,
       'La antena no tiene alcance para comunicarse desde ese destino: no llegará ningún dato.'),
-    barra('desarrollo', 'Tiempo de desarrollo', d.mesesDesarrollo, a.plazoMeses,
-      `${d.mesesDesarrollo} / ${a.plazoMeses} meses de plazo`,
+    barra('desarrollo', 'Tiempo', d.mesesDesarrollo, a.plazoMeses,
+      `${d.mesesDesarrollo} / ${a.plazoMeses} meses de desarrollo · viaje de ${a.diasViaje ?? '?'} días`,
       'Construir la nave tarda más que el plazo: los componentes avanzados demoran más.'),
     barra('vida', 'Vida útil', a.vidaMinMeses, a.vidaEsperada,
       `dura ~${a.vidaEsperada} meses (se piden ${a.vidaMinMeses})`,
@@ -231,4 +233,11 @@ export function construirBarras(a) {
       `${Math.round(d.riesgo * 100)}% de probabilidad de alguna falla (${d.componentesNuevos.length} componentes nuevos)`,
       'Demasiados componentes nuevos (sin vuelos previos): cambia algunos por equipos probados en vuelo.')
   ];
+  // Soporte vital: solo en misiones tripuladas
+  if (a.soporte) {
+    lista.push(barra('soporte', 'Soporte vital', a.soporte.necesario, a.soporte.disponible,
+      `necesita ${a.soporte.necesario} / lleva ${a.soporte.disponible} días-persona (oxígeno y comida)`,
+      'Los suministros no alcanzan para la ida, la estadía y la vuelta: elige más soporte vital o acorta la misión.'));
+  }
+  return lista;
 }

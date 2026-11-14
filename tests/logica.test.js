@@ -15,6 +15,50 @@ import { simularMision } from '../src/systems/simulacion.js';
 import { evaluarRequisitos, calcularPuntaje } from '../src/systems/puntaje.js';
 import { asignarRoles } from '../src/systems/roles.js';
 import { generarExplicaciones, misionesParecidas } from '../src/systems/informe.js';
+import { calcularSoporte } from '../src/systems/soporteVital.js';
+import { sortearAverias, viajeIntacto, registrarAveria, estaMitigada } from '../src/systems/averias.js';
+
+const AVERIAS = JSON.parse(readFileSync(new URL('../src/data/eventos.json', import.meta.url), 'utf8')).averiasViaje;
+
+test('soporte vital: ida + estadía + vuelta por tripulante', () => {
+  const s = calcularSoporte({ tripulantes: 2, diasViaje: 4, diasSuperficie: 7, diasPersona: 30 });
+  assert.equal(s.necesario, 30);
+  assert.equal(s.suficiente, true);
+  const conDemora = calcularSoporte({ tripulantes: 2, diasViaje: 4, diasSuperficie: 7, diasExtra: 1, diasPersona: 30 });
+  assert.equal(conDemora.suficiente, false); // un día de demora ya no alcanza: hace falta reserva
+});
+
+test('averías: las de tripulación solo aparecen en misiones tripuladas', () => {
+  const sinTripulacion = sortearAverias(AVERIAS, 10, false);
+  assert.ok(sinTripulacion.every((a) => !a.soloTripulada));
+  assert.equal(sortearAverias(AVERIAS, 10, true).length, AVERIAS.length);
+});
+
+test('averías: reparar evita el daño, fallar lo aplica', () => {
+  const grieta = AVERIAS.find((a) => a.id === 'grieta_casco');
+  const reparada = registrarAveria(viajeIntacto(), grieta, 'reparada');
+  assert.equal(reparada.perdidaCombustible, 0);
+  const fallida = registrarAveria(viajeIntacto(), grieta, 'fallida');
+  assert.ok(fallida.perdidaCombustible > 0);
+  assert.equal(estaMitigada(grieta, ['impactos']), true);
+});
+
+test('la expedición tripulada a la Luna tiene un diseño posible', () => {
+  const mision = MISIONES.find((m) => m.id === 'luna_tripulada');
+  const orbita = ORBITAS.find((o) => o.id === mision.orbitaSugerida);
+  const diseno = calcularDiseno({
+    estructura: 'estr_reforzada', paneles: 'pan_grandes', baterias: 'bat_grande', propulsion: 'prop_media',
+    termica: 'term_manta', avionica: 'comp_estandar', actitud: 'act_ruedas', antena: 'ant_media',
+    estaciones: 'est_regional', instrumentos: ['espectrometro'], soporte: 'sv_reserva'
+  }, CATEGORIAS, CONFIG.riesgo);
+  assert.ok(diseno.masaTotal <= diseno.capacidadMasa, `masa ${diseno.masaTotal} > ${diseno.capacidadMasa}`);
+  const cohete = coheteMasBarato(COHETES, orbita, diseno.masaTotal);
+  assert.ok(cohete, 'ningún cohete la lleva');
+  assert.ok(diseno.costoComponentes + cohete.costo <= mision.presupuesto);
+  const s = calcularSoporte({ tripulantes: mision.tripulantes, diasViaje: 4, diasSuperficie: mision.diasSuperficie, diasPersona: diseno.diasPersona });
+  assert.equal(s.suficiente, true);
+  assert.ok(diseno.empuje / (diseno.masaTotal * 1.62) > 1.5, 'el motor no alcanza para aterrizar');
+});
 
 const leer = (nombre) => JSON.parse(readFileSync(new URL(`../src/data/${nombre}`, import.meta.url), 'utf8'));
 const CATEGORIAS = leer('componentes.json').categorias;

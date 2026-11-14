@@ -1,10 +1,10 @@
 // =============================================================
 // FASE 5 — LANZAMIENTO: animación corta del despegue.
-// Después: aterrizaje (si la misión aterriza) o simulación.
+// Después: la travesía (EscenaViaje).
 // =============================================================
 import * as Phaser from 'phaser';
 import { CONFIG } from '../systems/datos.js';
-import { estado, misionActual, coheteActual, orbitaActual } from '../systems/estadoMision.js';
+import { estado, coheteActual, orbitaActual } from '../systems/estadoMision.js';
 import { ANCHO, ALTO, COLORES, texto, titulo, barraFases, estrellas } from '../ui/ui.js';
 
 export default class EscenaLanzamiento extends Phaser.Scene {
@@ -64,12 +64,9 @@ export default class EscenaLanzamiento extends Phaser.Scene {
       ease: 'Quad.easeIn',
       onUpdate: () => this.llama.setScale(1, 0.8 + Math.random() * 0.5),
       onComplete: () => {
-        const ins = estado.lanzamiento.insercion;
-        this.textoEstado.setText(ins.ok
-          ? 'Separación exitosa: la nave va camino a su órbita.'
-          : '⚠ La nave no tiene combustible suficiente para entrar en la órbita…');
-        this.textoEstado.setColor(ins.ok ? COLORES.bien : COLORES.mal);
-        this.time.delayedCall(1300, () => this.scene.start(misionActual().aterriza ? 'Aterrizaje' : 'Simulacion'));
+        this.textoEstado.setText('Separación exitosa: comienza la travesía.');
+        this.textoEstado.setColor(COLORES.bien);
+        this.time.delayedCall(1200, () => this.scene.start('Viaje'));
       }
     });
   }

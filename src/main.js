@@ -7,7 +7,7 @@
 //   2. Requisitos .......... EscenaRequisitos
 //   3. Compensaciones ...... EscenaDiseno
 //   4. Diseño puntual ...... EscenaDisenoPuntual
-//   5. Lanzamiento ......... EscenaLanzamiento
+//   5. Lanzamiento y viaje . EscenaLanzamiento → EscenaViaje (averías + minijuegos de reparación)
 //   6. Operación ........... EscenaAterrizaje (si aterriza) → EscenaSimulacion → EscenaInforme
 // =============================================================
 import * as Phaser from 'phaser';
@@ -19,6 +19,7 @@ import EscenaRequisitos from './scenes/EscenaRequisitos.js';
 import EscenaDiseno from './scenes/EscenaDiseno.js';
 import EscenaDisenoPuntual from './scenes/EscenaDisenoPuntual.js';
 import EscenaLanzamiento from './scenes/EscenaLanzamiento.js';
+import EscenaViaje from './scenes/EscenaViaje.js';
 import EscenaAterrizaje from './scenes/EscenaAterrizaje.js';
 import EscenaSimulacion from './scenes/EscenaSimulacion.js';
 import EscenaInforme from './scenes/EscenaInforme.js';
@@ -41,6 +42,7 @@ const config = {
     EscenaDiseno,
     EscenaDisenoPuntual,
     EscenaLanzamiento,
+    EscenaViaje,
     EscenaAterrizaje,
     EscenaSimulacion,
     EscenaInforme

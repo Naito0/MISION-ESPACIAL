@@ -1,14 +1,14 @@
 // =============================================================
 // FASE 3 — ESTUDIO DE COMPENSACIONES (diseño de la nave)
 // Izquierda: categorías por disciplina. Centro: componentes.
-// Derecha: panel de recursos (barras verde/amarillo/rojo) y metas de segmento.
+// Derecha: panel de recursos (barras verde/amarillo/rojo) y metas de cada rol.
 // Abajo: guardar diseños A y B y compararlos lado a lado.
-// En modo equipo cada jugador solo cambia las categorías de su segmento.
+// En modo equipo cada jugador solo cambia las categorías de su rol.
 // =============================================================
 import * as Phaser from 'phaser';
 import { CATEGORIAS, CONFIG, rolDeCategoria } from '../systems/datos.js';
 import {
-  estado, analizarDiseno, nivel, misionActual, esEquipo, opcionesDisponibles,
+  estado, analizarDiseno, nivel, misionActual, esEquipo, opcionesDisponibles, categoriasVisibles,
   puedeEditarCategoria, pasarTurno, textoTurno, anularAprobaciones, guardarComoAB, usarDisenoAB
 } from '../systems/estadoMision.js';
 import { compatibilidadInstrumento } from '../systems/recursos.js';
@@ -32,8 +32,9 @@ export default class EscenaDiseno extends Phaser.Scene {
 
     this.aplicarSeleccionPorDefecto();
 
-    // ---- Categorías (izquierda) ----
-    this.botonesCategoria = CATEGORIAS.map((cat, i) =>
+    // ---- Categorías (izquierda) — soporte vital solo aparece si hay tripulación ----
+    this.categorias = categoriasVisibles();
+    this.botonesCategoria = this.categorias.map((cat, i) =>
       boton(this, 110, 112 + i * 45, 180, 40, '', () => this.mostrarCategoria(cat), { tam: 13 })
     );
 
@@ -59,13 +60,13 @@ export default class EscenaDiseno extends Phaser.Scene {
     texto(this, 890, 92, 'Recursos', { tam: 18, negrita: true, color: COLORES.acento });
     const a = analizarDiseno();
     this.barras = a.barras.map((b, i) => {
-      const y = 118 + i * 38;
-      return { etiqueta: texto(this, 890, y, '', { tam: 12 }), barra: barra(this, 890, y + 17, 360, 9) };
+      const y = 118 + i * 35;
+      return { etiqueta: texto(this, 890, y, '', { tam: 12 }), barra: barra(this, 890, y + 16, 360, 8) };
     });
-    texto(this, 890, 466, esEquipo() ? 'Metas de cada segmento' : 'Metas de los segmentos (consejos)', {
+    texto(this, 890, 466, esEquipo() ? 'Metas de cada rol' : 'Metas de cada rol (consejos)', {
       tam: 16, negrita: true, color: COLORES.acento
     });
-    this.textosMeta = a.metas.map((m, i) => texto(this, 890, 492 + i * 52, '', { tam: 12, ancho: 360 }));
+    this.textosMeta = a.metas.map(() => texto(this, 890, 490, '', { tam: 11, ancho: 365 }));
 
     // ---- Botones inferiores ----
     boton(this, 110, 675, 170, 44, '◀ Requisitos', () => this.scene.start('Requisitos'), { tam: 15 });
@@ -77,8 +78,14 @@ export default class EscenaDiseno extends Phaser.Scene {
     }
     this.botonContinuar = boton(this, 735, 675, 240, 50, 'Diseño puntual ▶', () => this.scene.start('DisenoPuntual'), { tam: 18 });
 
-    this.categoriaActual = CATEGORIAS[0];
+    this.categoriaActual = this.categorias[0];
     this.mostrarCategoria(this.categoriaActual);
+  }
+
+  /** Tarjeta "¿Por qué importa esto?" de la categoría (se ve hasta pasar el mouse por un componente). */
+  mostrarPorQueImporta(cat) {
+    this.textoTooltip.setColor(COLORES.acento);
+    this.textoTooltip.setText(`¿Por qué importa esto? ${cat.porQueImporta || ''}`);
   }
 
   /** La primera vez, elige la opción más simple de cada categoría obligatoria. */
@@ -119,6 +126,7 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.textoAyudaCat.setText(`Disciplina: ${cat.disciplina}. ${cat.ayuda}` +
       (esEquipo() && rol ? `\nLa decide: ${rol.nombre}.${editable ? '' : ' (Ahora no es tu turno para esta categoría.)'}` : ''));
 
+    this.mostrarPorQueImporta(cat);
     const mision = misionActual();
     opcionesDisponibles(cat).forEach((op, i) => {
       const x = X_CARTA[i % 2];
@@ -183,8 +191,8 @@ export default class EscenaDiseno extends Phaser.Scene {
   actualizar() {
     const a = analizarDiseno();
 
-    // Botones de categorías (con el segmento en modo equipo)
-    CATEGORIAS.forEach((cat, i) => {
+    // Botones de categorías (con el rol en modo equipo)
+    this.categorias.forEach((cat, i) => {
       const b = this.botonesCategoria[i];
       const rol = rolDeCategoria(cat.id);
       const lapiz = esEquipo() && puedeEditarCategoria(cat) ? '✎ ' : '';
@@ -203,10 +211,15 @@ export default class EscenaDiseno extends Phaser.Scene {
       this.barras[i].barra.actualizar(b.ratio, b.nivel);
     });
 
-    // Metas de segmento
+    // Metas de cada rol
+    // (cada texto se ubica debajo del anterior según su altura, para que no se encimen)
+    let yMeta = 490;
     a.metas.forEach((m, i) => {
-      this.textosMeta[i].setText(`${m.ok ? '✔' : '✖'} ${m.abreviatura}: ${m.texto}\n   ${m.detalle}`);
-      this.textosMeta[i].setColor(m.ok ? COLORES.bien : COLORES.mal);
+      const t = this.textosMeta[i];
+      t.setText(`${m.ok ? '✔' : '✖'} ${m.abreviatura}: ${m.texto}\n   ${m.detalle}`);
+      t.setColor(m.ok ? COLORES.bien : COLORES.mal);
+      t.setY(yMeta);
+      yMeta += t.height + 3;
     });
 
     // Consejo (solo con ayudas)
@@ -246,7 +259,7 @@ export default class EscenaDiseno extends Phaser.Scene {
       ['Riesgo de falla', A.diseno.riesgo, B.diseno.riesgo, false, pct],
       ['Valor científico por mes', A.valorMes, B.valorMes, true, r1],
       ['Desarrollo (meses)', A.diseno.mesesDesarrollo, B.diseno.mesesDesarrollo, false],
-      ['Metas de segmento cumplidas', A.metas.filter((m) => m.ok).length, B.metas.filter((m) => m.ok).length, true, (x) => `${x} de 4`]
+      ['Metas de rol cumplidas', A.metas.filter((m) => m.ok).length, B.metas.filter((m) => m.ok).length, true, (x) => `${x} de 4`]
     ];
 
     const elementos = [];

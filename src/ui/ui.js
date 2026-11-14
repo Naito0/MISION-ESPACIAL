@@ -131,9 +131,10 @@ export const COLOR_NIVEL = { verde: 0x3cc46e, amarillo: 0xf2c14e, rojo: 0xe5484d
  * Devuelve { actualizar(fraccion 0-1+, nivel 'verde'|'amarillo'|'rojo') }.
  */
 export function barra(escena, x, y, ancho, alto = 12) {
-  escena.add.rectangle(x, y, ancho, alto, 0x2a3150).setOrigin(0, 0);
+  const fondo = escena.add.rectangle(x, y, ancho, alto, 0x2a3150).setOrigin(0, 0);
   const relleno = escena.add.rectangle(x, y, ancho, alto, COLOR_NIVEL.verde).setOrigin(0, 0);
   return {
+    fondo,
     relleno,
     actualizar(fraccion, nivel = 'verde') {
       relleno.scaleX = Math.max(0, Math.min(1, fraccion));

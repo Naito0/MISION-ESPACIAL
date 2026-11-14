@@ -1,5 +1,52 @@
 {
   "_comentario": "Eventos durante la simulación. Los eventos del ambiente (esFalla: false) se sortean según el nivel. Las fallas internas (esFalla: true) ocurren con una probabilidad que depende del RIESGO del diseño (componentes nuevos = más riesgo). mitigadoPor = efecto de un componente que evita el daño (null = inevitable). Tipos de daño: paneles, bateria, antena, vida (porcentaje que se pierde), datos (porcentaje de la memoria que se borra) e instrumento (uno deja de funcionar).",
+  "_averias": "averiasViaje: averías durante la travesía. Si la nave tiene la protección 'mitigadoPor', no pasa nada. Si no, se juega el minijuego indicado (cables, soldadura o antena) contra reloj; si se falla, se aplica el daño. soloTripulada: solo en misiones con tripulación. Tipos de daño extra: diasExtra (la misión se demora y consume soporte vital).",
+  "averiasViaje": [
+    {
+      "id": "grieta_casco", "nombre": "Impacto de micrometeorito en el casco", "minijuego": "soldadura", "probabilidad": 1,
+      "descripcion": "Un micrometeorito abrió grietas en el casco, junto al tanque de combustible.",
+      "mitigadoPor": "impactos",
+      "textoMitigado": "La estructura blindada resistió el impacto: no hubo grietas.",
+      "textoReparado": "¡Grietas soldadas a tiempo! No se perdió combustible.",
+      "textoDanio": "No se soldaron a tiempo: se fugó el 25% del combustible.",
+      "consecuencia": "se fugará el 25% del combustible.",
+      "danio": [{ "tipo": "combustible", "porcentaje": 25 }],
+      "explicacion": "Las fugas de combustible son peligrosísimas: sin combustible no se puede entrar en órbita ni aterrizar. Una estructura blindada evita las grietas."
+    },
+    {
+      "id": "corto_energia", "nombre": "Cortocircuito en el sistema de energía", "minijuego": "cables", "probabilidad": 1,
+      "descripcion": "Un cortocircuito desconectó parte de los cables que llevan la energía de los paneles.",
+      "mitigadoPor": "redundancia",
+      "textoMitigado": "Las baterías redundantes mantuvieron todo funcionando mientras se aislaba la falla.",
+      "textoReparado": "¡Cables reconectados! La energía volvió a la normalidad.",
+      "textoDanio": "No se reconectaron a tiempo: un ala de paneles quedó dañada (-30% de energía).",
+      "consecuencia": "un ala de paneles quedará dañada (-30% de energía).",
+      "danio": [{ "tipo": "paneles", "porcentaje": 30 }],
+      "explicacion": "Los sistemas con repuesto (redundancia) siguen funcionando aunque algo falle; por eso las naves reales duplican lo más importante."
+    },
+    {
+      "id": "antena_desalineada", "nombre": "Antena desalineada", "minijuego": "antena", "probabilidad": 1,
+      "descripcion": "Una vibración movió la antena y la nave perdió el contacto con la Tierra.",
+      "mitigadoPor": null,
+      "textoMitigado": "",
+      "textoReparado": "¡Antena recalibrada! Se recuperó el contacto con la Tierra.",
+      "textoDanio": "No se recalibró a tiempo: la antena quedó mal apuntada (-40% de datos) y la misión se demoró 1 día.",
+      "consecuencia": "la antena quedará mal apuntada (-40% de datos) y la misión se demorará 1 día.",
+      "danio": [{ "tipo": "antena", "porcentaje": 40 }, { "tipo": "diasExtra", "dias": 1 }],
+      "explicacion": "Para comunicarse a millones de km, la antena tiene que apuntar con muchísima precisión hacia la Tierra."
+    },
+    {
+      "id": "fuga_oxigeno", "nombre": "Fuga de oxígeno en la cabina", "minijuego": "soldadura", "probabilidad": 1.2, "soloTripulada": true,
+      "descripcion": "Una válvula de la cabina pierde oxígeno. ¡Hay que sellarla antes de que la tripulación corra peligro!",
+      "mitigadoPor": null,
+      "textoMitigado": "",
+      "textoReparado": "¡Fuga sellada! La tripulación está a salvo.",
+      "textoDanio": "No se selló a tiempo: se perdieron 6 días-persona de oxígeno y suministros.",
+      "consecuencia": "se perderán 6 días-persona de oxígeno y suministros.",
+      "danio": [{ "tipo": "soporte", "diasPersona": 6 }],
+      "explicacion": "En una misión tripulada, el soporte vital es lo primero. Llevar reserva de suministros da tiempo para resolver problemas."
+    }
+  ],
   "eventos": [
     {
       "id": "tormenta_solar", "nombre": "Tormenta solar", "probabilidad": 1, "esFalla": false,

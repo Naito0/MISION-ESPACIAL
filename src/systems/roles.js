@@ -1,12 +1,12 @@
 // =============================================================
-// roles.js — FUNCIONES PURAS del modo equipo: reparto de los 4 segmentos
-// (lanzamiento, espacial, terrestre, usuario) y evaluación de sus metas.
-// Las metas chocan entre sí a propósito y el presupuesto es compartido.
+// roles.js — FUNCIONES PURAS del modo equipo: reparto de roles
+// (Comandante, Ingeniero, Científico/médico, Comunicaciones y recursos)
+// y evaluación de sus metas, que chocan entre sí a propósito.
 // =============================================================
 
 /**
  * Reparte los roles entre N jugadores (con menos de 4, alguien toma varios).
- * Devuelve [{ jugador: 1, roles: ['lanzamiento', 'terrestre'] }, ...]
+ * Devuelve [{ jugador: 1, roles: ['comandante', 'cientifico'] }, ...]
  */
 export function asignarRoles(roles, numJugadores) {
   const jugadores = Array.from({ length: numJugadores }, (_, i) => ({ jugador: i + 1, roles: [] }));
@@ -16,7 +16,8 @@ export function asignarRoles(roles, numJugadores) {
 
 /**
  * Evalúa la meta de cada rol con los números actuales del diseño.
- * c = { margenes: { cohete, energia }, valorMes, metaValorMensual, operativo }
+ * c = { margenes: { cohete, masa, energia }, valorMes, metaValorMensual, operativo,
+ *       costoTotal, presupuesto, soporte (o null si no hay tripulación) }
  * Devuelve [{ rolId, nombre, abreviatura, texto, ok, detalle }]
  */
 export function evaluarMetas(roles, c) {
@@ -32,19 +33,24 @@ export function evaluarMetas(roles, c) {
           ? `Margen de capacidad del cohete: ${pct(c.margenes.cohete)} (mínimo ${pct(m.minimo)})`
           : 'Ningún cohete puede llevar la nave a esa órbita';
         break;
-      case 'energia':
-        ok = c.margenes.energia >= m.minimo;
-        detalle = `Margen de energía: ${pct(c.margenes.energia)} (mínimo ${pct(m.minimo)})`;
+      case 'margenes':
+        ok = c.margenes.masa >= m.minimo && c.margenes.energia >= m.minimo;
+        detalle = `Margen de masa ${pct(c.margenes.masa)} · de energía ${pct(c.margenes.energia)} (mínimo ${pct(m.minimo)})`;
         break;
-      case 'datos':
-        ok = c.operativo.enlaceOk && c.operativo.datosGeneradosDia > 0 &&
+      case 'ciencia': {
+        const soporteOk = !c.soporte || c.soporte.suficiente;
+        ok = c.valorMes >= c.metaValorMensual && soporteOk;
+        detalle = `Valor científico ${c.valorMes.toFixed(1)} de ${c.metaValorMensual} por mes` +
+          (c.soporte ? ` · soporte vital ${c.soporte.disponible}/${c.soporte.necesario} días-persona` : '');
+        break;
+      }
+      case 'datosPresupuesto': {
+        const datosOk = c.operativo.enlaceOk && c.operativo.datosGeneradosDia > 0 &&
           c.operativo.capacidadEnvioDia >= c.operativo.datosGeneradosDia;
-        detalle = `Envía ${c.operativo.capacidadEnvioDia.toFixed(2)} de ${c.operativo.datosGeneradosDia.toFixed(2)} GB/día generados`;
+        ok = datosOk && c.costoTotal <= c.presupuesto;
+        detalle = `Envía ${c.operativo.capacidadEnvioDia.toFixed(2)} de ${c.operativo.datosGeneradosDia.toFixed(2)} GB/día · costo ${c.costoTotal}/${c.presupuesto} M$`;
         break;
-      case 'ciencia':
-        ok = c.valorMes >= c.metaValorMensual;
-        detalle = `Valor científico ${c.valorMes.toFixed(1)} de ${c.metaValorMensual} por mes`;
-        break;
+      }
       default:
         detalle = 'Meta desconocida';
     }
