@@ -139,7 +139,7 @@ Al final de cada fase: `npm test`, `npm run build`, prueba en el navegador y un 
 | 4 Hangar | ✔ Hecho | Navegador: comprar, problemas explicados (energía en Marte), todos listos → despega; pruebas de reglas |
 | 5 Sistema solar | ✔ Hecho | Navegador: tarjetas NASA, "Próximamente", elegir Luna → presupuesto de la Luna |
 | 6 Informe | ✔ Hecho | Navegador: informe de fracaso y de éxito, progreso guardado en localStorage |
-| 7 Aterrizaje y superficie | Pendiente | — |
+| 7 Aterrizaje y superficie | ✔ Hecho | Navegador (Marte y Luna): motor con Espacio, aterrizaje clasificado, salto 3,6 m en Marte y 8,3 m en la Luna (gravedad real), recoger con E, analizar con E (solo Científico), informe |
 
 Nota de rendimiento: en el navegador de prueba (sin GPU, render por software) va a 20-45 FPS en calidad Media; con una GPU real debería ir mucho más rápido.
 

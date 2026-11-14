@@ -8,6 +8,12 @@
     "maxSimultaneas": 3,
     "vidaInicial": 100,
     "segundosFinal": 5,
+    "aterrizajeSuave": 2.5,
+    "aterrizajeDuro": 5,
+    "danioChoque": 25,
+    "segundosSuperficie": 120,
+    "distanciaMuestras": [9, 22],
+    "_notaAterrizaje": "Velocidades de contacto en m/s (valores del juego). La gravedad del aterrizaje y del salto es la real de destinos.json.",
     "creditosBase": { "luna": 300, "marte": 600 }
   },
   "emergencias": [

@@ -83,6 +83,17 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .paquetes .consola-msg { grid-column: 1 / -1; }
 #hud .consola .paquetes button { font-size: 20px; padding: 14px 0; }
 #hud .consola .paquetes button.ok { background: #2f9e5b; }
+/* ---- Aterrizaje y superficie ---- */
+#hud .hud-aterrizaje { position: absolute; left: 12px; top: 54px; width: 300px; padding: 10px 14px; font-size: 15px; }
+#hud .ha-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; }
+#hud .ha-fila b { font-size: 22px; }
+#hud .ha-fila .hv-barra { width: 150px; }
+#hud .ha-comb { height: 100%; }
+#hud .ha-ayuda { font-size: 13px; color: #c8d4f0; }
+#hud .boton-motor { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); padding: 14px 30px; font-size: 20px; color: #fff; background: #8a3a12; border-color: #ffa040; cursor: pointer; user-select: none; }
+#hud .resultado-aterrizaje { display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 30px; font-size: 30px; text-align: center; }
+#hud .hs-muestras { font-size: 22px; margin: 6px 0; }
+#hud .hud-viaje .boton { margin-top: 8px; }
 /* ---- Informe ---- */
 #hud .informe { position: absolute; right: 16px; top: 16px; bottom: 16px; width: 470px; overflow-y: auto; padding: 14px 20px; font-size: 14px; }
 #hud .informe h1 { margin: 0; color: #7cf3ff; font-size: 24px; }

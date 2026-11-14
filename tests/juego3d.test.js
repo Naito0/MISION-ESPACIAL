@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { Sala, generarCodigo, ROLES_ID } from '../src/compartido/sala.js';
 import { nuevoViaje, avanzarViaje, resolverEmergencia, elegirEmergencia, estaAgravada } from '../src/compartido/viaje.js';
 import { calcularInforme } from '../src/compartido/informe.js';
+import { clasificarAterrizaje } from '../src/compartido/superficie.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -118,11 +119,21 @@ test('informe: al terminar el viaje, después de unos segundos aparece el inform
   s.tick(0.2);
   assert.equal(s.fase, 'llegada');
   s.tick(EMERG.config.segundosFinal + 0.1);
+  assert.equal(s.fase, 'aterrizaje');
+  assert.ok(s.accion('b', 'aterrizar', { velocidad: 1 }).error, 'solo el Comandante aterriza');
+  assert.deepEqual(s.accion('a', 'aterrizar', { velocidad: 1.8 }), { ok: true, resultado: 'suave' });
+  assert.equal(s.fase, 'superficie');
+  // 3 muestras: cualquiera las recoge; solo el Científico (Beto) las analiza
+  assert.ok(s.accion('b', 'analizar', { i: 0, exito: true }).error, 'primero hay que recogerla');
+  for (const i of [0, 1, 2]) s.accion('a', 'recoger', { i });
+  assert.ok(s.accion('a', 'analizar', { i: 0, exito: true }).error, 'Ana no es científica');
+  for (const i of [0, 1, 2]) s.accion('b', 'analizar', { i, exito: true });
   assert.equal(s.fase, 'informe');
   const inf = s.estadoPublico().informe;
   assert.equal(inf.exito, true);
-  assert.ok(inf.creditos > 0);
-  assert.ok(inf.mision && inf.mision.destino === 'marte' && inf.mision.fuente.startsWith('https://'));
+  assert.equal(inf.estrellas, 3);
+  assert.ok(inf.creditos > 600);
+  assert.ok(inf.mision && inf.mision.id === 'phoenix' && inf.mision.fuente.startsWith('https://'));
   // Sin blindaje y con meteoritos fallidos → aparece la causa
   assert.deepEqual(s.accion('a', 'reiniciar'), { ok: true });
   assert.equal(s.fase, 'hangar');
@@ -137,6 +148,30 @@ test('informe: una emergencia fallida y agravada explica la causa', () => {
   assert.equal(inf.estrellas, 0);
   assert.match(inf.causas[0].causa, /blindaje/);
   assert.equal(inf.mision.id, 'apollo11');
+});
+
+test('aterrizaje: se clasifica por la velocidad al tocar el suelo', () => {
+  const c = EMERG.config;
+  assert.equal(clasificarAterrizaje(-2, c), 'suave');
+  assert.equal(clasificarAterrizaje(4, c), 'duro');
+  assert.equal(clasificarAterrizaje(9, c), 'choque');
+});
+
+test('superficie: si se acaba el tiempo, el informe cuenta solo las muestras analizadas', () => {
+  const s = salaEnHangar();
+  for (const o of NAVE_MARTE_OK.a) s.accion('a', 'comprar', { opcion: o });
+  for (const o of NAVE_MARTE_OK.b) s.accion('b', 'comprar', { opcion: o });
+  s.accion('a', 'listo'); s.accion('b', 'listo');
+  s.viaje.restante = 0.1; s.tick(0.2); s.tick(EMERG.config.segundosFinal + 0.1);
+  s.accion('a', 'aterrizar', { velocidad: 9 });
+  assert.equal(s.aterrizaje, 'choque');
+  assert.equal(s.viaje.vida, 100 - EMERG.config.danioChoque);
+  s.accion('a', 'recoger', { i: 1 });
+  s.accion('b', 'analizar', { i: 1, exito: true });
+  s.tick(EMERG.config.segundosSuperficie + 1);
+  assert.equal(s.fase, 'informe');
+  assert.equal(s.muestras, 1);
+  assert.ok(s.informe.causas.some((c) => c.causa.includes('muy rápido')));
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {

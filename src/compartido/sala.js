@@ -11,6 +11,7 @@
 import { nuevoViaje, avanzarViaje, resolverEmergencia } from './viaje.js';
 import { crearCatalogo, seleccionVacia, resumenDiseno, comprar } from './hangar.js';
 import { calcularInforme } from './informe.js';
+import { clasificarAterrizaje, nuevaSuperficie, recogerMuestra, analizarMuestra, analizadas } from './superficie.js';
 
 export const ROLES_ID = ['comandante', 'ingeniero', 'cientifico', 'comunicaciones'];
 
@@ -203,8 +204,47 @@ export class Sala {
       this.informe = null;
       this.muestras = 0;
       this.aterrizaje = null;
+      this.superficie = null;
       this.posiciones.clear();
       this.abrirHangar(); // de vuelta al hangar para mejorar la nave
+      return { ok: true };
+    },
+    /** Aterrizaje: el Comandante informa la velocidad con la que tocó el suelo. */
+    aterrizar(j, { velocidad }) {
+      if (this.fase !== 'aterrizaje') return { error: 'No estamos aterrizando.' };
+      if (!j.roles.includes('comandante')) return { error: 'El aterrizaje lo pilota el Comandante.' };
+      const config = this.datos.emergencias.config;
+      this.aterrizaje = clasificarAterrizaje(Number(velocidad) || 99, config);
+      if (this.aterrizaje === 'choque') this.viaje.vida = Math.max(0, this.viaje.vida - config.danioChoque);
+      this.superficie = nuevaSuperficie(config);
+      this.fase = 'superficie';
+      this.posiciones.clear();
+      const texto = { suave: '✅ ¡Aterrizaje suave!', duro: '⚠ Aterrizaje duro, pero estamos bien', choque: `💥 ¡Choque! La nave perdió ${config.danioChoque} de vida` }[this.aterrizaje];
+      this.cambio(`${texto} Busquen las 3 muestras.`);
+      return { ok: true, resultado: this.aterrizaje };
+    },
+    /** Superficie: recoger una muestra (cualquiera). */
+    recoger(j, { i }) {
+      if (this.fase !== 'superficie') return { error: 'No estamos en la superficie.' };
+      const r = recogerMuestra(this.superficie, i, j.nombre);
+      if (r.ok) this.cambio(`🪨 ${j.nombre} recogió una muestra: ¡al laboratorio del módulo!`);
+      return r;
+    },
+    /** Superficie: analizar una muestra (solo el Científico). */
+    analizar(j, { i, exito }) {
+      if (this.fase !== 'superficie') return { error: 'No estamos en la superficie.' };
+      const r = analizarMuestra(this.superficie, i, j.roles, !!exito);
+      if (r.ok && exito) {
+        this.cambio(`🔬 Muestra analizada (${analizadas(this.superficie)} de 3)`);
+        if (analizadas(this.superficie) === 3) this.terminarExploracion();
+      }
+      return r;
+    },
+    /** El anfitrión termina la exploración antes de tiempo. */
+    volverACasa(j) {
+      if (this.fase !== 'superficie') return { error: 'No estamos en la superficie.' };
+      if (!j.anfitrion) return { error: 'Solo el anfitrión.' };
+      this.terminarExploracion();
       return { ok: true };
     },
     /** Resultado del minijuego de una emergencia. */
@@ -216,8 +256,18 @@ export class Sala {
     }
   };
 
-  /** Qué viene después del viaje (el paso de la superficie se agrega aquí). */
+  /** Después del viaje: si llegamos, aterrizaje; si no, directo al informe. */
   despuesDelViaje() {
+    if (this.viaje && this.viaje.terminado === 'llegada') {
+      this.fase = 'aterrizaje';
+      this.aterrizaje = null;
+      this.cambio('🛬 ¡El Comandante debe aterrizar!');
+    } else this.cerrarMision();
+  }
+
+  /** Termina la exploración: cuenta las muestras analizadas y va al informe. */
+  terminarExploracion() {
+    this.muestras = this.superficie ? analizadas(this.superficie) : 0;
     this.cerrarMision();
   }
 
@@ -244,6 +294,14 @@ export class Sala {
     if (this.fase === 'llegada' || this.fase === 'fracaso') {
       this.esperaFinal = (this.esperaFinal || 0) + dt;
       if (this.esperaFinal >= this.datos.emergencias.config.segundosFinal) this.despuesDelViaje();
+      return;
+    }
+    // Exploración con tiempo límite
+    if (this.fase === 'superficie' && this.superficie) {
+      this.superficie.restante = Math.max(0, this.superficie.restante - dt);
+      if (this.superficie.restante <= 0) { this.terminarExploracion(); return; }
+      this.acumulado += dt;
+      if (this.acumulado >= 1) { this.acumulado = 0; this.cambio(); }
       return;
     }
     if (this.fase !== 'viaje' || !this.viaje) return;
@@ -279,6 +337,8 @@ export class Sala {
       listos: [...this.listos],
       resumen: this.fase === 'hangar' ? this.resumen() : null,
       informe: this.fase === 'informe' ? this.informe : null,
+      aterrizaje: this.aterrizaje || null,
+      superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
       viaje: this.viaje && {
         duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
         emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),
