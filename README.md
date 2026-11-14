@@ -4,21 +4,21 @@ Juego educativo **3D** para el desafío **"Juego de diseño de misiones espacial
 
 | Tecla | Astronauta | Sala de la nave | Segmento NASA | En el hangar elige… | En el viaje resuelve… |
 |---|---|---|---|---|---|
-| **1** | Piloto (Comandante) | Cabina | Lanzamiento | Motor y combustible, escudo térmico | Trayectoria, maniobra de frenado, micrometeoritos |
-| **2** | Ingeniero | Ingeniería | Espacial | Estructura y blindaje, paneles, baterías | Falla en los motores, cortocircuito, fuga en el casco |
-| **3** | Científico / médico | Laboratorio | Usuario | Instrumentos, soporte vital y reciclador de O₂ | Oxígeno bajo, muestra contaminada, invernadero |
-| **4** | Comunicaciones | Comunicaciones | Terrestre | Antena, red de estaciones, computadora | Pérdida de señal, tormenta solar, datos desordenados |
+| **1** | Piloto (Comandante) | Cabina | Lanzamiento | Motor y combustible, escudo térmico | Esquivar basura y micrometeoritos, corregir el rumbo · y aterrizar con alarmas (Apolo 11) |
+| **2** | Ingeniero | Ingeniería | Espacial | Estructura y blindaje, paneles, baterías | Cazar una fuga de aire, apagón (interruptores), falla en los motores · y limpiar paneles en Marte (InSight) |
+| **3** | Científico / médico | Laboratorio | Usuario | Instrumentos, soporte vital y reciclador de O₂ | Filtro improvisado (Apolo 13), equilibrar el oxígeno, huerto espacial |
+| **4** | Comunicaciones | Comunicaciones | Terrestre | Antena, red de estaciones, computadora | Unidades mezcladas (Mars Climate Orbiter), orden con retraso, contacto perdido (Opportunity) |
 
-**Una partida dura unos 5 minutos:**
+**Una partida dura unos 5 a 8 minutos:**
 
-1. **Sistema solar 3D:** tarjetas con datos de la NASA. Se elige la Luna (fácil) o Marte (difícil, paga el doble). Aquí también se elige la **dificultad** (Fácil / Normal).
-2. **Hangar:** se compran las piezas con un presupuesto. Cada categoría muestra una barra **Mínimo / Recomendado / Exagerado** calculada para ese destino; al pasar el mouse sobre una pieza se ve cómo cambiarían la masa, la energía y el dinero, y **Orbi** (el robot consejero) explica el porqué.
-3. **Viaje (3 minutos):** los 4 astronautas trabajan en sus salas. Cuando hay una emergencia, un **aviso grande** dice qué pasó, a quién le toca, qué tecla pulsar y por qué; el retrato de ese rol parpadea. Se cambia de astronauta, se camina a la consola con **"!"** y se pulsa **E** para jugar el minijuego.
-4. **Aterrizaje:** el Piloto frena con el motor contra la gravedad real del destino.
-5. **Superficie:** se recogen 3 muestras y el Científico las analiza (el salto depende de la gravedad).
-6. **Informe:** créditos, estrellas, causas y efectos, **lo que aprendiste en esta misión**, preguntas de repaso y una misión real de la NASA parecida.
+1. **Sistema solar 3D:** tarjetas con datos de la NASA. Se elige la Luna (dificultad media) o Marte (difícil, paga el doble) y la **dificultad** del viaje (Fácil / Normal).
+2. **Hangar:** primero una **predicción** ("¿necesitarás más o menos paneles?"). Después se compran las piezas: cada categoría muestra una barra **Mínimo / Recomendado / Exagerado** calculada para ese destino, una vista previa al pasar el mouse y los consejos de **Orbi**. En Marte los paneles brillan menos.
+3. **Viaje:** solo **3 emergencias en la Luna y 4 en Marte**, una por rol, con 30 a 45 segundos de calma entre ellas. Cada una tiene pasos: **aviso** (qué pasó y a quién le toca) → **diagnóstico** (una pregunta para pensar la causa) → **minijuego** → **"📜 Esto pasó de verdad"** → tarjeta **"💡 ¿Qué aprendiste?"**. Mientras se lee una tarjeta, **todo se congela**. Las puertas entre las salas están cerradas con llave.
+4. **Aterrizaje:** el Piloto frena con la gravedad real, esquiva las rocas hasta la zona verde e ignora las alarmas que no son graves.
+5. **Superficie:** se sale por la **esclusa** (despresurización), se recogen 3 muestras y el Científico las analiza. Los otros 3 astronautas trabajan de fondo (taladro, antena y rover).
+6. **Informe:** estrellas, **medallas**, **"Hoy aprendiste 3 cosas"** con 3 preguntas rápidas, causas y efectos y una misión real de la NASA parecida.
 
-La **primera misión a la Luna es un tutorial**: Orbi guía paso a paso con flechas. Durante el juego aparecen tarjetas **"¿Qué aprendiste?"** (nunca durante una emergencia) que se guardan en el diario **"Lo que aprendí"** del menú.
+La **primera misión a la Luna es un tutorial**: Orbi guía paso a paso con flechas. Lo aprendido queda en el diario **"Lo que aprendí"** y las medallas en la **"Sala de trofeos"** (menú Esc).
 
 > **Este proyecto no está respaldado, patrocinado ni aprobado por la NASA.** Es un trabajo educativo de un equipo del NASA Space Apps Challenge.
 
@@ -115,16 +115,18 @@ npm test           # pruebas de las reglas (hangar, viaje, recomendaciones, apre
 | Moverse | **WASD** o **flechas** (cada astronauta solo se mueve en su sala) |
 | Mirar alrededor | **Clic** en el juego y mover el mouse (Q / R también giran la cámara) |
 | Correr / saltar | **Shift** / **Espacio** |
-| Usar una consola, recoger o analizar | **E** |
-| Aterrizar | Mantener **Espacio** (o **W**, o el botón "Motor") |
+| Usar una consola, recoger, analizar, salir por la esclusa | **E** |
+| Aterrizar | Mantener **Espacio** (o **W**, o el botón "Motor") para frenar · **← →** para ir a la zona verde · **I** ignorar una alarma (**O** abortar) |
+| Minijuegos | Cada uno muestra sus teclas en una demo de 3 segundos la primera vez (flechas, mouse, Espacio) |
+| Tarjetas y diagnóstico | Clic en la respuesta · **"¡Entendido!"** para seguir (mientras tanto el juego está en pausa) |
 | Zoom de la cámara | Rueda del mouse |
-| Menú | **Esc**: dificultad, **tamaño de texto (Normal / Grande)**, calidad gráfica, sensibilidad, sonido y **"📖 Lo que aprendí"** |
+| Menú | **Esc**: **"📖 Lo que aprendí"**, **"🏆 Sala de trofeos"**, dificultad, **tamaño de texto (Normal / Grande)**, calidad gráfica, sensibilidad y sonido |
 
 El texto viene en **Grande** por defecto, para leerse desde 2 metros o en un proyector. Si la computadora va lenta, elegir calidad **Baja** en el menú.
 
 ---
 
-## 4. Estructura de carpetas
+## 5. Estructura de carpetas
 
 ```
 mision-espacial/
@@ -139,14 +141,17 @@ mision-espacial/
     │   ├── viaje.js               # emergencias, vida de la nave, llegada o fracaso
     │   ├── superficie.js          # aterrizaje y muestras
     │   ├── informe.js             # créditos, puntaje, causas y efectos, misión real
-    │   └── resumenAprendizaje.js  # lo que se aprendió en la partida
+    │   ├── resumenAprendizaje.js  # "Hoy aprendiste 3 cosas"
+    │   └── logros.js              # estrellas y medallas
     ├── aventura/                # todo lo que se ve (Three.js)
     │   ├── main3d.js              # arranque y cambio de pantallas
     │   ├── tripulacion.js         # los 4 astronautas: tecla, sala y límites
     │   ├── tutorial.js            # Orbi guía la primera misión (Luna)
     │   ├── aprendizaje.js         # tarjetas "¿Qué aprendiste?" y diario
+    │   ├── logros.js              # avisos de medallas y Sala de trofeos
+    │   ├── pausa.js               # pausa real (tarjetas, diagnósticos, menú)
     │   ├── pantallas/             # sistema solar, hangar, nave, aterrizaje, superficie, informe
-    │   ├── minijuegos/            # 12 minijuegos de consola (3 por rol)
+    │   ├── minijuegos/            # minijuegos basados en hechos reales (3 por rol)
     │   ├── escenarios/            # interior de la nave y superficie
     │   ├── entities/              # astronautas, nave del hangar, puertas
     │   ├── engine/                # motor 3D, física, cámara, controles
@@ -160,9 +165,12 @@ mision-espacial/
 
 | Quiero cambiar… | Archivo |
 |---|---|
-| Dificultad: emergencias a la vez, tiempos, daño, presupuesto, pasos de los minijuegos | `src/data/dificultad.json` |
-| Emergencias (nombre, rol, daño, frase "por qué le toca") | `src/data/emergencias3d.json` |
-| Tarjetas de aprendizaje y preguntas de repaso | `src/data/aprendizaje.json` |
+| Dificultad: tiempos, daño, presupuesto · pasos de los minijuegos por destino (`minijuegosPorDestino`) | `src/data/dificultad.json` |
+| Emergencias (nombre, rol, daño, "por qué le toca") y cuántas por viaje y la calma entre ellas | `src/data/emergencias3d.json` |
+| Preguntas de diagnóstico de cada emergencia | `src/data/diagnosticos.json` |
+| Hechos reales ("📜 Esto pasó de verdad") | `src/data/hechos_reales.json` |
+| Los 3 conceptos por destino, preguntas y predicciones | `src/data/aprendizaje.json` |
+| Medallas y criterios de las estrellas | `src/data/logros.json` |
 | Presupuesto base, capacidad del cohete, qué rol elige qué | `src/data/hangar3d.json` |
 | Precios, masas y energía de las piezas | `src/data/componentes.json` |
 | Datos de la Luna y Marte (gravedad, noche, polvo, distancias) | `src/data/destinos.json` |
@@ -179,27 +187,27 @@ El modo multijugador en red (lobby con código y servidor Socket.IO) **sigue en 
 
 ---
 
-## 5. Fuentes de los datos
+## 6. Fuentes de los datos
 
-- **Gravedad, radio, atmósfera, temperatura y distancia:** fichas técnicas de la NASA (NSSDC), con el enlace en el campo `"fuente"` de `src/data/destinos.json`:
-  - Luna: https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
-  - Marte: https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
-- **Luz solar en Marte (≈43% de la de la Tierra):** `destinos.json` → `juego.factorSolar`.
-- **Retraso de la señal:** se **calcula** como distancia ÷ velocidad de la luz (299 792 km/s): Luna ≈ 1,3 s; Marte entre ≈ 3 y 22 minutos (con 55 y 400 millones de km).
-- **Noche lunar (~14 días) y polvo en Marte:** `destinos.json` → `armado`, con su fuente.
-- **Tarjetas de aprendizaje:** `src/data/aprendizaje.json`, cada una con su fuente.
-- **Misiones reales del informe:** `src/data/misiones_reales.json`.
-- **Piezas, presupuesto, capacidad del cohete, emergencias, dificultad y fórmulas de recomendación:** valores **simplificados** para el juego (marcados `"aproximado": true` o explicados en comentarios).
+Cada dato y cada hecho real está en un JSON con su **fuente** (página de la NASA) y, cuando se pudo, una **cita** de esa página:
+
+- **Gravedad, radio, temperatura y distancia:** fichas técnicas de la NASA (NSSDC), en `src/data/destinos.json`.
+- **Noche lunar de casi 15 días terrestres:** https://www.nasa.gov/lunar-surface-technology/
+- **Señal Luna 1,3 s:** https://science.nasa.gov/mission/voyager/voyager-1/voyager-1-what-is-a-light-day/
+- **Señal Marte de 4 a 24 minutos:** https://www.nasa.gov/missions/tech-demonstration/space-communications-7-things-you-need-to-know/
+- **Atmósfera de Marte (≈1/100 de la presión de la Tierra):** https://science.nasa.gov/resource/wind-flow-on-mars/
+- **Hechos reales de los minijuegos** (`src/data/hechos_reales.json`): Estación Espacial y la basura espacial (2024), Apolo 11 (1969), Apolo 12 (1969), Apolo 13 (1970), InSight (2022), Veggie en la Estación Espacial (2018), Mars Climate Orbiter (1999) y Opportunity (2018), cada uno con su enlace y su cita.
+- **Piezas, presupuesto, capacidad del cohete, emergencias, dificultad, logros y fórmulas de recomendación:** valores **simplificados** para el juego (marcados `"aproximado": true` o explicados en comentarios).
 
 ### ⚠ Datos a verificar antes de la demo
 
-Al revisar las fichas de la NASA, la página no respondió, así que estos datos quedaron marcados con `"verificar"` en los JSON. Hay que abrir cada enlace y confirmarlos:
+Algunas páginas no se pudieron abrir al revisarlas (las fichas NSSDC de la NASA no respondieron). Esos datos quedaron marcados con `"verificar"` en los JSON:
 
-- `destinos.json` → Luna `armado.verificar` (periodo sinódico 29,53 días) y Marte `armado.verificar` (distancias mínima y máxima, frase sobre el polvo y los paneles, y que `factorPolvo` es un valor del juego).
-- `aprendizaje.json` → campo `verificar` de cada tarjeta (sobre todo los enlaces generales `https://www.nasa.gov/` que hay que cambiar por la página exacta, y el consumo de oxígeno por astronauta).
-- `misiones_reales.json` → campo `verificar` (que los enlaces sigan funcionando).
+- **43% de luz solar en Marte** (`aprendizaje.json` → `luz_marte`): confirmar en la ficha de Marte la irradiancia solar de Marte y de la Tierra.
+- **Fuga de aire de 2020** (`hechos_reales.json` → `fuga`): abrir el enlace y confirmar la cita. El juego **no** menciona las "hojas de té", porque ninguna página de la NASA revisada lo dice.
+- `destinos.json` → `armado.verificar` (distancias a Marte, `factorPolvo` que es un valor del juego) y `misiones_reales.json` → `verificar` (que los enlaces sigan funcionando).
 
-## 6. Recursos de la NASA usados
+## 7. Recursos de la NASA usados
 
 | Recurso | Cómo influyó en el juego |
 |---|---|
@@ -208,22 +216,22 @@ Al revisar las fichas de la NASA, la página no respondió, así que estos datos
 | **Concept Maturity Levels** (JPL) | El ciclo diseñar → probar → revisar el informe → mejorar el diseño. |
 | **Fichas técnicas NSSDC** | Gravedad, temperatura, atmósfera y distancia de cada destino. |
 
-Los minijuegos son mecánicas propias (unir cables, soldar, sintonizar, etc.); no copian personajes, arte ni niveles de ningún juego existente.
+Los minijuegos son mecánicas propias inspiradas en hechos reales de la NASA; no copian personajes, arte ni niveles de ningún juego existente.
 
-## 7. Créditos
+## 8. Créditos
 
 Ver **[CREDITOS.md](CREDITOS.md)** (bibliotecas y modelos 3D, con sus licencias).
 
-## 8. Uso de IA
+## 9. Uso de IA
 
 Usamos Claude Code para generar el borrador inicial del código.
 
 Claude Code (un asistente de programación con inteligencia artificial) escribió, a partir de nuestras instrucciones:
 
-- El motor 3D, los escenarios, los astronautas y los 12 minijuegos.
-- Las reglas del juego, las fórmulas de recomendación y las pruebas automáticas.
-- Los textos de las tarjetas de aprendizaje y la documentación.
+- El motor 3D, los escenarios, los astronautas y los minijuegos.
+- Las reglas del juego (viaje, hangar, recomendaciones, logros) y las pruebas automáticas.
+- Los textos de las tarjetas, los diagnósticos y la documentación.
 
-También probó cada cambio en un navegador automático. Los datos científicos salen de las fichas de la NASA citadas; lo que no se pudo confirmar quedó marcado "verificar" para revisarlo nosotros.
+También buscó en páginas de la NASA los datos y los hechos reales, y guardó cada uno con su enlace y una cita. Lo que no pudo confirmar quedó marcado "verificar" o se quitó, para que lo revisemos nosotros. Probó cada cambio en un navegador automático.
 
 <!-- Completar: qué partes revisó, probó y modificó el equipo después, y quién lo hizo. -->
