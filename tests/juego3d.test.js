@@ -10,6 +10,7 @@ import { recomendaciones, dependencias, retrasoSenal, textoRetraso } from '../sr
 import { resumenDiseno, seleccionVacia } from '../src/compartido/hangar.js';
 const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
+import { estrellasMision, nuevosLogros } from '../src/compartido/logros.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -281,6 +282,26 @@ test('aprendizaje: 3 conceptos por destino, con fuente, momento y pregunta; "Hoy
   const rl = resumenAprendizaje({ destino: luna, diseno: { energia: true }, aterrizaje: 'suave', muestras: 0, registro: [], estados: { baterias: 'bajo' } }, AP);
   assert.deepEqual(rl.map((f) => f.id), ['gravedad_luna', 'noche_luna', 'senal_luna']);
   assert.match(rl[1].texto, /pocas baterías/);
+});
+
+test('logros: estrellas por vida, tiempo y preguntas; medallas por buenas decisiones', () => {
+  const L = leerJSON('logros.json');
+  const base = { exito: true, destinoId: 'luna', vida: 95, estados: { paneles: 'ok', baterias: 'ok' }, costo: 150, presupuesto: 300, impactos: 0, fraccionTiempo: 0.3, aciertos: 3, aprendidos: 6, totalConceptos: 6 };
+  assert.equal(estrellasMision(base, L.estrellas), 3);
+  assert.equal(estrellasMision({ ...base, vida: 40, fraccionTiempo: 0.9, aciertos: 0 }, L.estrellas), 1);
+  assert.equal(estrellasMision({ ...base, exito: false }, L.estrellas), 0);
+  const ids = nuevosLogros(base, L.logros, []);
+  for (const id of ['primer_alunizaje', 'sin_rasgunos', 'diseno_perfecto', 'presupuesto_sobra', 'piloto_elite', 'tripulacion_sabia', 'coleccionista']) assert.ok(ids.includes(id), id);
+  assert.ok(!ids.includes('rumbo_marte'));
+  // Algo exagerado: no hay "Diseño perfecto"; gastar el 90%: no hay "Presupuesto de sobra"
+  const peor = nuevosLogros({ ...base, estados: { paneles: 'exagerado' }, costo: 270 }, L.logros, []);
+  assert.ok(!peor.includes('diseno_perfecto') && !peor.includes('presupuesto_sobra'));
+  // Minijuegos: fuga en menos de 30 s y el filtro del Apolo 13
+  assert.deepEqual(nuevosLogros({ minijuego: { id: 'fuga', segundos: 22 } }, L.logros, []), ['cazador_fugas']);
+  assert.deepEqual(nuevosLogros({ minijuego: { id: 'fuga', segundos: 40 } }, L.logros, []), []);
+  assert.deepEqual(nuevosLogros({ minijuego: { id: 'filtro' } }, L.logros, []), ['apolo13']);
+  // No se repiten
+  assert.deepEqual(nuevosLogros({ minijuego: { id: 'filtro' } }, L.logros, ['apolo13']), []);
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {

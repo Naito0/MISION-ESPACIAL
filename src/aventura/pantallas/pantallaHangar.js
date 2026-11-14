@@ -289,6 +289,7 @@ export function iniciarPantallaHangar(ctx) {
   // Una misión nueva: sus 3 conceptos se pueden enseñar otra vez.
   // PREDECIR ANTES DE ACTUAR: una pregunta antes de comprar; después se ve si acertó.
   ctx.aprendizaje?.nuevaMision();
+  ctx.logros?.nuevaMision();
   const pred = PREDICCIONES[conexion.estado.destinoId];
   if (pred && !ctx.prediccionHecha?.[conexion.estado.destinoId + conexion.estado.version]) {
     ctx.prediccionHecha = { [conexion.estado.destinoId + conexion.estado.version]: true };

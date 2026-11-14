@@ -64,7 +64,10 @@ export function esquivar(area, terminar, op = {}) {
       }
       if (o.z >= 1) {
         objetos.splice(objetos.indexOf(o), 1);
-        if (Math.hypot(x - nx, y - ny) < r + 18) { escudo--; golpe = 0.4; } else esquivados++;
+        if (Math.hypot(x - nx, y - ny) < r + 18) {
+          escudo--; golpe = 0.4;
+          window.dispatchEvent(new CustomEvent('impacto-meteorito')); // para el logro "Piloto de élite"
+        } else esquivados++;
       }
     }
     // Marco de la ventana de la cabina y la mira de la nave

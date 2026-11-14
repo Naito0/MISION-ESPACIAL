@@ -22,6 +22,7 @@ import { crearPartidaLocal } from './red/partidaLocal.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { crearTutorial } from './tutorial.js';
 import { crearAprendizaje } from './aprendizaje.js';
+import { crearLogros } from './logros.js';
 import { pausar, reanudar, estaPausado } from './pausa.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
@@ -51,10 +52,15 @@ const capa = document.createElement('div'); // capa de cada pantalla
 hud.appendChild(capa);
 // Tarjetas "¿Qué aprendiste?" y diario "Lo que aprendí"
 const aprendizaje = crearAprendizaje(hud);
+// Medallas: aviso pequeño en una esquina, lista en el informe y Sala de trofeos
+const logros = crearLogros(hud);
 const menu = crearMenuPausa(hud, {
   alAbrir: () => pausar('menu'),
   alCerrar: () => reanudar('menu'),
-  extras: [{ texto: '📖 Lo que aprendí', accion: () => { pausar('diario'); aprendizaje.abrirDiario(() => reanudar('diario')); } }]
+  extras: [
+    { texto: '📖 Lo que aprendí', accion: () => { pausar('diario'); aprendizaje.abrirDiario(() => reanudar('diario')); } },
+    { texto: '🏆 Sala de trofeos', accion: () => { pausar('trofeos'); logros.abrirSala(() => reanudar('trofeos')); } }
+  ]
 });
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement && !window.consolaAbierta) menu.alternar(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && !menu.abierto && !window.consolaAbierta) menu.abrir(); });
@@ -89,6 +95,7 @@ function irA() {
 }
 ctx.tutorial = crearTutorial(hud);
 ctx.aprendizaje = aprendizaje;
+ctx.logros = logros;
 // Cada emergencia resuelta puede enseñar un concepto (ej. 'resuelta:oxigeno')
 ctx.alResolver = (r) => {
   if (r.resultado !== 'resuelta') return;

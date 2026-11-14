@@ -17,6 +17,10 @@ import { resumenAprendizaje } from '../../compartido/resumenAprendizaje.js';
 import { recomendaciones } from '../../compartido/recomendaciones.js';
 import { crearCatalogo, resumenDiseno } from '../../compartido/hangar.js';
 import datosAprendizaje from '../../data/aprendizaje.json';
+import dificultadJSON from '../../data/dificultad.json';
+import emergenciasJSON from '../../data/emergencias3d.json';
+import { estrellasMision } from '../../compartido/logros.js';
+import { LOGROS, CONFIG_ESTRELLAS } from '../logros.js';
 import componentes from '../../data/componentes.json';
 import configHangar from '../../data/hangar3d.json';
 
@@ -101,10 +105,30 @@ export function iniciarPantallaInforme(ctx) {
   const preguntas = resumen.map((f) => f.pregunta);
   const ui = document.createElement('div');
   ui.className = 'panel informe';
-  const estrellas = '⭐'.repeat(inf.estrellas) + '☆'.repeat(3 - inf.estrellas);
+  // ---- Estrellas y medallas ----
+  // Tiempo: promedio de segundos para resolver las emergencias ÷ tiempo disponible
+  const limite = (dificultadJSON.niveles[e.nivel] || {}).tiempoParaResolver || emergenciasJSON.config.tiempoParaResolver;
+  const resueltasConTiempo = (e.viaje ? e.viaje.registro : []).filter((r) => r.resultado === 'resuelta' && r.segundos !== undefined);
+  const fraccionTiempo = resueltasConTiempo.length ? resueltasConTiempo.reduce((s, r) => s + r.segundos, 0) / resueltasConTiempo.length / limite : 0;
+  // Impactos: golpes en el minijuego de esquivar + emergencias de micrometeoritos sin resolver
+  const impactos = (ctx.logros?.stats.golpes || 0) + (e.viaje ? e.viaje.registro : []).filter((r) => r.id === 'meteoritos' && r.resultado === 'fallida').length;
+  const presupuestoReal = Math.round(configHangar.presupuesto[destino.id] * ((dificultadJSON.niveles[e.nivel] || {}).factorPresupuesto ?? 1));
+  const datosLogros = {
+    exito: inf.exito, destinoId: destino.id, vida: inf.vida, estados, costo: resumenHangar.costo, presupuesto: presupuestoReal,
+    impactos, fraccionTiempo, aciertos: 0, aprendidos: ctx.aprendizaje?.cantidad || 0, totalConceptos: ctx.aprendizaje?.total || 0
+  };
+  const estrellasHtml = (n) => '⭐'.repeat(n) + '☆'.repeat(3 - n);
+  const estrellas = estrellasHtml(estrellasMision(datosLogros, CONFIG_ESTRELLAS));
+  const listaLogros = () => {
+    const ids = ctx.logros ? ctx.logros.deEstaMision : [];
+    return ids.length ? ids.map((id) => { const l = LOGROS.find((x) => x.id === id); return `<span class="logro-chip">${l.icono} ${l.nombre}</span>`; }).join('') : '<small>Ninguna nueva en esta misión. Mira las pistas en la Sala de trofeos (menú Esc).</small>';
+  };
   ui.innerHTML = `
     <h1>${inf.exito ? '📋 ¡Misión cumplida!' : '📋 Informe: misión fallida'}</h1>
     <div class="estrellas">${estrellas}</div>
+    <small class="estrellas-nota">⭐ misión cumplida · ⭐ vida ≥ ${CONFIG_ESTRELLAS.vidaMinima} · ⭐ rapidez o preguntas</small>
+    <h3>🏅 Medallas de esta misión</h3>
+    <div class="logros-mision"></div>
     <div class="cifras">
       <div><span>Créditos</span><b>+${inf.creditos}</b></div>
       <div><span>Puntaje</span><b>${inf.puntaje}</b></div>
@@ -125,6 +149,8 @@ export function iniciarPantallaInforme(ctx) {
     ${progreso ? `<p class="progreso">Créditos acumulados: <b>${progreso.creditos}</b> · misiones: ${progreso.misiones.length} · mejor puntaje: ${progreso.mejorPuntaje} · conceptos: ${ctx.aprendizaje?.cantidad ?? 0} de ${CONCEPTOS.length}</p>` : ''}
     ${soyAnfitrion ? '<button id="volver">🛠 Volver al hangar y mejorar la nave</button>' : '<p class="nota">Esperando al anfitrión…</p>'}`;
   ctx.hud.appendChild(ui);
+  ctx.logros?.revisar(datosLogros);
+  ui.querySelector('.logros-mision').innerHTML = listaLogros();
   // Preguntas: un toque, respuesta inmediata con explicación; el resultado va al diario
   let respondidas = 0;
   let aciertos = 0;
@@ -143,6 +169,11 @@ export function iniciarPantallaInforme(ctx) {
           ctx.aprendizaje?.guardarRepaso(destino.id, aciertos, preguntas.length);
           ui.querySelector('.resultado-repaso').innerHTML = `🎯 <b>${aciertos} de ${preguntas.length}</b> · guardado en "Lo que aprendí"`;
           window.dispatchEvent(new CustomEvent('repaso-terminado', { detail: { aciertos, total: preguntas.length, destinoId: destino.id } }));
+          // Las preguntas también cuentan para las estrellas y las medallas
+          const conPreguntas = { ...datosLogros, aciertos, aprendidos: ctx.aprendizaje?.cantidad || 0 };
+          ctx.logros?.revisar(conPreguntas);
+          ui.querySelector('.estrellas').textContent = estrellasHtml(estrellasMision(conPreguntas, CONFIG_ESTRELLAS));
+          ui.querySelector('.logros-mision').innerHTML = listaLogros();
         }
       };
     });

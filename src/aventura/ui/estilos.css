@@ -109,6 +109,17 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Aterrizaje con alarmas */
 #hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
 #hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
+/* ---- Logros ---- */
+#hud .logros-avisos { position: absolute; right: 12px; bottom: 40px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 30; pointer-events: none; }
+#hud .logro-aviso { display: flex; gap: 10px; align-items: center; padding: 6px 12px; font-size: var(--tc); border-color: #ffd166; animation: aparecer 0.3s; transition: opacity 0.6s; }
+#hud .logro-aviso.saliendo { opacity: 0; }
+#hud .la-icono { font-size: 28px; }
+#hud .trofeos-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+#hud .trofeo { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; background: #2a2208; border: 2px solid #ffd166; border-radius: 12px; padding: 10px; font-size: var(--tc); }
+#hud .trofeo .t-icono { font-size: 40px; }
+#hud .trofeo.bloqueado { background: #1a1f2c; border-color: #3a4256; filter: grayscale(1); opacity: 0.7; }
+#hud .logro-chip { display: inline-block; margin: 3px; padding: 4px 10px; border-radius: 14px; background: #2a2208; border: 2px solid #ffd166; font-size: var(--tc); }
+#hud .estrellas-nota { color: #b8c3e0; }
 /* ---- Aprendizaje: tarjeta, diario y repaso ---- */
 #hud .tarjeta-aprendizaje { position: absolute; right: 12px; top: 64px; width: min(calc(380px * var(--ancho)), 40vw); padding: 12px 16px; border-color: #ffd166; border-width: 3px;
   box-shadow: 0 0 24px rgba(255, 209, 102, 0.5); animation: aparecer 0.4s; z-index: 4; font-size: var(--tc); }

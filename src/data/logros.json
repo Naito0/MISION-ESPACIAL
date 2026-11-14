@@ -1,0 +1,21 @@
+{
+  "_comentario": "Medallas. 'condicion' dice qué revisa compartido/logros.js (no hace falta tocar código para cambiar textos o umbrales). 'pista' se ve en la Sala de trofeos cuando la medalla está bloqueada. Las estrellas de cada misión (1 a 3) salen de 'estrellas'.",
+  "estrellas": {
+    "_nota": "Una misión cumplida da 1 estrella base. Suma 1 si cumple cada criterio y como máximo son 3. Si la misión fracasa: 0.",
+    "vidaMinima": 70,
+    "tiempoMaximo": 0.5,
+    "aciertosMinimos": 2
+  },
+  "logros": [
+    { "id": "primer_alunizaje", "icono": "🌙", "nombre": "Primer alunizaje", "pista": "Completa la misión a la Luna.", "condicion": { "tipo": "mision", "destino": "luna" } },
+    { "id": "rumbo_marte", "icono": "🔴", "nombre": "Rumbo a Marte", "pista": "Completa la misión a Marte.", "condicion": { "tipo": "mision", "destino": "marte" } },
+    { "id": "sin_rasgunos", "icono": "🛡️", "nombre": "Nave sin rasguños", "pista": "Termina una misión con más del 90% de vida.", "condicion": { "tipo": "vida", "minimo": 90 } },
+    { "id": "diseno_perfecto", "icono": "📐", "nombre": "Diseño perfecto", "pista": "Todas las piezas en la zona \"recomendado\", sin nada exagerado.", "condicion": { "tipo": "diseno" } },
+    { "id": "presupuesto_sobra", "icono": "💰", "nombre": "Presupuesto de sobra", "pista": "Completa una misión gastando menos del 80% del presupuesto.", "condicion": { "tipo": "presupuesto", "maximo": 0.8 } },
+    { "id": "piloto_elite", "icono": "🛩️", "nombre": "Piloto de élite", "pista": "Completa una misión sin ningún impacto de micrometeoritos.", "condicion": { "tipo": "impactos", "maximo": 0 } },
+    { "id": "cazador_fugas", "icono": "💨", "nombre": "Cazador de fugas", "pista": "Sella una fuga de aire en menos de 30 segundos.", "condicion": { "tipo": "minijuego", "id": "fuga", "segundosMax": 30 } },
+    { "id": "apolo13", "icono": "🧰", "nombre": "Como en el Apolo 13", "pista": "Arma el filtro de aire improvisado.", "condicion": { "tipo": "minijuego", "id": "filtro" } },
+    { "id": "tripulacion_sabia", "icono": "🎓", "nombre": "Tripulación sabia", "pista": "Responde bien las 3 preguntas de \"Hoy aprendiste 3 cosas\".", "condicion": { "tipo": "preguntas", "aciertos": 3 } },
+    { "id": "coleccionista", "icono": "📚", "nombre": "Coleccionista", "pista": "Desbloquea todas las tarjetas de \"Lo que aprendí\".", "condicion": { "tipo": "coleccion" } }
+  ]
+}
