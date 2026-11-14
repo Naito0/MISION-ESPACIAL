@@ -30,7 +30,7 @@
       "destino": "marte",
       "nombre": "Órbita baja de Marte (300 km)",
       "explicacion": "Mapas muy detallados, pero pasa mucho tiempo a la sombra, ve poco a la Tierra y frenar para quedarse ahí gasta mucho combustible.",
-      "factorDatos": 1.3, "contacto": 0.4, "factorVida": 0.8, "eclipse": 0.38, "horasSombra": 0.7, "factorCombustible": 0.35,
+      "factorDatos": 1.3, "contacto": 0.4, "factorVida": 0.8, "eclipse": 0.38, "horasSombra": 0.7, "factorCombustible": 0.35, "aterrizaje": { "altitudInicial": 1000, "velocidadVerticalInicial": 50, "velocidadHorizontalMax": 10 },
       "aproximado": true
     },
     {
@@ -38,7 +38,7 @@
       "destino": "marte",
       "nombre": "Órbita alta de Marte (1000 km)",
       "explicacion": "Menos detalle, pero más tiempo de contacto con la Tierra, menos sombra y más vida útil. Entrar gasta algo menos de combustible.",
-      "factorDatos": 0.9, "contacto": 0.6, "factorVida": 1.1, "eclipse": 0.25, "horasSombra": 0.6, "factorCombustible": 0.28,
+      "factorDatos": 0.9, "contacto": 0.6, "factorVida": 1.1, "eclipse": 0.25, "horasSombra": 0.6, "factorCombustible": 0.28, "aterrizaje": { "altitudInicial": 1000, "velocidadVerticalInicial": 50, "velocidadHorizontalMax": 10 },
       "aproximado": true
     },
     {

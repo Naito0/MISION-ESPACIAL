@@ -27,7 +27,9 @@ export function coheteMasBarato(cohetes, orbita, masaTotal) {
 
 /** Combustible para frenar/entrar en la órbita: proporcional a la masa de la nave. */
 export function calcularInsercion(masaTotal, combustible, orbita) {
-  const necesario = Math.round(masaTotal * orbita.factorCombustible);
+  // Redondeo a un decimal (no a entero): en naves livianas como un CubeSat
+  // 0,4 kg de combustible ya es importante
+  const necesario = Math.round(masaTotal * orbita.factorCombustible * 10) / 10;
   const gastado = Math.min(necesario, combustible);
   return { disponible: combustible, necesario, gastado, quedan: combustible - gastado, ok: combustible >= necesario };
 }

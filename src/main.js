@@ -6,7 +6,7 @@
 //   1. Concepto ............ EscenaMision
 //   2. Requisitos .......... EscenaRequisitos
 //   3. Compensaciones ...... EscenaDiseno
-//   4. Diseño puntual ...... EscenaDisenoPuntual
+//   4. Diseño puntual ...... EscenaDisenoPuntual (→ EscenaComparacionDestinos: "Probar en otros destinos")
 //   5. Lanzamiento y viaje . EscenaLanzamiento → EscenaViaje (averías + minijuegos de reparación)
 //   6. Operación ........... EscenaAterrizaje (si aterriza) → EscenaSimulacion → EscenaInforme
 // =============================================================
@@ -18,6 +18,7 @@ import EscenaMision from './scenes/EscenaMision.js';
 import EscenaRequisitos from './scenes/EscenaRequisitos.js';
 import EscenaDiseno from './scenes/EscenaDiseno.js';
 import EscenaDisenoPuntual from './scenes/EscenaDisenoPuntual.js';
+import EscenaComparacionDestinos from './scenes/EscenaComparacionDestinos.js';
 import EscenaLanzamiento from './scenes/EscenaLanzamiento.js';
 import EscenaViaje from './scenes/EscenaViaje.js';
 import EscenaAterrizaje from './scenes/EscenaAterrizaje.js';
@@ -41,6 +42,7 @@ const config = {
     EscenaRequisitos,
     EscenaDiseno,
     EscenaDisenoPuntual,
+    EscenaComparacionDestinos,
     EscenaLanzamiento,
     EscenaViaje,
     EscenaAterrizaje,

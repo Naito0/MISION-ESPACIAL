@@ -68,6 +68,13 @@
     "msPorTramo": 2200,
     "segundosReaccion": 6
   },
+  "comparacion": {
+    "_nota": "Prueba rápida de la misma nave en otros destinos. factorOtroDestino: si el destino no es el de la misión, el objetivo científico no aplica y los instrumentos solo hacen 'ciencia general' (valor × este factor). semilla: hace que los eventos al azar sean los mismos en todos los destinos (comparación justa). margenAterrizaje: combustible extra que se pide para un descenso seguro.",
+    "factorOtroDestino": 0.5,
+    "semilla": 2026,
+    "eventos": 2,
+    "margenAterrizaje": 1.3
+  },
   "simulacion": {
     "msPorMes": 350,
     "diasPorMes": 30

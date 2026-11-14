@@ -35,6 +35,39 @@ test('checklist: el CubeSat bien diseñado cumple todos los requisitos estimados
   assert.deepEqual(items.filter((i) => !i.ok).map((i) => i.texto), []);
 });
 
+import { simularEnDestino, mejoresPorFila } from '../src/systems/comparadorDestinos.js';
+
+function compararCubesat(orbitaId) {
+  const mision = MISIONES.find((m) => m.id === 'cubesat_tierra');
+  const orbita = ORBITAS.find((o) => o.id === orbitaId);
+  return simularEnDestino({
+    mision, seleccion: SELECCION_CUBESAT, orbita, destino: DESTINOS.find((d) => d.id === orbita.destino),
+    categorias: CATEGORIAS, cohetes: COHETES, eventos: EVENTOS, config: CONFIG, presupuesto: mision.presupuesto
+  });
+}
+
+test('comparación de destinos: el CubeSat funciona en la Tierra pero no llega a la Luna', () => {
+  const tierra = compararCubesat('tierra_leo');
+  const luna = compararCubesat('luna_alta');
+  assert.equal(tierra.llego, true);
+  assert.ok(tierra.datosEnviados > 0);
+  assert.equal(luna.llego, false);
+  assert.match(luna.explicacion, /Luna/);
+  const mejores = mejoresPorFila([tierra, luna]);
+  assert.deepEqual(mejores.llego, [true, false]);
+});
+
+test('comparación de destinos: siempre es igual con la misma semilla', () => {
+  assert.equal(compararCubesat('tierra_sso').puntaje, compararCubesat('tierra_sso').puntaje);
+});
+
+test('cada destino de prueba de cada misión existe en orbitas.json', () => {
+  for (const m of MISIONES) {
+    for (const id of m.destinosPrueba || []) assert.ok(ORBITAS.some((o) => o.id === id), `${m.id}: ${id}`);
+    assert.ok((m.destinosPrueba || []).length >= 2, `${m.id} necesita al menos 2 destinos de prueba`);
+  }
+});
+
 const AVERIAS = JSON.parse(readFileSync(new URL('../src/data/eventos.json', import.meta.url), 'utf8')).averiasViaje;
 
 test('soporte vital: ida + estadía + vuelta por tripulante', () => {

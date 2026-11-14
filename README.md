@@ -3,11 +3,11 @@
 Juego educativo para el navegador, con un toque arcade, para el desafío **"Juego de diseño de misiones espaciales"**. El jugador lleva una misión desde la idea hasta la operación siguiendo las fases que usa la NASA para madurar un concepto de misión:
 
 1. **Concepto:** elegir el objetivo científico.
-2. **Requisitos:** el juego deriva los requisitos mínimos (datos, vida útil, órbita o aterrizaje, instrumentos útiles).
-3. **Estudio de compensaciones:** diseñar la nave por disciplinas, guardar dos diseños (A y B) y compararlos.
-4. **Diseño puntual:** elegir la órbita (con diagrama 2D) y el cohete, y revisar la lista final de equipos.
-5. **Lanzamiento y viaje:** animación del despegue y **travesía por días** con averías. Si el diseño no las evita, el equipo las repara con **minijuegos contra reloj** (unir cables por color, soldar grietas del casco, recalibrar la antena). Si no llegan a tiempo, se pierde combustible, energía, señal o días.
-6. **Operación y resultados:** aterrizaje tipo Lunar Lander (si la misión aterriza), simulación mes a mes con línea de tiempo de eventos, e informe con causas y efectos, comparación con el intento anterior y misiones reales parecidas.
+2. **Requisitos:** un **checklist con iconos** que se marca en verde solo cuando el diseño cumple cada requisito.
+3. **Estudio de compensaciones:** diseñar la nave por disciplinas viendo un **dibujo 2D de la nave** que se arma pieza por pieza. Panel con 4 recursos principales (presupuesto, masa, energía, datos) y "Ver más" para el resto; textos flotantes con cada cambio; explicaciones en tooltips y botones "?". Guardar dos diseños (A y B) y compararlos.
+4. **Diseño puntual:** elegir la órbita (con diagrama 2D) y el cohete, revisar la lista final de equipos y **probar la misma nave en otros destinos** (tabla comparativa con la explicación de cada diferencia).
+5. **Lanzamiento y viaje:** animación del despegue (separación de etapas, llegada a la órbita) y **travesía** sobre un fondo de estrellas con paralaje. Las averías hacen temblar o destellar la pantalla: si la nave tiene la protección, aparece un escudo; si no, hay que **hacer clic en la pieza dañada** y repararla con un **minijuego contra reloj** (unir cables, soldar grietas, recalibrar la antena).
+6. **Operación y resultados:** aterrizaje tipo Lunar Lander (si la misión aterriza), simulación mes a mes con línea de tiempo y **paquetes de datos** que viajan a las estaciones terrenas, e informe con causas y efectos, comparación con el intento anterior y misiones reales parecidas.
 
 Hay **modo individual** y **modo equipo** (de 2 a 4 jugadores en la misma computadora) con 4 roles: **Comandante / Piloto** (órbita, cohete, propulsión, actitud), **Ingeniero de sistemas** (estructura, energía, térmica; lidera las reparaciones), **Especialista científico / médico** (instrumentos y soporte vital) y **Oficial de comunicaciones y recursos** (antena, estaciones, computadora y presupuesto). Hay **3 niveles**: 1) tutorial con un CubeSat, 2) misiones con un objetivo (Tierra, Luna, Marte y una **expedición tripulada** con soporte vital: oxígeno, agua y comida por día) y 3) misiones con varios objetivos a la vez.
 
@@ -103,6 +103,7 @@ mision-espacial/
     │   ├── EscenaRequisitos.js      # fase 2: Requisitos
     │   ├── EscenaDiseno.js          # fase 3: Estudio de compensaciones (A/B)
     │   ├── EscenaDisenoPuntual.js   # fase 4: órbita (diagrama 2D), cohete, aprobación
+    │   ├── EscenaComparacionDestinos.js # fase 4: la misma nave en varios destinos
     │   ├── EscenaLanzamiento.js     # fase 5: animación del despegue
     │   ├── EscenaViaje.js           # fase 5: travesía por días con averías
     │   ├── EscenaAterrizaje.js      # fase 6: minijuego tipo Lunar Lander
@@ -119,6 +120,8 @@ mision-espacial/
     │   ├── puntaje.js               # PURA: requisitos y puntaje por categorías
     │   ├── informe.js               # PURA: causas y efectos, misiones parecidas
     │   ├── averias.js               # PURA: averías del viaje y sus daños
+    │   ├── checklist.js             # PURA: checklist de requisitos (estimado)
+    │   ├── comparadorDestinos.js    # PURA: simulación rápida en otros destinos
     │   ├── soporteVital.js          # PURA: oxígeno/comida en días-persona
     │   └── almacenamiento.js        # récords y diseños en localStorage
     ├── minijuegos/                # minijuegos de reparación (uno por archivo)
@@ -127,7 +130,17 @@ mision-espacial/
     │   ├── MinijuegoSoldadura.js    # soldar grietas del casco
     │   ├── MinijuegoAntena.js       # recalibrar la antena
     │   └── index.js                 # registro de minijuegos
-    ├── ui/ui.js                   # botones, barras, ventanas, barra de fases
+    ├── efectos/                   # animaciones hechas con formas y tweens
+    │   ├── particulas.js            # fuego, humo, chispas
+    │   ├── paralaje.js              # estrellas en capas
+    │   ├── paquetesDatos.js         # paquetes que viajan a la Tierra
+    │   └── enlaceDatos.js           # estaciones terrenas en la operación
+    ├── ui/
+    │   ├── ui.js                    # botones, barras, ventanas, barra de fases
+    │   ├── ayuda.js                 # botón "?" y tooltips
+    │   ├── panelRecursos.js         # 4 recursos + "Ver más" + textos flotantes
+    │   ├── dibujoNave.js            # dibujo 2D de la nave según las piezas
+    │   └── checklistUI.js           # tarjetas del checklist de requisitos
     └── data/                      # TODO el balance del juego
         ├── destinos.json            # gravedad, atmósfera, temperatura (NASA)
         ├── componentes.json         # componentes por disciplina
@@ -163,6 +176,12 @@ Las funciones marcadas como **PURA** no usan Phaser ni leen el estado: reciben d
 | Minijuegos de reparación (o agregar uno nuevo) | `src/minijuegos/` | Principiante / intermedio |
 | Travesía y averías | `src/scenes/EscenaViaje.js` + `src/systems/averias.js` | Intermedio |
 | Soporte vital | `src/systems/soporteVital.js` + categoría `soporte` en `componentes.json` | Principiante |
+| Destinos donde se puede probar cada misión | `src/data/misiones.json` (`destinosPrueba`) + `config.json` (`comparacion`) | No programador |
+| Frases que explican cada destino | `src/systems/comparadorDestinos.js` (`explicarDestino`) | Principiante |
+| Dibujo de la nave (formas y colores de cada pieza) | `src/ui/dibujoNave.js` | Principiante |
+| Panel de recursos e iconos | `src/ui/panelRecursos.js` | Principiante |
+| Animación del lanzamiento | `src/scenes/EscenaLanzamiento.js` + `src/efectos/` | Intermedio |
+| Tiempos del viaje y de reacción a averías | `src/data/config.json` (`viaje`) | No programador |
 | Fases, niveles, límites, puntaje | `src/data/config.json` | No programador |
 | Misiones reales del informe | `src/data/misiones_reales.json` | No programador |
 | Textos de causa y efecto | `src/systems/informe.js` | Principiante |

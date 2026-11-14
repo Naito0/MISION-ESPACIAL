@@ -1,5 +1,5 @@
 {
-  "_comentario": "Escenarios por nivel (1 = tutorial CubeSat, 2 = una misión con un objetivo, 3 = varios objetivos a la vez). escala: qué componentes se usan ('cubesat' o 'normal'). presupuesto en M$ (nave + cohete). plazoMeses = tiempo máximo de desarrollo. duracionMeses = cuánto se simula. objetivos: cada uno lista los instrumentos útiles con su multiplicador de valor y el valor mínimo para cumplirlo. incompatibles: instrumentos que no sirven y por qué. valorReferencia = valor que da el puntaje completo de ciencia. metaValorMensual = meta del segmento Usuario. 'superficie' reemplaza a la órbita durante la operación si la misión aterriza. misionesReales: ids de misiones_reales.json.",
+  "_comentario": "Escenarios por nivel (1 = tutorial CubeSat, 2 = una misión con un objetivo, 3 = varios objetivos a la vez). escala: qué componentes se usan ('cubesat' o 'normal'). presupuesto en M$ (nave + cohete). plazoMeses = tiempo máximo de desarrollo. duracionMeses = cuánto se simula. objetivos: cada uno lista los instrumentos útiles con su multiplicador de valor y el valor mínimo para cumplirlo. incompatibles: instrumentos que no sirven y por qué. valorReferencia = valor que da el puntaje completo de ciencia. metaValorMensual = meta del segmento Usuario. 'superficie' reemplaza a la órbita durante la operación si la misión aterriza. misionesReales: ids de misiones_reales.json. destinosPrueba: órbitas (ids de orbitas.json) donde se puede probar la misma nave en la pantalla de comparación.",
   "misiones": [
     {
       "id": "cubesat_tierra",
@@ -16,6 +16,7 @@
       "duracionMeses": 12,
       "requisitos": { "datosMinimosGB": 10, "vidaMinMeses": 9 },
       "orbitaSugerida": "tierra_leo",
+      "destinosPrueba": ["tierra_leo", "tierra_sso", "luna_alta", "marte_alta"],
       "orbitasPermitidas": ["tierra_leo", "tierra_sso"],
       "objetivos": [
         { "id": "fotos", "nombre": "Fotografiar la Tierra",
@@ -42,6 +43,7 @@
       "duracionMeses": 36,
       "requisitos": { "datosMinimosGB": 600, "vidaMinMeses": 24 },
       "orbitaSugerida": "tierra_sso",
+      "destinosPrueba": ["tierra_sso", "tierra_geo", "luna_alta", "marte_alta"],
       "objetivos": [
         { "id": "incendios", "nombre": "Detectar incendios",
           "descripcion": "Encontrar focos de calor en los bosques y avisar a los bomberos.",
@@ -70,6 +72,7 @@
       "duracionMeses": 6,
       "requisitos": { "datosMinimosGB": 20, "vidaMinMeses": 3 },
       "orbitaSugerida": "luna_alta",
+      "destinosPrueba": ["luna_alta", "marte_alta"],
       "superficie": {
         "factorSolar": 0.5, "eclipse": 0.3, "horasSombra": 4, "contacto": 0.5, "factorDatos": 1.0, "factorVida": 1.0,
         "_nota": "En el polo sur el Sol está muy bajo: los paneles rinden la mitad y hay sombras largas."
@@ -105,6 +108,7 @@
       "duracionMeses": 1,
       "requisitos": { "datosMinimosGB": 5, "vidaMinMeses": 1 },
       "orbitaSugerida": "luna_alta",
+      "destinosPrueba": ["luna_alta", "marte_alta"],
       "superficie": {
         "factorSolar": 1.0, "eclipse": 0.1, "horasSombra": 2, "contacto": 0.8, "factorDatos": 1.0, "factorVida": 1.0,
         "_nota": "Se aterriza de día en una zona ecuatorial: mucho sol y buena vista de la Tierra."
@@ -134,6 +138,7 @@
       "duracionMeses": 36,
       "requisitos": { "datosMinimosGB": 150, "vidaMinMeses": 24 },
       "orbitaSugerida": "marte_alta",
+      "destinosPrueba": ["marte_alta", "luna_alta", "tierra_sso"],
       "objetivos": [
         { "id": "mapa", "nombre": "Mapear la superficie",
           "descripcion": "Fotografiar el terreno con detalle para encontrar lugares seguros de aterrizaje.",
@@ -162,6 +167,7 @@
       "duracionMeses": 36,
       "requisitos": { "datosMinimosGB": 900, "vidaMinMeses": 30 },
       "orbitaSugerida": "tierra_sso",
+      "destinosPrueba": ["tierra_sso", "luna_alta", "marte_alta"],
       "objetivos": [
         { "id": "incendios", "nombre": "Detectar incendios",
           "descripcion": "Encontrar focos de calor en los bosques.",
@@ -190,6 +196,7 @@
       "duracionMeses": 36,
       "requisitos": { "datosMinimosGB": 200, "vidaMinMeses": 24 },
       "orbitaSugerida": "marte_alta",
+      "destinosPrueba": ["marte_alta", "luna_alta", "tierra_sso"],
       "objetivos": [
         { "id": "mapa", "nombre": "Mapear la superficie",
           "descripcion": "Fotografiar el terreno con detalle.",

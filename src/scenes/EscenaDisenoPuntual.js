@@ -65,7 +65,7 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
     this.textoProblemas = texto(this, 875, 300, '', { tam: 13, ancho: 375 });
 
     // ---- Aprobaciones (modo equipo) ----
-    this.textoTurno = texto(this, 440, 655, '', { tam: 13, ancho: 400, color: COLORES.aviso });
+    this.textoTurno = texto(this, 440, 630, '', { tam: 13, ancho: 400, color: COLORES.aviso });
     this.botonesAprobar = [];
     if (esEquipo()) {
       texto(this, 875, 470, 'Aprobar diseño (cada rol, en su turno):', { tam: 13, negrita: true });
@@ -80,6 +80,8 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
       boton(this, 1160, 640, 190, 40, 'Pasar turno ▶', () => { pasarTurno(); this.actualizar(); }, { tam: 15 });
     }
     this.botonLanzar = boton(this, 1060, 690, 390, 46, '¡Aprobado: a lanzar! 🚀', () => this.lanzar(), { tam: 19 });
+    // Probar la misma nave en otros destinos (simulación rápida y tabla comparativa)
+    this.botonDestinos = boton(this, 640, 693, 400, 40, '🌍 Probar en otros destinos', () => this.scene.start('ComparacionDestinos'), { tam: 16 });
 
     this.actualizar();
     const o = this.orbitas.find((x) => x.id === estado.orbitaId);
@@ -230,6 +232,7 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
     }
 
     this.botonLanzar.setHabilitado(r.bloqueos.length === 0);
+    this.botonDestinos.setHabilitado(a.diseno.faltantes.length === 0);
   }
 
   lanzar() {

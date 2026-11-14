@@ -9,6 +9,7 @@
       "atmosfera": { "presionSuperficieMbar": 1014, "descripcion": "Atmósfera densa de nitrógeno y oxígeno." },
       "temperatura": { "minC": -89, "maxC": 57, "nota": "Extremos aproximados registrados en la superficie." },
       "distanciaTexto": "Órbita alrededor de la Tierra (cientos a miles de km de altura)",
+      "distanciaTierraKm": 0,
       "fuente": "NASA Earth Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
       "juego": {
         "aproximado": true,
@@ -27,6 +28,7 @@
       "atmosfera": { "presionSuperficieMbar": 0, "descripcion": "Prácticamente no tiene atmósfera (solo una exosfera muy tenue)." },
       "temperatura": { "minC": -173, "maxC": 117, "nota": "Rango aproximado en el ecuador lunar entre la noche y el día (100 K a 390 K)." },
       "distanciaTexto": "384 400 km de la Tierra (promedio)",
+      "distanciaTierraKm": 384400,
       "fuente": "NASA Moon Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
       "juego": {
         "aproximado": true,
@@ -34,7 +36,9 @@
         "factorComunicacion": 0.6,
         "alcanceRequerido": 2,
         "diasViaje": 4, "averiasViaje": 2,
-        "frenadoAtmosferico": 0
+        "frenadoAtmosferico": 0,
+        "superficie": { "factorSolar": 1.0, "eclipse": 0.3, "horasSombra": 4, "contacto": 0.5, "factorDatos": 1.0, "factorVida": 1.0,
+          "_nota": "Condiciones genéricas en la superficie (se usan al probar un módulo de aterrizaje en otro destino)." }
       }
     },
     {
@@ -45,6 +49,8 @@
       "atmosfera": { "presionSuperficieMbar": 6.36, "descripcion": "Atmósfera muy delgada de CO2 (menos del 1% de la presión de la Tierra)." },
       "temperatura": { "minC": -140, "maxC": 20, "nota": "Rango aproximado según lugar y estación; el promedio es cerca de -63 °C." },
       "distanciaTexto": "Entre 55 y 400 millones de km de la Tierra",
+      "distanciaTierraKm": 225000000,
+      "_notaDistancia": "distanciaTierraKm es un promedio aproximado: la distancia real varía entre unos 55 y 400 millones de km según la posición de los planetas.",
       "fuente": "NASA Mars Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
       "juego": {
         "aproximado": true,
@@ -53,6 +59,8 @@
         "alcanceRequerido": 3,
         "diasViaje": 210, "averiasViaje": 3,
         "frenadoAtmosferico": 0.0004,
+        "superficie": { "factorSolar": 0.43, "eclipse": 0.5, "horasSombra": 12, "contacto": 0.4, "factorDatos": 1.0, "factorVida": 0.9,
+          "_nota": "Superficie genérica de Marte: la noche dura ~12 h (el día marciano dura 24 h 37 min) y hay polvo que desgasta la nave." },
         "_nota": "factorSolar: Marte recibe ~43% de la luz solar que la Tierra. frenadoAtmosferico es k en a = k·v² (solo se usa si una misión aterriza en Marte)."
       }
     }
