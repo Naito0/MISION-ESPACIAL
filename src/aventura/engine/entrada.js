@@ -49,7 +49,8 @@ export function crearControlTeclado(distribucion = 'teclado1', elementoMouse = n
   let rueda = 0;
   if (d.usaMouse && elementoMouse) {
     // Clic en el juego → el mouse queda "capturado" para girar la cámara
-    elementoMouse.addEventListener('click', () => { if (!document.pointerLockElement) elementoMouse.requestPointerLock?.(); });
+    // (solo en las pantallas donde se camina: window.capturarMouse = true)
+    elementoMouse.addEventListener('click', () => { if (window.capturarMouse && !document.pointerLockElement) elementoMouse.requestPointerLock?.(); });
     document.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement === elementoMouse) { mouseX += e.movementX; mouseY += e.movementY; }
     });

@@ -11,6 +11,7 @@ import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
 import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
 import { iniciarPantallaHangar } from './pantallas/pantallaHangar.js';
+import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
 import { conectarServidor, crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { calidad3D } from '../systems/preferencias.js';
@@ -50,9 +51,13 @@ function irA(nombre) {
   // 'juego' = la pantalla que corresponde a la fase actual de la sala
   const fase = ctx.conexionActiva?.estado?.fase;
   if (nombre === 'lobby' || fase === 'lobby' || !fase) pantalla = iniciarPantallaLobby(ctx);
+  else if (fase === 'sistema') pantalla = iniciarPantallaSistema(ctx);
   else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
   else pantalla = iniciarPantallaNave(ctx); // viaje, llegada o fracaso
   window.aventura.pantalla = pantalla;
+  // El mouse solo se captura donde se camina (nave y superficie)
+  window.capturarMouse = !!pantalla.jugador;
+  hud.querySelector('.ayuda').style.display = window.capturarMouse ? '' : 'none';
 }
 ctx.conexionLocal = crearConexionLocal;
 ctx.irA = irA;

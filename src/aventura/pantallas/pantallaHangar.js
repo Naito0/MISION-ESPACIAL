@@ -142,7 +142,10 @@ export function iniciarPantallaHangar(ctx) {
         <h3>Tripulación</h3>
         <ul class="listos">${e.jugadores.map((j) => `<li>${e.listos.includes(j.id) ? '✅' : '⏳'} ${j.nombre}</li>`).join('')}</ul>
         <button id="listo" class="${listo ? 'activo' : ''}">${listo ? '✋ Ya no estoy listo' : '🚀 ¡Listo!'}</button>
+        ${yo && yo.anfitrion ? '<button id="cambiarDestino" class="secundario">🪐 Cambiar destino</button>' : ''}
         <p class="error">${mensajeError}</p>`;
+      const cambiar = holograma.querySelector('#cambiarDestino');
+      if (cambiar) cambiar.onclick = () => conexion.accion('cambiarDestino');
       holograma.querySelector('#listo').onclick = async () => {
         const res = await conexion.accion('listo');
         if (res.error) { efecto('error'); mensajeError = `${res.error} ${(res.problemas || []).join(' ')}`; dibujar(conexion.estado); }

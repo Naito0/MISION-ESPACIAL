@@ -33,6 +33,18 @@ test('lobby: no se puede empezar sin los 4 roles y un rol es de una sola persona
   assert.equal(s.puedeEmpezar(), true);
   assert.ok(s.accion('b', 'empezar').error, 'solo el anfitrión empieza');
   assert.deepEqual(s.accion('a', 'empezar'), { ok: true });
+  assert.equal(s.fase, 'sistema');
+});
+
+test('sistema solar: solo Luna y Marte se pueden elegir, y lo elige el anfitrión', () => {
+  const s = new Sala('SIS', { emergencias: EMERG, destinos: [], misionesReales: [] });
+  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  s.accion('a', 'tomarLibres');
+  s.accion('a', 'empezar');
+  assert.ok(s.accion('a', 'destino', { id: 'jupiter' }).error);
+  assert.ok(s.accion('b', 'destino', { id: 'luna' }).error);
+  assert.deepEqual(s.accion('a', 'destino', { id: 'luna' }), { ok: true });
+  assert.equal(s.destinoId, 'luna');
   assert.equal(s.fase, 'hangar');
 });
 
@@ -48,6 +60,7 @@ function salaEnHangar() {
   s.accion('a', 'rol', { rol: 'comandante' }); s.accion('a', 'rol', { rol: 'ingeniero' });
   s.accion('b', 'tomarLibres');
   s.accion('a', 'empezar');
+  s.accion('a', 'destino', { id: 'marte' });
   return s;
 }
 const NAVE_MARTE_OK = {

@@ -12,7 +12,7 @@ import { MundoFisico } from '../engine/fisica.js';
 import { crearNaveInterior } from '../escenarios/naveInterior.js';
 import { JugadorLocal } from '../entities/JugadorLocal.js';
 import { AstronautaRemoto } from '../entities/AstronautaRemoto.js';
-import { TIERRA, ROLES, colorRol } from '../datos3d.js';
+import { TIERRA, DESTINOS, ROLES, colorRol } from '../datos3d.js';
 import { ambiente, efecto } from '../audio.js';
 import { abrirMinijuego } from '../minijuegos/index.js';
 import { crearEfectosViaje } from './efectosViaje.js';
@@ -34,7 +34,10 @@ export function iniciarPantallaNave(ctx) {
   const { motor } = ctx;
   const conexion = ctx.conexionActiva;
   const estado = conexion.estado;
-  const esc = crearNaveInterior({ colorPlaneta: ctx.colorPlaneta, particulas: motor.calidad.sombras });
+  // Por el ventanal se ve el destino elegido (su color sale de destinos.json)
+  const destino = DESTINOS.find((d) => d.id === estado.destinoId);
+  const colorPlaneta = destino ? parseInt(destino.color.replace('#', ''), 16) : ctx.colorPlaneta;
+  const esc = crearNaveInterior({ colorPlaneta, particulas: motor.calidad.sombras });
   const escena = new THREE.Scene();
   escena.background = new THREE.Color(esc.colorFondo);
   // Adentro: luz ambiente suave, sin sol (las luces de cada sala hacen el resto)

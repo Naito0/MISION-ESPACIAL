@@ -155,7 +155,25 @@ export class Sala {
     empezar(j) {
       if (!j.anfitrion) return { error: 'Solo el anfitrión puede empezar.' };
       if (!this.puedeEmpezar()) return { error: `Faltan roles: ${this.rolesLibres().join(', ')}.` };
+      this.fase = 'sistema';
+      this.cambio('🪐 Elijan el destino de la misión');
+      return { ok: true };
+    },
+    /** Sistema solar: el anfitrión elige el destino (solo Luna o Marte por ahora). */
+    destino(j, { id }) {
+      if (this.fase !== 'sistema') return { error: 'Ahora no se elige destino.' };
+      if (!j.anfitrion) return { error: 'El anfitrión elige el destino (pueden discutirlo juntos).' };
+      if (!['luna', 'marte'].includes(id)) return { error: 'Ese destino llegará próximamente.' };
+      this.destinoId = id;
       this.abrirHangar();
+      return { ok: true };
+    },
+    /** Desde el hangar, volver a elegir destino. */
+    cambiarDestino(j) {
+      if (this.fase !== 'hangar') return { error: 'Solo desde el hangar.' };
+      if (!j.anfitrion) return { error: 'Solo el anfitrión.' };
+      this.fase = 'sistema';
+      this.cambio('🪐 Elijan otro destino');
       return { ok: true };
     },
     /** Hangar: comprar, cambiar o quitar una pieza (solo las de tus roles). */
