@@ -7,6 +7,7 @@
     "intervaloMax": 15,
     "maxSimultaneas": 3,
     "vidaInicial": 100,
+    "segundosFinal": 5,
     "creditosBase": { "luna": 300, "marte": 600 }
   },
   "emergencias": [

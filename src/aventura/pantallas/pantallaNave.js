@@ -122,7 +122,7 @@ export function iniciarPantallaNave(ctx) {
   let consola = null; // minijuego abierto: { uid, cerrar }
   let final = null;
   const quitarEstado = conexion.alEstado((e) => {
-    if (e.fase === 'lobby' || e.fase === 'hangar') { ctx.irA('juego'); return; }
+    if (!['viaje', 'llegada', 'fracaso'].includes(e.fase)) { ctx.irA('juego'); return; }
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
@@ -177,10 +177,8 @@ export function iniciarPantallaNave(ctx) {
       <p>${final === 'llegada' ? `La nave llegó con <b>${v.vida}</b> de vida.` : 'La nave se quedó sin vida… ¡los astronautas quedaron mareados en el piso! 😵'}</p>
       <p>Emergencias resueltas: <b>${resueltas}</b> · no resueltas: <b>${fallidas.length}</b></p>
       ${fallidas.length ? `<h3>Qué falló</h3><ul>${[...new Set(fallidas.map((f) => f.nombre))].map((n) => `<li>${n}</li>`).join('')}</ul>` : ''}
-      ${soyAnfitrion ? '<button class="boton" id="otra">Volver a la base</button>' : '<p class="nota">Esperando al anfitrión…</p>'}`;
+      <p class="nota">Preparando el informe de la misión…</p>`;
     hud.appendChild(panel);
-    const b = panel.querySelector('#otra');
-    if (b) b.onclick = () => conexion.accion('reiniciar');
     // Soltar el mouse sin abrir el menú de pausa
     if (document.pointerLockElement) {
       window.consolaAbierta = true;

@@ -10,6 +10,7 @@
 
 import { nuevoViaje, avanzarViaje, resolverEmergencia } from './viaje.js';
 import { crearCatalogo, seleccionVacia, resumenDiseno, comprar } from './hangar.js';
+import { calcularInforme } from './informe.js';
 
 export const ROLES_ID = ['comandante', 'ingeniero', 'cientifico', 'comunicaciones'];
 
@@ -199,6 +200,9 @@ export class Sala {
       if (!j.anfitrion) return { error: 'Solo el anfitrión puede reiniciar.' };
       if (this.fase === 'lobby' || this.fase === 'hangar') return { ok: true };
       this.viaje = null;
+      this.informe = null;
+      this.muestras = 0;
+      this.aterrizaje = null;
       this.posiciones.clear();
       this.abrirHangar(); // de vuelta al hangar para mejorar la nave
       return { ok: true };
@@ -212,6 +216,23 @@ export class Sala {
     }
   };
 
+  /** Qué viene después del viaje (el paso de la superficie se agrega aquí). */
+  despuesDelViaje() {
+    this.cerrarMision();
+  }
+
+  /** Calcula el informe final de la misión y pasa a la fase "informe". */
+  cerrarMision() {
+    this.informe = calcularInforme({
+      destinoId: this.destinoId, viaje: this.viaje, diseno: this.diseno, seleccion: this.seleccion,
+      muestras: this.muestras || 0, aterrizaje: this.aterrizaje || null
+    }, this.datos);
+    this.informe.id = `${this.codigo}-${this.version}`; // para que el anfitrión lo guarde una sola vez
+    this.informe.destinoId = this.destinoId;
+    this.fase = 'informe';
+    this.cambio('📋 Informe de la misión');
+  }
+
   /** Posición de un jugador (no sube la versión: se envía aparte, 15 veces por segundo). */
   posicion(id, p) {
     if (this.jugadores.has(id) && p && Number.isFinite(p.x)) this.posiciones.set(id, p);
@@ -219,6 +240,12 @@ export class Sala {
 
   /** Avanza el tiempo: emergencias del viaje, vida de la nave, llegada o fracaso. */
   tick(dt, rng = Math.random) {
+    // Después de llegar o fracasar se muestra la escena unos segundos y luego el informe
+    if (this.fase === 'llegada' || this.fase === 'fracaso') {
+      this.esperaFinal = (this.esperaFinal || 0) + dt;
+      if (this.esperaFinal >= this.datos.emergencias.config.segundosFinal) this.despuesDelViaje();
+      return;
+    }
     if (this.fase !== 'viaje' || !this.viaje) return;
     const sucesos = avanzarViaje(this.viaje, dt, this.datos.emergencias.emergencias, this.datos.emergencias.config, rng);
     for (const s of sucesos) {
@@ -227,6 +254,7 @@ export class Sala {
     }
     if (this.viaje.terminado) {
       this.fase = this.viaje.terminado; // 'llegada' o 'fracaso'
+      this.esperaFinal = 0;
       this.cambio(this.fase === 'llegada' ? '🪐 ¡Llegamos al destino!' : '💫 La nave se quedó sin vida…');
       return;
     }
@@ -250,6 +278,7 @@ export class Sala {
       seleccion: this.seleccion,
       listos: [...this.listos],
       resumen: this.fase === 'hangar' ? this.resumen() : null,
+      informe: this.fase === 'informe' ? this.informe : null,
       viaje: this.viaje && {
         duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
         emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),

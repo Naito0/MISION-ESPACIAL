@@ -12,6 +12,7 @@ import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
 import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
 import { iniciarPantallaHangar } from './pantallas/pantallaHangar.js';
 import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
+import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { conectarServidor, crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { calidad3D } from '../systems/preferencias.js';
@@ -53,6 +54,7 @@ function irA(nombre) {
   if (nombre === 'lobby' || fase === 'lobby' || !fase) pantalla = iniciarPantallaLobby(ctx);
   else if (fase === 'sistema') pantalla = iniciarPantallaSistema(ctx);
   else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
+  else if (fase === 'informe') pantalla = iniciarPantallaInforme(ctx);
   else pantalla = iniciarPantallaNave(ctx); // viaje, llegada o fracaso
   window.aventura.pantalla = pantalla;
   // El mouse solo se captura donde se camina (nave y superficie)

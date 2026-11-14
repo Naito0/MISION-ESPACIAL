@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Sala, generarCodigo, ROLES_ID } from '../src/compartido/sala.js';
 import { nuevoViaje, avanzarViaje, resolverEmergencia, elegirEmergencia, estaAgravada } from '../src/compartido/viaje.js';
+import { calcularInforme } from '../src/compartido/informe.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -51,7 +52,7 @@ test('sistema solar: solo Luna y Marte se pueden elegir, y lo elige el anfitrió
 // ---------- Hangar ----------
 const leerJSON = (n) => JSON.parse(readFileSync(new URL(`../src/data/${n}`, import.meta.url), 'utf8'));
 const datosCompletos = {
-  emergencias: EMERG, misionesReales: [],
+  emergencias: EMERG, misionesReales: leerJSON('misiones_reales.json').misiones,
   destinos: leerJSON('destinos.json').destinos, componentes: leerJSON('componentes.json'), hangar: leerJSON('hangar3d.json')
 };
 function salaEnHangar() {
@@ -106,6 +107,36 @@ test('hangar: con todo en orden y todos listos, despega con el diseño calculado
   assert.equal(s.fase, 'viaje');
   assert.equal(s.diseno.blindaje, false, 'sin estructura blindada');
   assert.equal(s.diseno.antena, true, 'antena media');
+});
+
+test('informe: al terminar el viaje, después de unos segundos aparece el informe con una misión real', () => {
+  const s = salaEnHangar();
+  for (const o of NAVE_MARTE_OK.a) s.accion('a', 'comprar', { opcion: o });
+  for (const o of NAVE_MARTE_OK.b) s.accion('b', 'comprar', { opcion: o });
+  s.accion('a', 'listo'); s.accion('b', 'listo');
+  s.viaje.restante = 0.1;
+  s.tick(0.2);
+  assert.equal(s.fase, 'llegada');
+  s.tick(EMERG.config.segundosFinal + 0.1);
+  assert.equal(s.fase, 'informe');
+  const inf = s.estadoPublico().informe;
+  assert.equal(inf.exito, true);
+  assert.ok(inf.creditos > 0);
+  assert.ok(inf.mision && inf.mision.destino === 'marte' && inf.mision.fuente.startsWith('https://'));
+  // Sin blindaje y con meteoritos fallidos → aparece la causa
+  assert.deepEqual(s.accion('a', 'reiniciar'), { ok: true });
+  assert.equal(s.fase, 'hangar');
+});
+
+test('informe: una emergencia fallida y agravada explica la causa', () => {
+  const inf = calcularInforme({
+    destinoId: 'luna', diseno: { blindaje: false }, seleccion: {}, muestras: 0,
+    viaje: { terminado: 'fracaso', vida: 0, registro: [{ id: 'meteoritos', nombre: 'Lluvia de micrometeoritos', resultado: 'fallida', agravada: true, danio: 30 }] }
+  }, { emergencias: EMERG, misionesReales: leerJSON('misiones_reales.json').misiones });
+  assert.equal(inf.exito, false);
+  assert.equal(inf.estrellas, 0);
+  assert.match(inf.causas[0].causa, /blindaje/);
+  assert.equal(inf.mision.id, 'apollo11');
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {
