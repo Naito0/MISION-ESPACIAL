@@ -63,6 +63,11 @@
     "velocidadRotacionGrados": 90,
     "escalaTiempo": 1
   },
+  "viaje": {
+    "_nota": "msPorTramo: cuánto tarda (en ms) cada tramo del viaje entre averías. segundosReaccion: tiempo para hacer clic en la pieza dañada antes de que la avería cause daño.",
+    "msPorTramo": 2200,
+    "segundosReaccion": 6
+  },
   "simulacion": {
     "msPorMes": 350,
     "diasPorMes": 30

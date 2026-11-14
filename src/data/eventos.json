@@ -3,7 +3,18 @@
   "_averias": "averiasViaje: averías durante la travesía. Si la nave tiene la protección 'mitigadoPor', no pasa nada. Si no, se juega el minijuego indicado (cables, soldadura o antena) contra reloj; si se falla, se aplica el daño. soloTripulada: solo en misiones con tripulación. Tipos de daño extra: diasExtra (la misión se demora y consume soporte vital).",
   "averiasViaje": [
     {
-      "id": "grieta_casco", "nombre": "Impacto de micrometeorito en el casco", "minijuego": "soldadura", "probabilidad": 1,
+      "id": "tormenta_viaje", "nombre": "Tormenta solar", "minijuego": "cables", "probabilidad": 1, "pieza": "paneles", "efecto": "tormenta",
+      "descripcion": "Una tormenta solar baña la nave de partículas y sobrecarga los circuitos de los paneles.",
+      "mitigadoPor": "radiacion",
+      "textoMitigado": "La protección contra radiación absorbió las partículas: los paneles están intactos.",
+      "textoReparado": "¡Circuitos reconectados! Los paneles vuelven a dar energía.",
+      "textoDanio": "No se reconectaron a tiempo: las celdas quedaron dañadas (-20% de energía).",
+      "consecuencia": "las celdas quedarán dañadas (-20% de energía).",
+      "danio": [{ "tipo": "paneles", "porcentaje": 20 }],
+      "explicacion": "Las partículas del Sol dañan la electrónica. Una estructura blindada o una computadora resistente a radiación protegen la nave."
+    },
+    {
+      "id": "grieta_casco", "nombre": "Impacto de micrometeorito en el casco", "minijuego": "soldadura", "probabilidad": 1, "pieza": "casco", "efecto": "impacto",
       "descripcion": "Un micrometeorito abrió grietas en el casco, junto al tanque de combustible.",
       "mitigadoPor": "impactos",
       "textoMitigado": "La estructura blindada resistió el impacto: no hubo grietas.",
@@ -14,7 +25,7 @@
       "explicacion": "Las fugas de combustible son peligrosísimas: sin combustible no se puede entrar en órbita ni aterrizar. Una estructura blindada evita las grietas."
     },
     {
-      "id": "corto_energia", "nombre": "Cortocircuito en el sistema de energía", "minijuego": "cables", "probabilidad": 1,
+      "id": "corto_energia", "nombre": "Cortocircuito en el sistema de energía", "minijuego": "cables", "probabilidad": 1, "pieza": "paneles", "efecto": "falla",
       "descripcion": "Un cortocircuito desconectó parte de los cables que llevan la energía de los paneles.",
       "mitigadoPor": "redundancia",
       "textoMitigado": "Las baterías redundantes mantuvieron todo funcionando mientras se aislaba la falla.",
@@ -25,7 +36,7 @@
       "explicacion": "Los sistemas con repuesto (redundancia) siguen funcionando aunque algo falle; por eso las naves reales duplican lo más importante."
     },
     {
-      "id": "antena_desalineada", "nombre": "Antena desalineada", "minijuego": "antena", "probabilidad": 1,
+      "id": "antena_desalineada", "nombre": "Antena desalineada", "minijuego": "antena", "probabilidad": 1, "pieza": "antena", "efecto": "falla",
       "descripcion": "Una vibración movió la antena y la nave perdió el contacto con la Tierra.",
       "mitigadoPor": null,
       "textoMitigado": "",
@@ -36,7 +47,7 @@
       "explicacion": "Para comunicarse a millones de km, la antena tiene que apuntar con muchísima precisión hacia la Tierra."
     },
     {
-      "id": "fuga_oxigeno", "nombre": "Fuga de oxígeno en la cabina", "minijuego": "soldadura", "probabilidad": 1.2, "soloTripulada": true,
+      "id": "fuga_oxigeno", "nombre": "Fuga de oxígeno en la cabina", "minijuego": "soldadura", "probabilidad": 1.2, "soloTripulada": true, "pieza": "cabina", "efecto": "falla",
       "descripcion": "Una válvula de la cabina pierde oxígeno. ¡Hay que sellarla antes de que la tripulación corra peligro!",
       "mitigadoPor": null,
       "textoMitigado": "",

@@ -10,6 +10,7 @@ import { estado, analizarDiseno, misionActual, destinoActual, orbitaActual, nive
 import { sortearEventos } from '../systems/eventos.js';
 import { simularMision } from '../systems/simulacion.js';
 import { aplicarDaniosAlDiseno } from '../systems/averias.js';
+import { crearEnlaceDatos } from '../efectos/enlaceDatos.js';
 import { ANCHO, COLORES, texto, titulo, panel, boton, barra, ventana, estrellas, barraFases } from '../ui/ui.js';
 
 const LINEA = { x0: 60, x1: 1220, y: 610 };
@@ -53,6 +54,16 @@ export default class EscenaSimulacion extends Phaser.Scene {
       this.rOrbita = rOrbita;
       texto(this, PLANETA.x, PLANETA.y + rOrbita + 10, orbitaActual().nombre, { tam: 14, origen: [0.5, 0], color: COLORES.textoSuave });
     }
+
+    // ---- Estaciones terrenas y paquetes de datos (ver efectos/enlaceDatos.js) ----
+    const analisis = analizarDiseno();
+    const f = analisis.diseno.factorEstaciones;
+    this.enlace = crearEnlaceDatos(this, {
+      planeta: PLANETA,
+      esTierra: mision.destino === 'tierra',
+      cantidadEstaciones: f <= 0.6 ? 1 : f <= 1.0 ? 3 : 5,
+      enlaceOk: analisis.operativo.enlaceOk
+    });
 
     // ---- Panel de estado (derecha) ----
     panel(this, 560, 95, 700, 440);
@@ -125,6 +136,9 @@ export default class EscenaSimulacion extends Phaser.Scene {
       this.anguloNave += delta / 600;
       this.nave.setPosition(PLANETA.x + Math.cos(this.anguloNave) * this.rOrbita, PLANETA.y + Math.sin(this.anguloNave) * this.rOrbita);
     }
+    // Paquetes de datos hacia las estaciones (solo mientras la misión está operando)
+    const operando = !this.terminado && !this.pausado && this.sim.pasos.length > 0;
+    this.enlace.actualizar(delta, { x: this.nave.x, y: this.nave.y }, this.rOrbita ? this.anguloNave : null, operando);
   }
 
   avanzar() {
