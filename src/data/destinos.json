@@ -39,6 +39,16 @@
         "frenadoAtmosferico": 0,
         "superficie": { "factorSolar": 1.0, "eclipse": 0.3, "horasSombra": 4, "contacto": 0.5, "factorDatos": 1.0, "factorVida": 1.0,
           "_nota": "Condiciones genéricas en la superficie (se usan al probar un módulo de aterrizaje en otro destino)." }
+      },
+      "armado": {
+        "_comentario": "Datos para las recomendaciones del hangar (compartido/recomendaciones.js). 'nocheDias' es dato real; 'horasReservaBaterias' es un valor del juego (reducido) que crece con la noche.",
+        "nocheDias": 14.8,
+        "nocheTexto": "La noche lunar dura unos 14 días terrestres (la mitad de un día lunar de 29,5 días).",
+        "fuenteNoche": "NASA Moon Fact Sheet (NSSDC), periodo sinódico 29,53 días: https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+        "verificar": ["nocheDias: confirmar el periodo sinódico (29,53 días) en la ficha de la NASA; la página no respondió al revisarla"],
+        "horasReservaBaterias": 6,
+        "factorPolvo": 1.0,
+        "aproximado": true
       }
     },
     {
@@ -62,6 +72,24 @@
         "superficie": { "factorSolar": 0.43, "eclipse": 0.5, "horasSombra": 12, "contacto": 0.4, "factorDatos": 1.0, "factorVida": 0.9,
           "_nota": "Superficie genérica de Marte: la noche dura ~12 h (el día marciano dura 24 h 37 min) y hay polvo que desgasta la nave." },
         "_nota": "factorSolar: Marte recibe ~43% de la luz solar que la Tierra. frenadoAtmosferico es k en a = k·v² (solo se usa si una misión aterriza en Marte)."
+      },
+      "distanciaMinKm": 55000000,
+      "distanciaMaxKm": 400000000,
+      "armado": {
+        "_comentario": "Datos para las recomendaciones del hangar (compartido/recomendaciones.js). 'factorPolvo' y 'horasReservaBaterias' son valores del juego (aproximados).",
+        "nocheDias": 0.51,
+        "nocheTexto": "La noche en Marte dura unas 12 horas (un día marciano dura 24 h 37 min).",
+        "fuenteNoche": "NASA Mars Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+        "horasReservaBaterias": 3,
+        "factorPolvo": 0.75,
+        "polvoTexto": "Las tormentas de polvo de Marte tapan la luz del Sol: en 2018 una tormenta global dejó sin contacto al rover Opportunity, que funcionaba con paneles solares.",
+        "fuentePolvo": "NASA, misión Opportunity: https://science.nasa.gov/mission/mer-opportunity/",
+        "verificar": [
+          "factorPolvo 0.75 es un valor del juego, no un dato medido",
+          "polvoTexto: la página confirma que la tormenta de 2018 dejó sin contacto al rover; confirmar en la misma página la frase sobre la energía de los paneles",
+          "distanciaMinKm / distanciaMaxKm: confirmar en la ficha de Marte de la NASA (la página no respondió al revisarla)"
+        ],
+        "aproximado": true
       }
     }
   ]

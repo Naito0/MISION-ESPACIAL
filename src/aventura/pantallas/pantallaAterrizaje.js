@@ -10,11 +10,16 @@ import * as THREE from 'three';
 import { crearSuperficie, lucesSuperficie } from '../escenarios/superficie.js';
 import { DESTINOS } from '../datos3d.js';
 import emergencias from '../../data/emergencias3d.json';
+import componentes from '../../data/componentes.json';
+import configHangar from '../../data/hangar3d.json';
+import { crearCatalogo, resumenDiseno } from '../../compartido/hangar.js';
+import { recomendaciones } from '../../compartido/recomendaciones.js';
 import { efecto } from '../audio.js';
 
 const ALTURA_INICIAL = 60;   // m (valores del juego)
 const VELOCIDAD_INICIAL = -6; // m/s (negativa = bajando)
-const COMBUSTIBLE = 10;       // segundos de motor encendido
+const COMBUSTIBLE_BASE = 10;  // segundos de motor con el combustible recomendado
+const CATALOGO = crearCatalogo(componentes, configHangar);
 
 /** ctx = { motor, hud, conexionActiva, irA } */
 export function iniciarPantallaAterrizaje(ctx) {
@@ -29,6 +34,11 @@ export function iniciarPantallaAterrizaje(ctx) {
   const soyComandante = !!(yo && yo.roles.includes('comandante'));
   const comandante = e.jugadores.find((j) => j.roles.includes('comandante'));
   const config = emergencias.config;
+  // El combustible depende de lo que se compró en el hangar comparado con lo recomendado
+  // para este destino (compartido/recomendaciones.js): menos combustible = menos segundos de motor.
+  const resumen = resumenDiseno(e.seleccion, CATALOGO, destino, configHangar);
+  const zProp = recomendaciones(e.seleccion, CATALOGO, destino, resumen).propulsion;
+  const COMBUSTIBLE = zProp && zProp.valor ? COMBUSTIBLE_BASE * Math.min(1.2, Math.max(0.5, zProp.valor / zProp.rec)) : COMBUSTIBLE_BASE;
 
   const esc = crearSuperficie(destino, { particulas: motor.calidad.sombras });
   const escena = new THREE.Scene();

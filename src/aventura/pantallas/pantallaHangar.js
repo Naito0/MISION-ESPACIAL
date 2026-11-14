@@ -5,6 +5,9 @@
 // - Derecha: holograma con presupuesto compartido, masa vs capacidad
 //   del cohete, energía (generada vs usada) y qué falta.
 // - Cada jugador pulsa "¡Listo!". Si la nave no puede despegar, se explica por qué.
+// - Cada categoría tiene una barra Mínimo / Recomendado / Exagerado según el
+//   destino (compartido/recomendaciones.js). Al pasar el mouse sobre una pieza
+//   se ve cómo cambiarían las barras, y Orbi (el consejero) explica el porqué.
 // =============================================================
 import * as THREE from 'three';
 import { crearLuces } from '../engine/luces.js';
@@ -14,15 +17,15 @@ import { NaveModelo } from '../entities/naveModelo.js';
 import { crearAstronauta } from '../entities/fabricaAstronautas.js';
 import { crearEtiqueta } from '../entities/AstronautaRemoto.js';
 import { colorDeJugador } from './pantallaNave.js';
-import { crearCatalogo } from '../../compartido/hangar.js';
+import { crearCatalogo, resumenDiseno } from '../../compartido/hangar.js';
+import { recomendaciones, dependencias } from '../../compartido/recomendaciones.js';
 import componentes from '../../data/componentes.json';
 import configHangar from '../../data/hangar3d.json';
-import { ROLES, colorRol } from '../datos3d.js';
+import { ROLES, DESTINOS, colorRol } from '../datos3d.js';
 import { efecto } from '../audio.js';
 
 const CATALOGO = crearCatalogo(componentes, configHangar);
 const hex = (n) => `#${n.toString(16).padStart(6, '0')}`;
-const nombreRol = (id) => ROLES.find((r) => r.id === id)?.nombre || id;
 
 /** ctx = { motor, hud, conexionActiva, irA } */
 export function iniciarPantallaHangar(ctx) {
@@ -96,54 +99,153 @@ export function iniciarPantallaHangar(ctx) {
   const holograma = ui.querySelector('.holograma');
   let mensajeError = '';
 
-  const barra = (valor, max, colorOk, texto) => {
+  // ---- Barras del holograma (con vista previa: "valor actual → valor si compras") ----
+  const barra = (valor, max, colorOk, texto, nuevo = null) => {
     const f = Math.min(1, valor / Math.max(1, max));
     const color = valor > max ? '#e5484d' : colorOk;
-    return `<div class="hg-dato"><span>${texto}</span><b>${valor} / ${max}</b></div><div class="hg-barra"><div style="width:${f * 100}%;background:${color}"></div></div>`;
+    const fn = nuevo === null ? null : Math.min(1, nuevo / Math.max(1, max));
+    const cambio = nuevo === null || nuevo === valor ? '' : ` <span class="previa ${nuevo > max ? 'mal' : ''}">→ ${nuevo}</span>`;
+    return `<div class="hg-dato"><span>${texto}</span><b>${valor}${cambio} / ${max}</b></div>
+      <div class="hg-barra">${fn !== null ? `<div class="fantasma" style="width:${fn * 100}%"></div>` : ''}<div style="width:${f * 100}%;background:${color}"></div></div>`;
   };
+
+  // ---- Barra de recomendación de una categoría: rojo / verde / amarillo y marcador ----
+  const ESTADO_TXT = { vacio: '⚪ Elige una pieza', bajo: '🔴 Debajo del mínimo', justo: '🟢 Alcanza, sin margen', ok: '🟢 Recomendado', exagerado: '🟡 Exagerado' };
+  function posicion(z, v) {
+    if (z.tipo === 'nivel') return (v + 0.5) / (z.max + 1);
+    return Math.min(1, v / z.max);
+  }
+  function limite(z, v) { // dónde empieza cada zona (0 a 1)
+    if (z.tipo === 'nivel') return Math.min(1, v / (z.max + 1));
+    return Math.min(1, v / z.max);
+  }
+  function barraCategoria(z, previa = null) {
+    const rojo = limite(z, z.min) * 100;
+    const amarillo = limite(z, z.exag) * 100;
+    const rec = limite(z, z.rec) * 100;
+    const marca = (v, clase) => (v === null || v === undefined ? '' : `<div class="${clase}" style="left:${posicion(z, v) * 100}%"></div>`);
+    const etiquetas = z.tipo === 'nivel' && z.etiquetas ? `<div class="zb-etiquetas">${z.etiquetas.map((t) => `<span>${t}</span>`).join('')}</div>` : '';
+    const numeros = z.tipo === 'numero'
+      ? `<small>${z.valor !== null ? `Tienes ${Math.round(z.valor)} · ` : ''}mín. ${Math.round(z.min)} · rec. ${Math.round(z.rec)} ${z.unidad}</small>` : '';
+    return `<div class="zona-barra">
+        <div class="zb-fondo" style="background:linear-gradient(90deg,#b8323a 0 ${rojo}%,#2f9e5b ${rojo}% ${amarillo}%,#c9a227 ${amarillo}% 100%)">
+          <div class="zb-rec" style="left:${rec}%"></div>${marca(previa, 'zb-previa')}${marca(z.valor, 'zb-marca')}
+        </div>${etiquetas}
+        <div class="zb-estado">${ESTADO_TXT[z.estado]} ${numeros}</div>
+      </div>`;
+  }
+
+  let catFoco = null;     // categoría de la que habla Orbi
+  let consejoExtra = '';  // consecuencia de la última compra
+  const textoOrbi = (cat, z, extra = '') => {
+    if (!z) return 'Pasa el mouse sobre una pieza y te explico si conviene para este destino.';
+    const nombre = CATALOGO.find((c) => c.id === cat)?.nombre || '';
+    const recom = z.recomendadas.length ? ` Te recomiendo: <b>${z.recomendadas.join(' o ')}</b>.` : '';
+    return `<b>${nombre}:</b> ${z.porQue}${recom}${extra ? `<br>${extra}` : ''}`;
+  };
+
+  /** Selección "de prueba": cómo quedaría si tocas esta pieza (igual que la regla de compra). */
+  function seleccionSi(seleccion, idOpcion) {
+    const cat = CATALOGO.find((c) => c.opciones.some((o) => o.id === idOpcion));
+    const actual = seleccion[cat.id] || [];
+    let nueva;
+    if (cat.multiple) nueva = actual.includes(idOpcion) ? actual.filter((x) => x !== idOpcion) : [...actual, idOpcion].slice(0, cat.maximo || 99);
+    else nueva = actual[0] === idOpcion ? [] : [idOpcion];
+    return { cat, prueba: { ...seleccion, [cat.id]: nueva } };
+  }
+
+  /** Consecuencia de una elección, en una frase. */
+  function consecuencia(z, opcion) {
+    if (z.estado === 'bajo') return `⚠ ${z.bajo || 'Por debajo de lo necesario para este destino.'}`;
+    if (z.estado === 'exagerado') return `🟡 Exagerado: ${opcion ? `suma ${opcion.masa} kg y ${opcion.costo} M$` : 'suma masa y costo'} sin mejorar la misión.`;
+    if (z.estado === 'justo') return 'Alcanza, pero sin margen de seguridad.';
+    if (z.estado === 'ok') return '✅ Buena elección para este destino.';
+    return '';
+  }
 
   function dibujar(e) {
     const yo = e.jugadores.find((j) => j.id === conexion.id);
     const misRoles = yo ? yo.roles : [];
     const r = e.resumen;
     const destino = e.destinoId === 'luna' ? 'la Luna' : 'Marte';
-    // Tienda: solo las categorías de mis roles
-    tienda.innerHTML = `<h2>Tienda de piezas</h2><p class="sub">Viajamos a <b>${destino}</b>. Toca una pieza para comprarla; tócala otra vez para devolverla.</p>` +
+    const destinoObj = DESTINOS.find((d) => d.id === e.destinoId);
+    // Configuración con el presupuesto de la dificultad elegida (para la vista previa)
+    const config = { ...configHangar, presupuesto: { ...configHangar.presupuesto, [e.destinoId]: r ? r.presupuesto : 0 } };
+    const rec = r ? recomendaciones(e.seleccion, CATALOGO, destinoObj, r) : {};
+    const deps = r ? dependencias(e.seleccion, CATALOGO, destinoObj, r) : [];
+    const scroll = tienda.scrollTop; // que la tienda no salte arriba al comprar
+    // Tienda: solo las categorías de mis roles, cada una con su barra mínimo/recomendado/exagerado
+    tienda.innerHTML = `<h2>Tienda de piezas</h2><p class="sub">Viajamos a <b>${destino}</b>. Toca una pieza para comprarla; otra vez para devolverla.</p>` +
       CATALOGO.filter((c) => misRoles.includes(c.rol)).map((c) => {
         const elegidas = e.seleccion[c.id] || [];
-        return `<div class="categoria" style="border-color:${hex(colorRol(ROLES.find((x) => x.id === c.rol)))}">
+        return `<div class="categoria" data-cat="${c.id}" style="border-color:${hex(colorRol(ROLES.find((x) => x.id === c.rol)))}">
           <h3>${c.icono} ${c.nombre} ${elegidas.length ? '✅' : '<span class="falta">falta</span>'}</h3>
+          <div class="cat-barra">${rec[c.id] ? barraCategoria(rec[c.id]) : ''}</div>
           <div class="opciones">${c.opciones.map((o) => `
-            <button class="opcion ${elegidas.includes(o.id) ? 'elegida' : ''}" data-op="${o.id}" title="${o.tooltip}">
+            <button class="opcion ${elegidas.includes(o.id) ? 'elegida' : ''} ${rec[c.id]?.recomendadas.includes(o.nombre) ? 'sugerida' : ''}" data-op="${o.id}">
               <b>${o.nombre}</b><span>${o.costo} M$ · ${o.masa} kg${o.energia ? ` · ${o.energia > 0 ? '+' : ''}${o.energia} W` : ''}</span>
               <small>${o.tooltip}</small>
             </button>`).join('')}</div></div>`;
       }).join('');
+    tienda.scrollTop = scroll;
+
+    // Vista previa al pasar el mouse: cómo cambiarían la masa, la energía, el dinero y la barra
+    const vistaPrevia = (idOpcion) => {
+      if (!r) return;
+      if (!idOpcion) {
+        holograma.querySelector('.hg-barras').innerHTML = barrasHolograma(r, null);
+        holograma.querySelector('.orbi-txt').innerHTML = textoOrbi(catFoco, rec[catFoco], consejoExtra);
+        tienda.querySelectorAll('.categoria').forEach((div) => { const z = rec[div.dataset.cat]; if (z) div.querySelector('.cat-barra').innerHTML = barraCategoria(z); });
+        return;
+      }
+      const { cat, prueba } = seleccionSi(e.seleccion, idOpcion);
+      const r2 = resumenDiseno(prueba, CATALOGO, destinoObj, config);
+      const rec2 = recomendaciones(prueba, CATALOGO, destinoObj, r2);
+      holograma.querySelector('.hg-barras').innerHTML = barrasHolograma(r, r2);
+      const z2 = rec2[cat.id];
+      const div = tienda.querySelector(`.categoria[data-cat="${cat.id}"]`);
+      if (z2 && div) div.querySelector('.cat-barra').innerHTML = barraCategoria(rec[cat.id], z2.valor);
+      const opcion = cat.opciones.find((o) => o.id === idOpcion);
+      catFoco = cat.id;
+      if (z2) holograma.querySelector('.orbi-txt').innerHTML = textoOrbi(cat.id, z2, `Con <b>${opcion.nombre}</b>: ${consecuencia(z2, opcion)}`);
+    };
     tienda.querySelectorAll('[data-op]').forEach((b) => {
+      b.onmouseenter = () => vistaPrevia(b.dataset.op);
+      b.onmouseleave = () => vistaPrevia(null);
       b.onclick = async () => {
-        const res = await conexion.accion('comprar', { opcion: b.dataset.op });
-        if (res.error) { efecto('error'); mensajeError = res.error; dibujar(conexion.estado); }
-        else { efecto(res.quitada ? 'clic' : 'compra'); mensajeError = ''; }
+        const id = b.dataset.op;
+        const res = await conexion.accion('comprar', { opcion: id });
+        if (res.error) { efecto('error'); mensajeError = res.error; dibujar(conexion.estado); return; }
+        efecto(res.quitada ? 'clic' : 'compra');
+        mensajeError = '';
+        // Se puede comprar fuera de lo recomendado: Orbi explica la consecuencia
+        const e2 = conexion.estado;
+        const rNuevo = recomendaciones(e2.seleccion, CATALOGO, destinoObj, e2.resumen);
+        const cat = CATALOGO.find((c) => c.opciones.some((o) => o.id === id));
+        catFoco = cat.id;
+        consejoExtra = res.quitada ? '' : consecuencia(rNuevo[cat.id], cat.opciones.find((o) => o.id === id));
+        dibujar(e2);
       };
     });
-    // Holograma: números de la nave
+
+    // Holograma: números de la nave, consejero y avisos
     if (r) {
       const listo = e.listos.includes(conexion.id);
+      const varios = e.jugadores.length > 1;
       holograma.innerHTML = `
         <h2>📊 Holograma de la nave</h2>
-        ${barra(r.costo, r.presupuesto, '#ffd166', '💰 Presupuesto (M$)')}
-        ${barra(r.masa, r.capacidad, '#5be08a', '⚖ Masa vs. cohete (kg)')}
-        ${barra(r.consumo, r.generacion, '#7cc4ff', `⚡ Energía usada / generada (W)${r.factorSolar < 1 ? ` · sol al ${Math.round(r.factorSolar * 100)}%` : ''}`)}
+        <div class="hg-barras">${barrasHolograma(r, null)}</div>
+        <button id="listo" class="${listo ? 'activo' : ''}">${listo ? '✋ Ya no estoy listo' : '🚀 ¡Listo!'}</button>
+        <p class="error">${mensajeError}</p>
+        <div class="orbi"><span class="guia-robot">🤖</span><div class="orbi-txt">${textoOrbi(catFoco, rec[catFoco], consejoExtra)}</div></div>
+        ${deps.length ? `<h3>🔗 Ojo</h3><ul class="problemas">${deps.map((t) => `<li>${t}</li>`).join('')}</ul>` : ''}
+        ${r.problemas.length ? `<h3>⚠ Antes de despegar</h3><ul class="problemas">${r.problemas.map((p) => `<li>${p.texto}</li>`).join('')}</ul>` : '<p class="ok">✅ ¡La nave puede despegar!</p>'}
         <h3>Protecciones para el viaje</h3>
         <div class="protecciones">${Object.entries({ blindaje: '🧱 Blindaje', motor: '🔥 Motor fuerte', energia: '⚡ Energía de sobra', reciclador: '🫁 Reciclador O₂', laboratorio: '🔬 Laboratorio', antena: '📡 Antena', computadora: '💻 Computadora' })
           .map(([k, n]) => `<span class="${r.diseno[k] ? 'si' : 'no'}">${n}</span>`).join('')}</div>
         <p class="nota">Lo que no esté protegido hará que esas emergencias salgan más seguido y dañen más.</p>
-        ${r.problemas.length ? `<h3>⚠ Antes de despegar</h3><ul class="problemas">${r.problemas.map((p) => `<li>${p.rol ? `<b>${nombreRol(p.rol)}:</b> ` : ''}${p.texto}</li>`).join('')}</ul>` : '<p class="ok">✅ ¡La nave puede despegar!</p>'}
-        <h3>Tripulación</h3>
-        <ul class="listos">${e.jugadores.map((j) => `<li>${e.listos.includes(j.id) ? '✅' : '⏳'} ${j.nombre}</li>`).join('')}</ul>
-        <button id="listo" class="${listo ? 'activo' : ''}">${listo ? '✋ Ya no estoy listo' : '🚀 ¡Listo!'}</button>
-        ${yo && yo.anfitrion ? '<button id="cambiarDestino" class="secundario">🪐 Cambiar destino</button>' : ''}
-        <p class="error">${mensajeError}</p>`;
+        ${varios ? `<h3>Tripulación</h3><ul class="listos">${e.jugadores.map((j) => `<li>${e.listos.includes(j.id) ? '✅' : '⏳'} ${j.nombre}</li>`).join('')}</ul>` : ''}
+        ${yo && yo.anfitrion ? '<button id="cambiarDestino" class="secundario">🪐 Cambiar destino</button>' : ''}`;
       const cambiar = holograma.querySelector('#cambiarDestino');
       if (cambiar) cambiar.onclick = () => conexion.accion('cambiarDestino');
       holograma.querySelector('#listo').onclick = async () => {
@@ -160,6 +262,14 @@ export function iniciarPantallaHangar(ctx) {
     nave.sincronizar(e.seleccion);
     // Los astronautas que están listos saludan
     tripulacion.forEach((t) => { t.listo = e.listos.includes(t.id); });
+  }
+
+  /** Las 3 barras principales; r2 = cómo quedarían con la pieza bajo el mouse. */
+  function barrasHolograma(r, r2) {
+    return `${barra(r.costo, r.presupuesto, '#ffd166', '💰 Dinero (M$)', r2 ? r2.costo : null)}
+      ${barra(r.masa, r.capacidad, '#5be08a', '⚖ Masa / cohete (kg)', r2 ? r2.masa : null)}
+      ${barra(r.consumo, r.generacion, '#7cc4ff', `⚡ Energía usa / genera (W)`, r2 ? r2.consumo : null)}
+      ${r2 && r2.generacion !== r.generacion ? `<small class="previa">Los paneles darían ${r2.generacion} W${r.factorSolar < 1 ? ` (sol al ${Math.round(r.factorSolar * 100)}%)` : ''}</small>` : ''}`;
   }
 
   const quitarEstado = conexion.alEstado((e) => {

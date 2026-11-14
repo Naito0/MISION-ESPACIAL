@@ -6,6 +6,9 @@ import { Sala, generarCodigo, ROLES_ID } from '../src/compartido/sala.js';
 import { nuevoViaje, avanzarViaje, resolverEmergencia, elegirEmergencia, estaAgravada } from '../src/compartido/viaje.js';
 import { calcularInforme } from '../src/compartido/informe.js';
 import { clasificarAterrizaje } from '../src/compartido/superficie.js';
+import { recomendaciones, dependencias, retrasoSenal, textoRetraso } from '../src/compartido/recomendaciones.js';
+import { resumenDiseno, seleccionVacia } from '../src/compartido/hangar.js';
+const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -193,6 +196,35 @@ test('dificultad: Fácil da 1 emergencia a la vez, más tiempo, menos daño y m�
   assert.deepEqual(n.accion('a', 'dificultad', { nivel: 'normal' }), { ok: true });
   assert.equal(n.configViaje.maxSimultaneas, 2);
   assert.ok(n.configViaje.tiempoParaResolver < s.configViaje.tiempoParaResolver);
+});
+
+test('recomendaciones: dependen del destino (paneles, combustible, baterías, antena)', () => {
+  const DEST = leerJSON('destinos.json').destinos;
+  const luna = DEST.find((d) => d.id === 'luna');
+  const marte = DEST.find((d) => d.id === 'marte');
+  const s = new Sala('REC', datosCompletos);
+  const sel = { ...seleccionVaciaDe(s), propulsion: ['prop_chica'], paneles: ['pan_chicos'], baterias: ['bat_chica'], antena: ['ant_baja'], soporte: ['sv_basico'], instrumentos: ['cam_simple'], avionica: ['comp_basica'] };
+  const resM = resumenDiseno(sel, s.catalogo, marte, datosCompletos.hangar);
+  const resL = resumenDiseno(sel, s.catalogo, luna, datosCompletos.hangar);
+  const rM = recomendaciones(sel, s.catalogo, marte, resM);
+  const rL = recomendaciones(sel, s.catalogo, luna, resL);
+  // Mismos paneles: en Marte no alcanzan (43% de luz), en la Luna sí
+  assert.equal(rM.paneles.estado, 'bajo');
+  assert.notEqual(rL.paneles.estado, 'bajo');
+  // Aterrizar en Marte pide más combustible que en la Luna
+  assert.ok(rM.propulsion.min > rL.propulsion.min * 2);
+  assert.equal(rM.propulsion.estado, 'bajo');
+  // La noche lunar es más larga: la Luna pide más baterías
+  assert.ok(rL.baterias.min > rM.baterias.min);
+  // Antena de baja ganancia: alcanza en la Luna, no en Marte
+  assert.equal(rM.antena.estado, 'bajo');
+  assert.notEqual(rL.antena.estado, 'bajo');
+  // Retraso de la señal: Luna ~1,3 s; Marte entre ~3 y ~22 minutos
+  assert.ok(Math.abs(retrasoSenal(luna).max - 1.28) < 0.05);
+  assert.equal(textoRetraso(marte), 'entre 3 y 22 minutos');
+  // Dependencia: baterías grandes con paneles que no alcanzan
+  const sel2 = { ...sel, baterias: ['bat_grande'] };
+  assert.ok(dependencias(sel2, s.catalogo, marte, resumenDiseno(sel2, s.catalogo, marte, datosCompletos.hangar)).some((t) => t.includes('baterías grandes')));
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {
