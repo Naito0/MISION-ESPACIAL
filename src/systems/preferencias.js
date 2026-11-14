@@ -31,6 +31,20 @@ export function setModoExperto(valor) {
   guardar();
 }
 
+/** Calidad gráfica de la aventura 3D: 'bajo' | 'medio' | 'alto'. */
+export const calidad3D = () => prefs.calidad3D || 'medio';
+export function setCalidad3D(valor) {
+  prefs.calidad3D = valor;
+  guardar();
+}
+
+/** Sensibilidad del mouse en la aventura 3D (1 = normal). */
+export const sensibilidad3D = () => prefs.sensibilidad3D || 1;
+export function setSensibilidad3D(valor) {
+  prefs.sensibilidad3D = valor;
+  guardar();
+}
+
 export function setSilencio(valor) {
   prefs.silencio = !!valor;
   guardar();

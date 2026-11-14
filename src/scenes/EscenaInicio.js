@@ -60,6 +60,8 @@ export default class EscenaInicio extends Phaser.Scene {
       tam: 12, color: COLORES.textoSuave
     });
     boton(this, ANCHO - 170, 640, 280, 60, 'Comenzar ▶', () => this.comenzar(), { tam: 24 });
+    // Abre la aventura 3D (página aparte, con Three.js). Este modo clásico sigue igual.
+    boton(this, ANCHO - 170, 572, 280, 44, '🧑‍🚀 Aventura 3D (nuevo)', () => { window.location.href = './aventura.html'; }, { tam: 17 });
 
     this.elegirModo(opcionesModo[0], 0);
     this.elegirNivel('1');
