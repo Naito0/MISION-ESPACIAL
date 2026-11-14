@@ -49,9 +49,18 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .tarea.urgente { animation: latir 0.6s infinite alternate; }
 #hud .flecha { display: inline-block; font-size: 32px; color: #ffd166; transition: transform 0.12s linear; }
 #hud .otras { display: block; margin-top: 4px; color: #b8c3e0; }
-#hud .aviso-e { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); padding: 12px 22px; font-size: var(--tg); display: none; border-color: #ffd166; white-space: nowrap; }
-#hud .avisos { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
+#hud .aviso-e { position: absolute; left: 50%; bottom: 200px; transform: translateX(-50%); padding: 12px 22px; font-size: var(--tg); display: none; border-color: #ffd166; white-space: nowrap; }
+#hud .avisos { position: absolute; left: 50%; bottom: 270px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
 #hud .aviso-flotante.amable { border-color: #ffd166; font-size: var(--tg); }
+/* ---- Tutorial (Orbi, el robot guía) ---- */
+#hud .guia { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); width: min(760px, 56vw); display: flex; gap: 12px; align-items: center;
+  padding: 10px 16px; font-size: var(--t); border-color: #ffd166; border-width: 3px; box-shadow: 0 0 22px rgba(255, 209, 102, 0.45); z-index: 5; }
+/* En el hangar la guía va arriba, en el hueco entre la tienda y el holograma */
+#hud .guia[data-pantalla="hangar"] { top: 64px; bottom: auto; width: 300px; flex-direction: column; text-align: center; }
+#hud .guia-robot { font-size: 44px; animation: flotar 1.6s ease-in-out infinite alternate; }
+#hud .flecha-guia { position: fixed; font-size: 40px; color: #ffd166; text-shadow: 0 0 10px #000; z-index: 6; pointer-events: none; animation: rebote 0.6s ease-in-out infinite alternate; }
+@keyframes flotar { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+@keyframes rebote { from { transform: translateY(-8px); } to { transform: translateY(4px); } }
 /* ---- Retratos de la tripulación (cambiar de astronauta) ---- */
 #hud .retratos { position: absolute; left: 12px; top: 130px; display: flex; flex-direction: column; gap: 8px; }
 #hud .retrato { display: flex; align-items: center; gap: 8px; padding: 6px 12px; min-width: calc(200px * var(--ancho)); color: #fff; font-size: var(--t); cursor: pointer; text-align: left; opacity: 0.75; }

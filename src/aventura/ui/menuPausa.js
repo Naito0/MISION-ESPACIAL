@@ -7,7 +7,7 @@
 import { NIVELES_CALIDAD } from '../engine/calidad.js';
 import {
   calidad3D, setCalidad3D, sensibilidad3D, setSensibilidad3D, estaSilenciado, setSilencio,
-  tamanoTexto, setTamanoTexto
+  tamanoTexto, setTamanoTexto, dificultad, setDificultad
 } from '../../systems/preferencias.js';
 
 /** Aplica el tamaño de texto guardado (clase en <html>, ver estilos.css). */
@@ -30,6 +30,8 @@ export function crearMenuPausa(hud, { alAbrir, alCerrar, extras = [] }) {
     <h2>⏸ Pausa</h2>
     <button data-accion="continuar">▶ Continuar</button>
     ${extras.map((x, i) => `<button data-extra="${i}">${x.texto}</button>`).join('')}
+    <h3>Dificultad <small>(se aplica en el próximo viaje)</small></h3>
+    <div class="fila"><button data-nivel="facil">Fácil</button><button data-nivel="normal">Normal</button></div>
     <h3>Tamaño de texto</h3>
     <div class="fila"><button data-texto="normal">Normal</button><button data-texto="grande">Grande</button></div>
     <h3>Calidad gráfica</h3>
@@ -44,6 +46,14 @@ export function crearMenuPausa(hud, { alAbrir, alCerrar, extras = [] }) {
   menu.querySelectorAll('[data-texto]').forEach((b) => {
     b.onclick = () => { setTamanoTexto(b.dataset.texto); aplicarTamanoTexto(); marcarTexto(); };
   });
+
+  // Dificultad: se guarda y se avisa al juego con el evento "cambio-dificultad"
+  const marcarNivel = () => menu.querySelectorAll('[data-nivel]').forEach((b) => b.classList.toggle('activo', b.dataset.nivel === dificultad()));
+  marcarNivel();
+  menu.querySelectorAll('[data-nivel]').forEach((b) => {
+    b.onclick = () => { setDificultad(b.dataset.nivel); marcarNivel(); window.dispatchEvent(new CustomEvent('cambio-dificultad')); };
+  });
+  window.addEventListener('cambio-dificultad', marcarNivel);
 
   const estado = { abierto: false };
   const abrir = () => { estado.abierto = true; menu.style.display = 'block'; if (document.pointerLockElement) document.exitPointerLock(); alAbrir?.(); };

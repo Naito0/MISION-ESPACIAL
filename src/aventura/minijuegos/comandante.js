@@ -1,11 +1,14 @@
 // =============================================================
 // Minijuegos del COMANDANTE / PILOTO (segmento de lanzamiento):
-//   trayectoria · ritmo (propulsores) · esquivar (meteoritos)
+//   trayectoria · ritmo (frenado) · esquivar (meteoritos)
+// Cada minijuego recibe (area, terminar, op): "op" trae los pasos según la
+// dificultad (dificultad.json → minijuegos). terminar(true/false).
 // =============================================================
 import { lienzo, teclas } from './base.js';
 
-/** Corregir la trayectoria: girar la nave (← →) hasta apuntar al planeta y mantenerla 1,5 s. */
-export function trayectoria(area, terminar) {
+/** Corregir la trayectoria: girar la nave (← →) hasta apuntar al planeta y mantenerla unos segundos. */
+export function trayectoria(area, terminar, op = {}) {
+  const meta = op.segundos ?? 1.5;
   const { c, g } = lienzo(area);
   const t = teclas();
   const objetivo = (-60 + Math.random() * 120) * Math.PI / 180;
@@ -29,24 +32,24 @@ export function trayectoria(area, terminar) {
     angulo += (giro * 1.3 + deriva) * dt;
     if (Math.random() < 0.01) deriva = -deriva;
     const dif = Math.abs(Math.atan2(Math.sin(angulo - objetivo), Math.cos(angulo - objetivo)));
-    alineado = dif < 0.1 ? alineado + dt : 0;
-    // Dibujo
+    alineado = dif < 0.12 ? alineado + dt : 0;
     g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);
     const cx = 80; const cy = 120;
     const px = cx + Math.cos(objetivo) * 280; const py = cy + Math.sin(objetivo) * 280;
     g.fillStyle = '#d2693c'; g.beginPath(); g.arc(Math.min(px, 390), Math.max(30, Math.min(py, 210)), 22, 0, 7); g.fill();
     g.strokeStyle = 'rgba(124,243,255,0.4)'; g.setLineDash([6, 6]); g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(objetivo) * 400, cy + Math.sin(objetivo) * 400); g.stroke(); g.setLineDash([]);
     g.save(); g.translate(cx, cy); g.rotate(angulo);
-    g.fillStyle = dif < 0.1 ? '#5be08a' : '#ffd166'; g.beginPath(); g.moveTo(26, 0); g.lineTo(-14, -12); g.lineTo(-14, 12); g.fill(); g.restore();
-    g.fillStyle = '#fff'; g.font = '16px Arial'; g.fillText(dif < 0.1 ? `¡Alineado! ${(1.5 - alineado).toFixed(1)} s` : 'Apunta la nave al planeta', 150, 225);
-    if (alineado >= 1.5) return terminar(true);
+    g.fillStyle = dif < 0.12 ? '#5be08a' : '#ffd166'; g.beginPath(); g.moveTo(26, 0); g.lineTo(-14, -12); g.lineTo(-14, 12); g.fill(); g.restore();
+    g.fillStyle = '#fff'; g.font = '16px Arial'; g.fillText(dif < 0.12 ? `¡Alineado! ${Math.max(0, meta - alineado).toFixed(1)} s` : 'Apunta la nave al planeta', 150, 225);
+    if (alineado >= meta) return terminar(true);
     id = requestAnimationFrame(cuadro);
   }
   return () => { cancelAnimationFrame(id); t.quitar(); };
 }
 
-/** Propulsores: pulsar Espacio (o el botón) cuando la marca pasa por la zona verde, 3 veces. */
-export function ritmo(area, terminar) {
+/** Frenado: pulsar Espacio (o el botón) cuando la marca pasa por la zona verde, N veces. */
+export function ritmo(area, terminar, op = {}) {
+  const necesarios = op.aciertos ?? 3;
   const { c, g } = lienzo(area, 420, 120);
   const boton = document.createElement('button');
   boton.className = 'consola-grande';
@@ -54,10 +57,10 @@ export function ritmo(area, terminar) {
   area.appendChild(boton);
   let pos = 0; let dir = 1; let aciertos = 0;
   let zona = 160 + Math.random() * 160;
-  let mensaje = 'Enciende cuando la marca esté en verde (3 veces)';
+  let mensaje = `Enciende en la zona verde (${necesarios} veces)`;
   let anterior = performance.now();
   const pulsar = () => {
-    if (Math.abs(pos - zona) < 28) { aciertos++; mensaje = `¡Bien! ${aciertos} de 3`; zona = 60 + Math.random() * 300; if (aciertos >= 3) terminar(true); }
+    if (Math.abs(pos - zona) < 30) { aciertos++; mensaje = `¡Bien! ${aciertos} de ${necesarios}`; zona = 60 + Math.random() * 300; if (aciertos >= necesarios) terminar(true); }
     else { aciertos = Math.max(0, aciertos - 1); mensaje = 'Muy pronto o muy tarde…'; }
   };
   const tecla = (e) => { if (e.code === 'Space') { e.preventDefault(); pulsar(); } };
@@ -66,11 +69,11 @@ export function ritmo(area, terminar) {
   let id = requestAnimationFrame(cuadro);
   function cuadro(ahora) {
     const dt = Math.min(0.05, (ahora - anterior) / 1000); anterior = ahora;
-    pos += dir * (220 + aciertos * 60) * dt;
+    pos += dir * (200 + aciertos * 50) * dt;
     if (pos > 400 || pos < 20) dir = -dir;
     g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = '#1a2342'; g.fillRect(20, 50, 380, 30);
-    g.fillStyle = '#3cc46e'; g.fillRect(zona - 28, 50, 56, 30);
+    g.fillStyle = '#3cc46e'; g.fillRect(zona - 30, 50, 60, 30);
     g.fillStyle = '#ffd166'; g.fillRect(pos - 3, 40, 6, 50);
     g.fillStyle = '#fff'; g.font = '16px Arial'; g.fillText(mensaje, 20, 25);
     id = requestAnimationFrame(cuadro);
@@ -78,11 +81,12 @@ export function ritmo(area, terminar) {
   return () => { cancelAnimationFrame(id); window.removeEventListener('keydown', tecla); };
 }
 
-/** Esquivar micrometeoritos: mover la nave (← → o mouse) durante 8 segundos. 3 golpes = falla. */
-export function esquivar(area, terminar) {
+/** Esquivar micrometeoritos: mover la nave (← → o mouse) unos segundos. Si se acaba el escudo, falla. */
+export function esquivar(area, terminar, op = {}) {
+  const duracion = op.segundos ?? 8;
   const { c, g } = lienzo(area, 420, 260);
   const t = teclas();
-  let x = 210; let vidas = 3; let tiempo = 0; let golpeado = 0;
+  let x = 210; let vidas = op.escudo ?? 3; let tiempo = 0; let golpeado = 0;
   const rocas = [];
   let anterior = performance.now();
   c.onmousemove = (e) => { const r = c.getBoundingClientRect(); x = (e.clientX - r.left) * (c.width / r.width); };
@@ -92,7 +96,7 @@ export function esquivar(area, terminar) {
     tiempo += dt;
     x += ((t.s.has('ArrowRight') || t.s.has('KeyD') ? 1 : 0) - (t.s.has('ArrowLeft') || t.s.has('KeyA') ? 1 : 0)) * 260 * dt;
     x = Math.max(20, Math.min(400, x));
-    if (Math.random() < 0.06 + tiempo * 0.006) rocas.push({ x: Math.random() * 420, y: -10, v: 120 + Math.random() * 120, r: 6 + Math.random() * 8 });
+    if (Math.random() < 0.05 + tiempo * 0.005) rocas.push({ x: Math.random() * 420, y: -10, v: 110 + Math.random() * 110, r: 6 + Math.random() * 8 });
     g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);
     for (const r of rocas) {
       r.y += r.v * dt;
@@ -103,9 +107,9 @@ export function esquivar(area, terminar) {
     golpeado -= dt;
     g.beginPath(); g.moveTo(x, 215); g.lineTo(x - 14, 245); g.lineTo(x + 14, 245); g.fill();
     g.fillStyle = '#fff'; g.font = '16px Arial';
-    g.fillText(`Escudo: ${'❤'.repeat(Math.max(0, vidas))}   Aguanta: ${Math.max(0, 8 - tiempo).toFixed(1)} s`, 10, 20);
+    g.fillText(`Escudo: ${'❤'.repeat(Math.max(0, vidas))}   Aguanta: ${Math.max(0, duracion - tiempo).toFixed(1)} s`, 10, 20);
     if (vidas <= 0) return terminar(false);
-    if (tiempo >= 8) return terminar(true);
+    if (tiempo >= duracion) return terminar(true);
     id = requestAnimationFrame(cuadro);
   }
   return () => { cancelAnimationFrame(id); t.quitar(); };

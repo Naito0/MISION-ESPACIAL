@@ -47,14 +47,38 @@ export class Sala {
     this.catalogo = datos.componentes && datos.hangar ? crearCatalogo(datos.componentes, datos.hangar) : [];
     this.seleccion = seleccionVacia(this.catalogo);
     this.listos = new Set();
+    // Dificultad ('facil' | 'normal'), valores en dificultad.json
+    this.nivel = datos.dificultad ? datos.dificultad.porDefecto : null;
   }
 
   get destino() {
     return (this.datos.destinos || []).find((d) => d.id === this.destinoId);
   }
 
+  /** Valores de la dificultad elegida (o null si no hay dificultad.json). */
+  get valoresNivel() {
+    return this.datos.dificultad ? this.datos.dificultad.niveles[this.nivel] : null;
+  }
+
+  /** Configuración del viaje: la base de emergencias3d.json con los valores de la dificultad. */
+  get configViaje() {
+    const base = this.datos.emergencias.config;
+    const d = this.valoresNivel;
+    if (!d) return base;
+    return { ...base, maxSimultaneas: d.maxSimultaneas, tiempoParaResolver: d.tiempoParaResolver, intervaloMin: d.intervaloMin, intervaloMax: d.intervaloMax, factorDanio: d.factorDanio };
+  }
+
+  /** Configuración del hangar: el presupuesto se multiplica según la dificultad. */
+  get configHangar() {
+    const base = this.datos.hangar;
+    const d = this.valoresNivel;
+    if (!base || !d) return base;
+    const presupuesto = Object.fromEntries(Object.entries(base.presupuesto).map(([k, v]) => [k, Math.round(v * d.factorPresupuesto)]));
+    return { ...base, presupuesto };
+  }
+
   resumen() {
-    return this.destino && this.datos.hangar ? resumenDiseno(this.seleccion, this.catalogo, this.destino, this.datos.hangar) : null;
+    return this.destino && this.datos.hangar ? resumenDiseno(this.seleccion, this.catalogo, this.destino, this.configHangar) : null;
   }
 
   /** Abre el hangar (sin compras y sin nadie listo). */
@@ -69,7 +93,7 @@ export class Sala {
   iniciarViaje() {
     const r = this.resumen();
     if (r) this.diseno = r.diseno;
-    this.viaje = nuevoViaje(this.datos.emergencias.config, this.diseno);
+    this.viaje = nuevoViaje(this.configViaje, this.diseno);
     this.fase = 'viaje';
     this.cambio('🚀 ¡Despegamos! Atentos a las emergencias.');
   }
@@ -178,10 +202,18 @@ export class Sala {
       this.cambio('🪐 Elijan otro destino');
       return { ok: true };
     },
+    /** Elegir la dificultad ('facil' o 'normal'); se aplica en el próximo hangar y viaje. */
+    dificultad(j, { nivel }) {
+      if (!this.datos.dificultad || !this.datos.dificultad.niveles[nivel]) return { error: 'Dificultad desconocida.' };
+      if (this.fase === 'viaje') return { error: 'Se puede cambiar al terminar el viaje.' };
+      this.nivel = nivel;
+      this.cambio();
+      return { ok: true };
+    },
     /** Hangar: comprar, cambiar o quitar una pieza (solo las de tus roles). */
     comprar(j, { opcion }) {
       if (this.fase !== 'hangar') return { error: 'Ahora no se puede comprar.' };
-      const r = comprar(this.seleccion, this.catalogo, j.roles, opcion, this.destino, this.datos.hangar);
+      const r = comprar(this.seleccion, this.catalogo, j.roles, opcion, this.destino, this.configHangar);
       if (r.ok) { this.listos.clear(); this.cambio(); } // si cambia la nave, todos revisan de nuevo
       return r;
     },
@@ -305,7 +337,7 @@ export class Sala {
       return;
     }
     if (this.fase !== 'viaje' || !this.viaje) return;
-    const sucesos = avanzarViaje(this.viaje, dt, this.datos.emergencias.emergencias, this.datos.emergencias.config, rng);
+    const sucesos = avanzarViaje(this.viaje, dt, this.datos.emergencias.emergencias, this.configViaje, rng);
     for (const s of sucesos) {
       if (s.tipo === 'nueva') this.cambio(`⚠ ${s.nombre}`);
       if (s.tipo === 'fallida') this.cambio(`💥 ${s.nombre}: la nave perdió ${s.danio} de vida`);
@@ -336,13 +368,16 @@ export class Sala {
       seleccion: this.seleccion,
       listos: [...this.listos],
       resumen: this.fase === 'hangar' ? this.resumen() : null,
+      nivel: this.nivel,
       informe: this.fase === 'informe' ? this.informe : null,
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
       viaje: this.viaje && {
         duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
         emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),
-        registro: this.viaje.registro, terminado: this.viaje.terminado
+        // copia: en el modo de un jugador el estado no viaja por la red, y sin copia
+        // la pantalla vería la misma lista y no notaría lo que se agregó
+        registro: [...this.viaje.registro], terminado: this.viaje.terminado
       }
     };
   }

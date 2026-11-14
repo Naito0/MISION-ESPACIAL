@@ -12,6 +12,9 @@ import { DESTINOS, TIERRA } from '../datos3d.js';
 import emergencias from '../../data/emergencias3d.json';
 import configHangar from '../../data/hangar3d.json';
 import { efecto } from '../audio.js';
+import configDificultad from '../../data/dificultad.json';
+import { dificultad, setDificultad } from '../../systems/preferencias.js';
+import { tutorialHecho } from '../tutorial.js';
 
 // Solo aspecto visual (colores, tamaño en pantalla y órbita del dibujo): no son datos científicos.
 const CUERPOS = [
@@ -93,16 +96,28 @@ export function iniciarPantallaSistema(ctx) {
   ctx.hud.appendChild(ui);
   const lista = ui.querySelector('.lista-planetas');
   const tarjeta = ui.querySelector('.tarjeta-planeta');
-  let seleccionado = 'marte';
+  // En la primera misión (tutorial) se propone la Luna, que es la más fácil
+  let seleccionado = ctx.tutorial?.activo || !tutorialHecho() ? 'luna' : 'marte';
   let mensaje = '';
 
-  const nombres = [...CUERPOS.slice(0, 3), { id: 'luna', nombre: 'Luna (de la Tierra)', elegible: true }, ...CUERPOS.slice(3)];
+  const nombres = [...CUERPOS.slice(0, 3), { id: 'luna', nombre: 'Luna', elegible: true }, ...CUERPOS.slice(3)];
   function dibujarLista() {
     lista.innerHTML = `<h3>Destinos</h3>${nombres.filter((c) => c.id !== 'tierra').map((c) => `
-      <button data-p="${c.id}" class="${c.id === seleccionado ? 'activo' : ''} ${c.elegible ? '' : 'pronto'}">${c.nombre}${c.elegible ? '' : ' <small>· próximamente</small>'}</button>`).join('')}
-      <p class="nota">Toca un planeta en el espacio o en esta lista.</p>`;
+      <button data-p="${c.id}" class="${c.id === seleccionado ? 'activo' : ''} ${c.elegible ? '' : 'pronto'}">${c.nombre}${c.elegible ? '' : ' <small>🔒</small>'}</button>`).join('')}
+      <h3>Dificultad</h3>
+      <div class="fila">${Object.entries(configDificultad.niveles).map(([id, n]) => `<button data-nivel="${id}" class="${dificultad() === id ? 'activo' : ''}">${n.nombre}</button>`).join('')}</div>`;
     lista.querySelectorAll('[data-p]').forEach((b) => { b.onclick = () => elegir(b.dataset.p); });
+    lista.querySelectorAll('[data-nivel]').forEach((b) => {
+      b.onclick = () => {
+        setDificultad(b.dataset.nivel);
+        window.dispatchEvent(new CustomEvent('cambio-dificultad'));
+        efecto('clic');
+        setTimeout(() => { dibujarLista(); dibujarTarjeta(); }, 50);
+      };
+    });
   }
+  /** Presupuesto del hangar con el ajuste de la dificultad (dificultad.json → factorPresupuesto). */
+  const presupuestoDe = (id) => Math.round(configHangar.presupuesto[id] * (configDificultad.niveles[dificultad()]?.factorPresupuesto ?? 1));
 
   function dibujarTarjeta() {
     const e = conexion.estado;
@@ -129,7 +144,7 @@ export function iniciarPantallaSistema(ctx) {
       <h3>${marte ? '🔴 Difícil' : '🟢 Para empezar'}</h3>
       <ul>
         <li>Recompensa: <b>${emergencias.config.creditosBase[d.id]} créditos</b></li>
-        <li>Presupuesto del hangar: <b>${configHangar.presupuesto[d.id]} M$</b> · el cohete lleva hasta <b>${configHangar.capacidadCohete[d.id]} kg</b></li>
+        <li>Presupuesto: <b>${presupuestoDe(d.id)} M$</b> · el cohete lleva <b>${configHangar.capacidadCohete[d.id]} kg</b></li>
         ${marte ? '<li>Los paneles dan menos energía y hace falta una antena de largo alcance.</li>' : '<li>Cerca de casa: alcanza una antena sencilla.</li>'}
       </ul>
       <p class="fuente">Fuente: ${d.fuente.split(':')[0]}</p>
@@ -137,6 +152,8 @@ export function iniciarPantallaSistema(ctx) {
       <p class="error">${mensaje}</p>`;
     const ir = tarjeta.querySelector('#ir');
     if (ir) ir.onclick = async () => {
+      // El tutorial solo acompaña la misión a la Luna
+      if (d.id === 'luna') ctx.tutorial?.reactivarSiFalta(); else ctx.tutorial?.desactivar();
       const r = await conexion.accion('destino', { id: d.id });
       if (r.error) { mensaje = r.error; efecto('error'); dibujarTarjeta(); } else efecto('exito');
     };

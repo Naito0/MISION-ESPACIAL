@@ -77,6 +77,8 @@ export function iniciarPantallaInforme(ctx) {
   const yo = e.jugadores.find((j) => j.id === conexion.id);
   const soyAnfitrion = !!(yo && yo.anfitrion);
   const progreso = soyAnfitrion ? guardarInforme(inf) : null;
+  // La primera misión a la Luna era el tutorial: queda marcado como hecho
+  if (e.destinoId === 'luna' && ctx.tutorial?.activo) ctx.tutorial.terminar();
   const ui = document.createElement('div');
   ui.className = 'panel informe';
   const estrellas = '⭐'.repeat(inf.estrellas) + '☆'.repeat(3 - inf.estrellas);

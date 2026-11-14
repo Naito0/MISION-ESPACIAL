@@ -174,6 +174,27 @@ test('superficie: si se acaba el tiempo, el informe cuenta solo las muestras ana
   assert.ok(s.informe.causas.some((c) => c.causa.includes('muy rápido')));
 });
 
+test('dificultad: Fácil da 1 emergencia a la vez, más tiempo, menos daño y más presupuesto', () => {
+  const DIF = leerJSON('dificultad.json');
+  const s = new Sala('DIF', { ...datosCompletos, dificultad: DIF });
+  s.unir('a', 'Ana'); s.accion('a', 'tomarLibres');
+  assert.equal(s.nivel, 'facil');
+  s.accion('a', 'empezar'); s.accion('a', 'destino', { id: 'marte' });
+  assert.equal(s.resumen().presupuesto, Math.round(270 * DIF.niveles.facil.factorPresupuesto));
+  for (const o of [...NAVE_MARTE_OK.a, ...NAVE_MARTE_OK.b]) s.accion('a', 'comprar', { opcion: o });
+  s.accion('a', 'listo');
+  assert.equal(s.fase, 'viaje');
+  for (let i = 0; i < 400; i++) { s.tick(0.25); assert.ok(s.viaje.emergencias.length <= 1, 'nunca más de 1 a la vez'); if (s.fase !== 'viaje') break; }
+  const e = s.viaje.registro[0] || s.viaje.emergencias[0];
+  assert.ok(e, 'hubo al menos una emergencia');
+  // Normal permite 2 y se puede cambiar fuera del viaje
+  const n = new Sala('DIF2', { ...datosCompletos, dificultad: DIF });
+  n.unir('a', 'Ana');
+  assert.deepEqual(n.accion('a', 'dificultad', { nivel: 'normal' }), { ok: true });
+  assert.equal(n.configViaje.maxSimultaneas, 2);
+  assert.ok(n.configViaje.tiempoParaResolver < s.configViaje.tiempoParaResolver);
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

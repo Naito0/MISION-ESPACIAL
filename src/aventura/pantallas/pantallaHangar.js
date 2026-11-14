@@ -151,6 +151,8 @@ export function iniciarPantallaHangar(ctx) {
         if (res.error) { efecto('error'); mensajeError = `${res.error} ${(res.problemas || []).join(' ')}`; dibujar(conexion.estado); }
         else efecto('clic');
       };
+      // Tutorial: cuando no falta ninguna categoría, pasa al paso "¡Listo!"
+      if (!r.problemas.some((p) => p.texto.startsWith('Falta elegir'))) ctx.tutorial?.evento('completo');
       holo.material.color.setHex(r.masa > r.capacidad ? 0xe5484d : 0x5be08a);
       holo.geometry.dispose();
       holo.geometry = new THREE.RingGeometry(4.5, 4.9, 64, 1, 0, Math.max(0.01, Math.min(1, r.masa / r.capacidad)) * Math.PI * 2);

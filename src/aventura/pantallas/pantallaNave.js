@@ -149,7 +149,10 @@ export function iniciarPantallaNave(ctx) {
     }
     // Avisar al tutorial / aprendizaje de lo que se resolvió
     if (antes && viaje) {
-      for (const r of viaje.registro.slice(antes.registro.length)) ctx.alResolver?.(r);
+      for (const r of viaje.registro.slice(antes.registro.length)) {
+        if (r.resultado === 'resuelta') ctx.tutorial?.evento('resuelta');
+        ctx.alResolver?.(r);
+      }
     }
     if ((e.fase === 'llegada' || e.fase === 'fracaso') && !final) mostrarFinal(e);
   });
@@ -235,6 +238,7 @@ export function iniciarPantallaNave(ctx) {
       esc.actualizar(dt, t);
       const activas = !final && viaje ? viaje.emergencias : [];
       efectos.actualizar(dt, t, activas, [yo.rol]);
+      if (activas.length) ctx.tutorial?.evento('emergencia');
 
       // El planeta de la ventana se acerca a medida que avanza el viaje
       if (esc.planeta && viaje) {

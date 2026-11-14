@@ -36,6 +36,23 @@ export function abrirConsola(o) {
   const teclaEsc = (e) => { if (e.key === 'Escape') terminar(null); };
   window.addEventListener('keydown', teclaEsc);
 
+  // El minijuego llama a esto con true (logrado) o false (falló).
+  // Si falla y queda tiempo, se puede REINTENTAR enseguida en la misma consola.
+  function intento(resultado) {
+    if (terminado) return;
+    if (resultado === false && !seAcaboElTiempo()) {
+      if (limpiar) limpiar();
+      limpiar = null;
+      efecto('error');
+      area.innerHTML = `<div class="consola-resultado">❌ No salió… ¡no pasa nada!</div>
+        <button class="consola-grande reintentar">🔁 Reintentar</button>`;
+      area.querySelector('.reintentar').onclick = empezar;
+      return;
+    }
+    terminar(resultado);
+  }
+  const seAcaboElTiempo = () => (performance.now() - inicio) / 1000 >= o.segundos;
+
   function terminar(resultado) {
     if (terminado) return;
     terminado = true;
@@ -43,7 +60,7 @@ export function abrirConsola(o) {
     window.removeEventListener('keydown', teclaEsc);
     if (limpiar) limpiar();
     efecto(resultado ? 'exito' : resultado === false ? 'error' : 'clic');
-    const aviso = resultado ? '✅ ¡Resuelto!' : resultado === false ? '❌ No salió… ¡inténtalo otra vez!' : '';
+    const aviso = resultado ? '✅ ¡Resuelto!' : resultado === false ? '⏱ Se acabó el tiempo' : '';
     if (aviso) {
       area.innerHTML = `<div class="consola-resultado">${aviso}</div>`;
       setTimeout(cerrar, 900);
@@ -55,8 +72,13 @@ export function abrirConsola(o) {
     }
   }
 
+  function empezar() {
+    area.innerHTML = '';
+    limpiar = o.iniciar(area, intento, o.opciones || {});
+  }
+
   capa.querySelector('.consola-cerrar').onclick = () => terminar(null);
-  limpiar = o.iniciar(area, terminar);
+  empezar();
   return { cerrar: () => terminar(null), terminar };
 }
 

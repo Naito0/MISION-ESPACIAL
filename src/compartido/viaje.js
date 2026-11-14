@@ -57,6 +57,9 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
 
   // ¿Aparece una emergencia nueva?
   v.proxima -= dt;
+  // Si ya está el máximo de emergencias, la siguiente espera: así, al resolver una,
+  // hay un respiro antes de la próxima (no aparece otra al instante)
+  if (v.emergencias.length >= config.maxSimultaneas) v.proxima = Math.max(v.proxima, config.intervaloMin * 0.5);
   if (v.proxima <= 0 && v.emergencias.length < config.maxSimultaneas && v.restante > 12) {
     const e = elegirEmergencia(v, catalogo, rng);
     if (e) {
@@ -65,7 +68,8 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
       v.emergencias.push({
         uid: v.contador, id: e.id, nombre: e.nombre, rol: e.rol, consola: e.consola, minijuego: e.minijuego,
         efecto: e.efecto, descripcion: e.descripcion, limite: config.tiempoParaResolver, restante: config.tiempoParaResolver,
-        danio: Math.round(e.danio * (agravada ? 1.5 : 1)), agravada
+        // factorDanio (dificultad): en Fácil la vida baja más lento
+        danio: Math.max(1, Math.round(e.danio * (agravada ? 1.5 : 1) * (config.factorDanio ?? 1))), agravada
       });
       v.ultimaPorRol[e.rol] = e.id;
       sucesos.push({ tipo: 'nueva', nombre: e.nombre, rol: e.rol });

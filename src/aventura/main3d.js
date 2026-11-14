@@ -17,7 +17,8 @@ import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
 import { crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
-import { calidad3D } from '../systems/preferencias.js';
+import { crearTutorial } from './tutorial.js';
+import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
 const hud = document.getElementById('hud');
@@ -60,11 +61,17 @@ function irA(nombre) {
   else if (fase === 'superficie') pantalla = iniciarPantallaSuperficie(ctx);
   else pantalla = iniciarPantallaNave(ctx); // viaje, llegada o fracaso
   window.aventura.pantalla = pantalla;
+  // El tutorial (Orbi) muestra los pasos de esta pantalla
+  const nombreTutorial = { sistema: 'sistema', hangar: 'hangar', viaje: 'viaje', llegada: 'viaje', fracaso: 'viaje', aterrizaje: 'aterrizaje', superficie: 'superficie', informe: 'informe' }[fase];
+  if (nombreTutorial && nombreTutorial !== ultimaPantallaTutorial) ctx.tutorial.pantalla(nombreTutorial);
+  ultimaPantallaTutorial = nombreTutorial;
   // El mouse solo se captura donde se camina (nave y superficie)
   window.capturarMouse = !!pantalla.jugador;
   hud.querySelector('.ayuda').style.display = window.capturarMouse ? '' : 'none';
 }
 ctx.conexionLocal = crearConexionLocal;
+ctx.tutorial = crearTutorial(hud);
+let ultimaPantallaTutorial = null;
 ctx.irA = irA;
 
 motor.alActualizarGlobal = true;
@@ -91,7 +98,10 @@ prepararModelos().then(async (hayModelo) => {
   const partida = crearConexionLocal();
   await partida.crear('Tripulación');
   await partida.accion('tomarLibres');  // el jugador tiene los 4 roles
+  await partida.accion('dificultad', { nivel: dificultad() });
   await partida.accion('empezar');      // directo al sistema solar
   ctx.conexionActiva = partida;
+  // Si el jugador cambia la dificultad (menú o sistema solar), se avisa a la partida
+  window.addEventListener('cambio-dificultad', () => partida.accion('dificultad', { nivel: dificultad() }));
   irA('juego');
 });

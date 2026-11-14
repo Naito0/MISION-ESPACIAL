@@ -101,6 +101,8 @@ export function iniciarPantallaSuperficie(ctx) {
   const quitarEstado = conexion.alEstado((e) => {
     if (e.fase !== 'superficie') { ctx.irA('juego'); return; }
     sup = e.superficie;
+    if (sup.muestras.some((m) => m.estado !== 'suelo')) ctx.tutorial?.evento('recogida');
+    if (sup.muestras.some((m) => m.estado === 'analizada')) ctx.tutorial?.evento('analizada');
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;

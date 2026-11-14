@@ -1,0 +1,52 @@
+{
+  "_comentario": "Valores de cada dificultad. Se pueden cambiar sin tocar código. 'maxSimultaneas' = emergencias a la vez. 'tiempoParaResolver' = segundos para cada emergencia. 'intervaloMin/Max' = segundos entre emergencias. 'factorDanio' = multiplica el daño de las emergencias (más bajo = la vida baja más lento). 'factorPresupuesto' = multiplica el presupuesto del hangar. 'minijuegos' = cuántos pasos tiene cada minijuego (menos = más fácil).",
+  "porDefecto": "facil",
+  "niveles": {
+    "facil": {
+      "nombre": "Fácil",
+      "maxSimultaneas": 1,
+      "tiempoParaResolver": 60,
+      "intervaloMin": 14,
+      "intervaloMax": 22,
+      "factorDanio": 0.6,
+      "factorPresupuesto": 1.35,
+      "minijuegos": {
+        "trayectoria": { "segundos": 1 },
+        "ritmo": { "aciertos": 2 },
+        "esquivar": { "segundos": 5, "escudo": 4 },
+        "cables": { "cables": 3 },
+        "soldar": { "grietas": 3, "clics": 2 },
+        "deslizadores": { "barras": 2, "tolerancia": 8 },
+        "nivel": { "segundos": 3 },
+        "secuencia": { "largo": 3 },
+        "regar": { "segundos": 5, "plantas": 4 },
+        "sintonizar": { "segundos": 1, "tolerancia": 0.3 },
+        "apuntar": { "segundos": 1.2, "radio": 36 },
+        "ordenar": { "paquetes": 4 }
+      }
+    },
+    "normal": {
+      "nombre": "Normal",
+      "maxSimultaneas": 2,
+      "tiempoParaResolver": 40,
+      "intervaloMin": 10,
+      "intervaloMax": 16,
+      "factorDanio": 1,
+      "factorPresupuesto": 1.1,
+      "minijuegos": {
+        "trayectoria": { "segundos": 1.5 },
+        "ritmo": { "aciertos": 3 },
+        "esquivar": { "segundos": 8, "escudo": 3 },
+        "cables": { "cables": 4 },
+        "soldar": { "grietas": 5, "clics": 3 },
+        "deslizadores": { "barras": 3, "tolerancia": 5 },
+        "nivel": { "segundos": 5 },
+        "secuencia": { "largo": 4 },
+        "regar": { "segundos": 8, "plantas": 6 },
+        "sintonizar": { "segundos": 1.5, "tolerancia": 0.18 },
+        "apuntar": { "segundos": 2, "radio": 26 },
+        "ordenar": { "paquetes": 6 }
+      }
+    }
+  }
+}
