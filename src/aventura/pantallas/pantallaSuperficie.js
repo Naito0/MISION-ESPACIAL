@@ -45,10 +45,32 @@ export function iniciarPantallaSuperficie(ctx) {
   // Gravedad real del destino: el mismo impulso de salto llega más alto
   const mundo = new MundoFisico(esc.colisiones, destino.gravedad);
   const indice = Math.max(0, e0.jugadores.indexOf(yo));
-  esc.puntoInicio = new THREE.Vector3(-1.5 + indice * 1.2, 0.05, 4.5);
+  // Empieza junto a la escotilla del módulo (en la esclusa)
+  esc.puntoInicio = new THREE.Vector3(-0.6 + indice * 1.2, 0.05, 2.8);
   const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDeJugador(yo));
   ambiente(true);
   ctx.aprendizaje?.evento('superficie:llegada', destino.id); // en Marte: tormentas de polvo
+
+  // ---- La ESCLUSA: el astronauta empieza adentro del módulo ----
+  // Pulsa E → despresurización (se iguala la presión con la de afuera) → se abre la escotilla.
+  let enEsclusa = true;
+  let despresurizando = 0; // segundos que faltan de la animación
+  jugador.bloqueado = true;
+  jugador.camara.yaw = 0; // mirando hacia el módulo
+  const escotilla = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.9, 0.12), new THREE.MeshStandardMaterial({ color: 0xc9d0dc, metalness: 0.6, roughness: 0.4 }));
+  escotilla.position.set(0, 1.05, 1.85);
+  esc.modulo.add(escotilla);
+  const luzEsclusa = new THREE.PointLight(0xffb020, 6, 6);
+  luzEsclusa.position.set(0, 2.3, 2.6);
+  escena.add(luzEsclusa);
+  const vapor = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(60 * 3), 3)),
+    new THREE.PointsMaterial({ color: 0xeef4ff, size: 0.25, transparent: true, opacity: 0.7, depthWrite: false }));
+  vapor.visible = false;
+  escena.add(vapor);
+  const semillasVapor = Array.from({ length: 60 }, () => [Math.random() * 6.28, Math.random()]);
+  const afuera = destino.id === 'luna' ? 'el vacío de la Luna' : 'el aire muy delgado de Marte';
+  ctx.aprendizaje?.alPoderMostrar(() => !enEsclusa); // primero se sale; después, las tarjetas
+  const CLAVE_ESCLUSA = 'misionEspacial.esclusaExplicada';
 
   // ---- Muestras (cristales que brillan) ----
   const mallas = e0.superficie.muestras.map((m) => {
@@ -94,6 +116,7 @@ export function iniciarPantallaSuperficie(ctx) {
     </div>
     <div class="panel hud-tareas"><h4>Objetivo</h4><div class="hv-lista"></div></div>
     <div class="panel aviso-e"></div>
+    <div class="panel esclusa"><b>🚪 Estás en la esclusa del módulo</b><br>Pulsa <span class="tecla">E</span> para despresurizar y salir.</div>
     <div class="avisos"></div>`;
   ctx.hud.appendChild(ui);
   const $ = (s) => ui.querySelector(s);
@@ -159,6 +182,44 @@ export function iniciarPantallaSuperficie(ctx) {
     escena, esc, jugador, remotos, mundo,
     actualizar(dt, t) {
       const entrada = jugador.actualizar(dt);
+      // ---- Esclusa: pulsar E, despresurizar y salir ----
+      if (enEsclusa) {
+        const panel = ui.querySelector('.esclusa');
+        if (despresurizando > 0) {
+          despresurizando -= dt;
+          const f = 1 - Math.max(0, despresurizando) / 3;
+          panel.innerHTML = `<b>🚪 Despresurizando…</b><div class="hv-barra"><div style="width:${(1 - f) * 100}%;background:#7cc4ff"></div></div>
+            <small>Se saca el aire de la esclusa hasta igualar ${afuera}.</small>`;
+          vapor.visible = true;
+          const arr = vapor.geometry.attributes.position.array;
+          semillasVapor.forEach(([a, s], i) => { const k = (f * 2 + s) % 1; arr[i * 3] = Math.cos(a) * k * 2; arr[i * 3 + 1] = 0.5 + s * 2 + k; arr[i * 3 + 2] = 2.4 + Math.sin(a) * k * 2; });
+          vapor.geometry.attributes.position.needsUpdate = true;
+          luzEsclusa.intensity = 6 + Math.sin(t * 12) * 4;
+          if (despresurizando <= 0) {
+            escotilla.position.y = 3.2; // la escotilla se abre
+            vapor.visible = false;
+            luzEsclusa.color.setHex(0x5be08a);
+            enEsclusa = false;
+            jugador.bloqueado = false;
+            ctx.tutorial?.evento('esclusa');
+            panel.remove();
+            efecto('exito');
+            // La primera vez: tarjeta que explica para qué sirve una esclusa
+            let vista = false; try { vista = localStorage.getItem(CLAVE_ESCLUSA) === '1'; } catch { /* sin almacenamiento */ }
+            if (!vista) {
+              try { localStorage.setItem(CLAVE_ESCLUSA, '1'); } catch { /* sin almacenamiento */ }
+              mostrarTarjeta({
+                etiqueta: '💡 ¿Para qué sirve una esclusa?', icono: '🚪', titulo: 'La esclusa',
+                frase: 'Es una sala con dos puertas: se iguala la presión antes de salir, así no se pierde el aire de la nave.',
+                detalle: `Primero se cierra la puerta de adentro. Después se saca el aire de la esclusa (despresurizar) hasta igualar la presión de afuera: ${afuera}. Recién ahí se abre la puerta de afuera. Para volver se hace al revés.`
+              });
+            }
+          }
+        } else if (entrada && entrada.interactuarPulsado) {
+          despresurizando = 3;
+          efecto('alarma');
+        }
+      }
       // Un salto alto (gravedad baja) enseña el concepto del salto
       if (jugador.pies.y > 1.2) ctx.aprendizaje?.evento('superficie:salto', destino.id);
       // Enviar mi posición unas 15 veces por segundo

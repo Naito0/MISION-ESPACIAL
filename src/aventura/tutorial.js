@@ -29,6 +29,7 @@ const PASOS = {
     { texto: 'Mantén <span class="tecla">Espacio</span> para encender el motor y frenar. Toca el suelo despacio: menos de 2.5 m/s (verde).', resaltar: '.hud-aterrizaje' }
   ],
   superficie: [
+    { texto: 'Estás en la <b>esclusa</b> del módulo. Pulsa <span class="tecla">E</span> para despresurizar y salir.', hasta: 'esclusa' },
     { texto: 'Camina hasta la <b>columna de luz</b> y pulsa <span class="tecla">E</span> para recoger la muestra.', hasta: 'recogida' },
     { texto: 'Ahora ve a la <b>pantalla verde</b> junto al módulo y pulsa <span class="tecla">E</span> para analizarla.', hasta: 'analizada' },
     { texto: '¡Muy bien! Busca las otras muestras siguiendo las flechas.', dura: 6 }

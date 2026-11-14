@@ -56,6 +56,9 @@ export function iniciarPantallaNave(ctx) {
   motor.cambiarEscena(escena);
   const mundo = new MundoFisico(esc.colisiones, TIERRA.gravedad); // gravedad artificial de la nave
   esc.puertas.forEach((p) => mundo.dinamicos.push(p));
+  // Las puertas entre las áreas quedan cerradas con llave (luz roja y candado):
+  // cada astronauta trabaja en su sala. La de la esclusa solo se abre al salir a la superficie.
+  esc.puertas.forEach((p) => p.bloquear(p.centro.z > 6 ? '🚪' : '🔒'));
   motor.camara.fov = 70;
   motor.camara.updateProjectionMatrix();
   ambiente(true);

@@ -109,6 +109,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Aterrizaje con alarmas */
 #hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
 #hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
+/* ---- Esclusa ---- */
+#hud .esclusa { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: min(520px, 80vw); padding: 14px 20px; text-align: center; font-size: var(--t); border-color: #ffb020; border-width: 3px; }
+#hud .esclusa .hv-barra { margin: 10px 0; height: 20px; }
+#hud .esclusa .hv-barra > div { height: 100%; }
 /* ---- Logros ---- */
 #hud .logros-avisos { position: absolute; right: 12px; bottom: 40px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 30; pointer-events: none; }
 #hud .logro-aviso { display: flex; gap: 10px; align-items: center; padding: 6px 12px; font-size: var(--tc); border-color: #ffd166; animation: aparecer 0.3s; transition: opacity 0.6s; }
