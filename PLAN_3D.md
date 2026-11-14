@@ -127,7 +127,19 @@ Al final de cada fase: `npm test`, `npm run build`, prueba en el navegador y un 
 | 0 Auditoría | ✔ Hecha | 22/22 pruebas, build correcto |
 | 1 Motor | ✔ Hecha | Build con dos páginas; escena 3D con sombras, niebla, menú ESC y calidad, sin errores en el navegador |
 | 2 Astronauta | ✔ Hecha | Teclas reales en el navegador: camina, corre, salta (sube ~0,7 m y vuelve a apoyarse), se detiene contra la pared (z = −19,45) y contra una caja (z = −2,65); la cámara gira y no atraviesa paredes |
-| 3 Base espacial | Pendiente | — |
+| 3 Base espacial | Reemplazada por la versión hackatón (abajo) | — |
+
+### Versión hackatón (rama `juego-3d`, todo en 3D, sin 2D)
+
+| Paso | Estado | Cómo se comprobó |
+|---|---|---|
+| 1 Movimiento y nave decorada | ✔ Hecho | Navegador: cruza puertas automáticas, sin errores |
+| 2 Red local (Socket.IO) | ✔ Hecho | Dos navegadores: crear, unirse con código, roles, ver al otro moverse |
+| 3 Viaje con emergencias y tareas | ✔ Hecho | Navegador: emergencia → flecha → E → minijuego → resuelta; los 12 minijuegos abren sin errores; fracaso y llegada |
+| 4 Hangar | ✔ Hecho | Navegador: comprar, problemas explicados (energía en Marte), todos listos → despega; pruebas de reglas |
+| 5 Sistema solar | ✔ Hecho | Navegador: tarjetas NASA, "Próximamente", elegir Luna → presupuesto de la Luna |
+| 6 Informe | ✔ Hecho | Navegador: informe de fracaso y de éxito, progreso guardado en localStorage |
+| 7 Aterrizaje y superficie | Pendiente | — |
 
 Nota de rendimiento: en el navegador de prueba (sin GPU, render por software) va a 20-45 FPS en calidad Media; con una GPU real debería ir mucho más rápido.
 
