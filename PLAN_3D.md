@@ -141,6 +141,16 @@ Al final de cada fase: `npm test`, `npm run build`, prueba en el navegador y un 
 | 6 Informe | ✔ Hecho | Navegador: informe de fracaso y de éxito, progreso guardado en localStorage |
 | 7 Aterrizaje y superficie | ✔ Hecho | Navegador (Marte y Luna): motor con Espacio, aterrizaje clasificado, salto 3,6 m en Marte y 8,3 m en la Luna (gravedad real), recoger con E, analizar con E (solo Científico), informe |
 
+### Cambios v3 (un jugador con 4 astronautas, armado guiado y aprendizaje)
+
+| Cambio | Estado | Cómo se comprobó |
+|---|---|---|
+| 1 Textos grandes | ✔ Hecho | Capturas: texto ≥ 18 px, títulos 30 px; menú Normal / Grande |
+| 2 Cambio de astronauta | ✔ Hecho | Navegador: teclas 1-4 y clic en retratos, límites de sala, aviso grande por rol, aviso amable con el astronauta equivocado |
+| 3 Misiones más fáciles | ✔ Hecho | Pruebas (máx. 1 emergencia en Fácil) y navegador: tutorial en la Luna paso a paso, 3 cables en Fácil, "Reintentar" |
+| 4 Armado con recomendaciones | ✔ Hecho | Pruebas de fórmulas por destino y navegador: barras, vista previa, Orbi, dependencias |
+| 5 Aprendizaje | ✔ Hecho | Pruebas del resumen y navegador: tarjetas (nunca durante emergencias), diario 6/12, resumen y repaso en el informe |
+
 Nota de rendimiento: en el navegador de prueba (sin GPU, render por software) va a 20-45 FPS en calidad Media; con una GPU real debería ir mucho más rápido.
 
 ## 10. Decisiones que necesito del equipo antes de empezar
