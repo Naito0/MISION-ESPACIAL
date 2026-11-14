@@ -15,7 +15,7 @@ import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
 import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
-import { conectarServidor, crearConexionLocal } from './red/conexion.js';
+import { crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { calidad3D } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
@@ -29,7 +29,7 @@ hud.innerHTML = `
   <div class="panel ayuda">
     Clic + mouse: cámara · <span class="tecla">WASD</span> moverse ·
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
-    <span class="tecla">E</span> usar · <span class="tecla">Esc</span> menú
+    <span class="tecla">E</span> usar · <span class="tecla">1-4</span> astronauta · <span class="tecla">Esc</span> menú
   </div>
   <div class="fps"></div>
   <div class="cargando">Cargando…</div>`;
@@ -81,9 +81,17 @@ motor.renderer.setAnimationLoop(() => {
 
 window.aventura = { motor, THREE, irA, ctx, abrirMinijuego };
 // Primero se intenta cargar el modelo GLB del astronauta (si existe) y después arranca el juego
-Promise.all([prepararModelos(), conectarServidor()]).then(([hayModelo, conexion]) => {
+// Un solo jugador controla a los 4 astronautas: la partida corre dentro del navegador
+// (sin servidor ni lobby). El modo en red sigue en el código pero está desactivado:
+// pantallaLobby.js, pantallaNaveRed.js, red/conexion.js (conectarServidor) y server/.
+prepararModelos().then(async (hayModelo) => {
   hud.querySelector('.cargando').remove();
   window.aventura.modeloGLB = hayModelo;
-  ctx.conexion = conexion; // null si no hay servidor (entonces solo se puede jugar solo)
-  irA('lobby');
+  ctx.conexion = null;
+  const partida = crearConexionLocal();
+  await partida.crear('Tripulación');
+  await partida.accion('tomarLibres');  // el jugador tiene los 4 roles
+  await partida.accion('empezar');      // directo al sistema solar
+  ctx.conexionActiva = partida;
+  irA('juego');
 });

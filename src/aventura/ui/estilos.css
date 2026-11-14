@@ -50,7 +50,23 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .flecha { display: inline-block; font-size: 32px; color: #ffd166; transition: transform 0.12s linear; }
 #hud .otras { display: block; margin-top: 4px; color: #b8c3e0; }
 #hud .aviso-e { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); padding: 12px 22px; font-size: var(--tg); display: none; border-color: #ffd166; white-space: nowrap; }
-#hud .avisos { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
+#hud .avisos { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
+#hud .aviso-flotante.amable { border-color: #ffd166; font-size: var(--tg); }
+/* ---- Retratos de la tripulación (cambiar de astronauta) ---- */
+#hud .retratos { position: absolute; left: 12px; top: 130px; display: flex; flex-direction: column; gap: 8px; }
+#hud .retrato { display: flex; align-items: center; gap: 8px; padding: 6px 12px; min-width: calc(200px * var(--ancho)); color: #fff; font-size: var(--t); cursor: pointer; text-align: left; opacity: 0.75; }
+#hud .retrato .r-icono { font-size: 30px; }
+#hud .retrato b { display: inline-block; min-width: 26px; padding: 0 4px; border: 2px solid #fff; border-radius: 6px; text-align: center; margin-right: 4px; }
+#hud .retrato.activo { opacity: 1; background: rgba(30, 60, 110, 0.95); box-shadow: 0 0 16px rgba(124, 243, 255, 0.7); transform: scale(1.05); }
+#hud .retrato.alerta { animation: parpadeo 0.5s infinite alternate; }
+@keyframes parpadeo { from { background: rgba(6, 12, 30, 0.88); } to { background: rgba(229, 72, 77, 0.85); } }
+/* ---- Avisos grandes de emergencia ---- */
+#hud .alertas { position: absolute; left: 50%; top: 62px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(820px, 62vw); }
+#hud .alerta-grande { width: 100%; padding: 10px 18px; border-width: 3px; background: rgba(60, 10, 16, 0.92); text-align: center; animation: aparecer 0.3s; }
+#hud .alerta-grande.urgente { animation: latir 0.6s infinite alternate; }
+#hud .ag-titulo { font-size: var(--tg); font-weight: bold; }
+#hud .ag-tecla { font-size: var(--t); font-weight: normal; }
+#hud .ag-porque { font-size: var(--tc); color: #ffe0a0; margin-top: 4px; }
 #hud .aviso-flotante { padding: 8px 16px; font-size: var(--t); animation: aparecer 0.3s; white-space: nowrap; }
 #hud .vineta { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 rgba(255, 0, 0, 0); transition: box-shadow 0.3s; }
 #hud .vineta.golpe { box-shadow: inset 0 0 160px rgba(255, 30, 30, 0.8); }

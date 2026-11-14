@@ -46,22 +46,46 @@ export class JugadorLocal {
     };
   }
 
-  actualizar(dt) {
-    const e = this.control.leer();
+  /**
+   * Límites del área donde puede moverse (rectángulo en el piso).
+   * l = { xMin, xMax, zMin, zMax } o null (sin límites).
+   */
+  limitarA(l) { this.limites = l; }
+
+  /**
+   * @param activo true = lo controla el jugador (teclado y cámara);
+   *               false = está "en espera" trabajando en su área (no mueve la cámara).
+   */
+  actualizar(dt, activo = true) {
+    const e = activo ? this.control.leer() : null;
     this.ultimaEntrada = e;
-    this.camara.sensibilidad = sensibilidad3D();
-    this.camara.girar(e.camaraX, e.camaraY, e.zoom);
+    if (activo) {
+      this.camara.sensibilidad = sensibilidad3D();
+      this.camara.girar(e.camaraX, e.camaraY, e.zoom);
+    }
 
     this.camara.adelante(this._adelante);
     this.camara.derecha(this._derecha);
     const d = this._deseo.set(0, 0, 0);
-    if (!this.bloqueado && !this.astronauta.desmayado) {
+    if (e && !this.bloqueado && !this.astronauta.desmayado) {
       d.addScaledVector(this._adelante, e.moverY).addScaledVector(this._derecha, e.moverX);
       if (d.lengthSq() > 1) d.normalize();
     }
-    this.cuerpo.actualizar(dt, d, e.correr, e.saltar && !this.bloqueado);
+    this.cuerpo.actualizar(dt, d, e ? e.correr : false, !!(e && e.saltar && !this.bloqueado));
 
     this.cuerpo.pies(this.pies);
+    // No puede salir de su área: si se pasa del borde, vuelve al borde y frena
+    if (this.limites) {
+      const l = this.limites;
+      const x = THREE.MathUtils.clamp(this.pies.x, l.xMin, l.xMax);
+      const z = THREE.MathUtils.clamp(this.pies.z, l.zMin, l.zMax);
+      if (x !== this.pies.x || z !== this.pies.z) {
+        this.cuerpo.capsula.translate(this._deseo.set(x - this.pies.x, 0, z - this.pies.z));
+        if (x !== this.pies.x) this.cuerpo.velocidad.x = 0;
+        if (z !== this.pies.z) this.cuerpo.velocidad.z = 0;
+        this.cuerpo.pies(this.pies);
+      }
+    }
     const a = this.astronauta;
     a.raiz.position.copy(this.pies);
     const vel = Math.hypot(this.cuerpo.velocidad.x, this.cuerpo.velocidad.z);
@@ -77,7 +101,7 @@ export class JugadorLocal {
     a.actualizar(dt, { velocidad: vel, apoyado: this.cuerpo.apoyado, velocidadVertical: this.cuerpo.velocidad.y, giro });
 
     this._cabeza.copy(this.pies).y += 1.55;
-    this.camara.actualizar(dt, this._cabeza);
+    if (activo) this.camara.actualizar(dt, this._cabeza);
     return e;
   }
 }

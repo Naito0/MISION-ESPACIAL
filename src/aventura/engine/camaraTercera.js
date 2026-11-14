@@ -44,7 +44,9 @@ export class CamaraTercera {
 
   /** @param posicionCabeza punto a mirar (la cabeza del personaje) */
   actualizar(dt, posicionCabeza) {
-    this.objetivo.lerp(posicionCabeza, this.primera ? 1 : 1 - Math.exp(-18 * dt));
+    // suavidad: qué tan rápido sigue al personaje (más bajo = viaja más despacio,
+    // se usa al cambiar de astronauta para que la cámara "vuele" hasta él)
+    this.objetivo.lerp(posicionCabeza, this.primera ? 1 : 1 - Math.exp(-(this.suavidad || 18) * dt));
     const desplazamiento = new THREE.Vector3(
       Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),
@@ -54,7 +56,7 @@ export class CamaraTercera {
     let distancia = this.distancia;
     this.rayo.set(this.objetivo, desplazamiento);
     this.rayo.far = this.distancia;
-    const choque = this.rayo.intersectObjects(this.solidos.children, true)[0];
+    const choque = this.sinParedes ? null : this.rayo.intersectObjects(this.solidos.children, true)[0];
     if (choque) distancia = Math.max(0.6, choque.distance - 0.3);
 
     this.posicionDeseada.copy(this.objetivo).addScaledVector(desplazamiento, distancia);

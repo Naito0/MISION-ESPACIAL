@@ -1,10 +1,12 @@
-# Publica el juego en GitHub Pages cada vez que se sube algo a la rama main.
+# Publica el juego en GitHub Pages cada vez que se sube algo a la rama main o juego-3d.
 # Una sola vez: en GitHub → Settings → Pages → Source: "GitHub Actions".
+# (Si GitHub dice que la rama no tiene permiso: Settings → Environments → github-pages →
+#  agregar "juego-3d" en "Deployment branches".)
 name: Publicar en GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, juego-3d]
   workflow_dispatch: # permite ejecutarlo a mano desde la pestaña Actions
 
 permissions:
