@@ -1,0 +1,66 @@
+{
+  "_comentario": "Tarjetas '📜 Esto pasó de verdad' que aparecen al ganar cada minijuego. Clave = id del minijuego. Cada hecho tiene mision, anio, frase (lo que pasó, dicho simple), fuente (página de la NASA) y cita (texto de esa página que lo confirma). 'verificar' = lo que el equipo debe comprobar. NO se agregan detalles que no estén en la fuente.",
+  "hechos": {
+    "esquivar": {
+      "icono": "🛰️", "mision": "Estación Espacial Internacional", "anio": 2024,
+      "frase": "La Estación Espacial enciende sus propulsores para esquivar basura espacial: se llama maniobra de evasión de basura.",
+      "fuente": "https://www.nasa.gov/blogs/spacestation/2024/11/19/space-station-raises-orbit-avoiding-orbital-debris/",
+      "cita": "Pre-determined Debris Avoidance Maneuver (PDAM)"
+    },
+    "aterrizaje": {
+      "icono": "🌙", "mision": "Apolo 11", "anio": 1969,
+      "frase": "Al bajar a la Luna sonaron alarmas de la computadora (1202 y 1201) que se podían ignorar. Armstrong tomó el control manual para pasar un campo de rocas y aterrizó con poco combustible.",
+      "fuente": "https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/",
+      "cita": "The alarm simply meant the computer was overloaded with too much data … Armstrong took over manual control of the descent … indicating only 5% fuel remaining"
+    },
+    "fuga": {
+      "icono": "💨", "mision": "Estación Espacial Internacional", "anio": 2020,
+      "frase": "La tripulación buscó una pequeña fuga de aire y la ubicó en el área de trabajo principal del módulo ruso Zvezda.",
+      "fuente": "https://blogs.nasa.gov/spacestation/2020/09/29/crew-continues-troubleshooting-as-tests-isolate-small-leak",
+      "cita": "isolated to the main work area of the Zvezda Service Module",
+      "verificar": ["Abrir la página y confirmar la cita (se encontró con un buscador, no se abrió). No se dice cómo la encontraron porque ninguna página de la NASA revisada lo cuenta."]
+    },
+    "interruptores": {
+      "icono": "⚡", "mision": "Apolo 12", "anio": 1969,
+      "frase": "Un rayo alcanzó al cohete a los 36,5 segundos del despegue y otro a los 52 segundos. Se alteraron los sistemas eléctricos, pero el equipo los restableció y la misión siguió.",
+      "fuente": "https://science.nasa.gov/resource/lightning-strikes-twice/",
+      "cita": "This electrical discharge between clouds and the ground took place 36.5 seconds after lift-off … struck by lightning again at 52 seconds and caused an electrical disturbance."
+    },
+    "paneles": {
+      "icono": "☀️", "mision": "InSight (Marte)", "anio": 2022,
+      "frase": "El polvo que se acumuló sobre los paneles solares del módulo InSight fue reduciendo su energía hasta terminar la misión.",
+      "fuente": "https://www.nasa.gov/missions/insight/nasa-retires-insight-mars-lander-mission-after-years-of-science/",
+      "cita": "as dust accumulating on the lander's solar panels gradually reduced its energy"
+    },
+    "filtro": {
+      "icono": "🧰", "mision": "Apolo 13", "anio": 1970,
+      "frase": "Los filtros cuadrados no encajaban en las entradas redondas. Desde la Tierra idearon un adaptador con bolsas de plástico, cartón y cinta, y la tripulación lo armó.",
+      "fuente": "https://www.nasa.gov/missions/apollo/apollo-13-mission-details/",
+      "cita": "the square canisters from the command module were not compatible with the round openings in the lunar module … using plastic bags, cardboard and tape"
+    },
+    "huerto": {
+      "icono": "🥬", "mision": "Estación Espacial Internacional (Veggie)", "anio": 2018,
+      "frase": "En la Estación Espacial se cultivan plantas como lechuga y kale en el experimento Veggie, y los astronautas las comen.",
+      "fuente": "https://www.nasa.gov/image-article/astronaut-scott-tingle-tries-space-grown-lettuce/",
+      "cita": "NASA astronaut Scott Tingle eats a piece of lettuce harvested as part of the ongoing space crop study VEG-03."
+    },
+    "unidades": {
+      "icono": "📏", "mision": "Mars Climate Orbiter", "anio": 1999,
+      "frase": "La sonda se perdió al llegar a Marte porque un equipo usó unidades inglesas (libras, pies) y otro usó unidades métricas.",
+      "fuente": "https://www.jpl.nasa.gov/news/mars-climate-orbiter-team-finds-likely-cause-of-loss/",
+      "cita": "one team used English units (e.g., inches, feet and pounds) while the other used metric units for a key spacecraft operation."
+    },
+    "retraso": {
+      "icono": "📡", "mision": "Comunicaciones con Marte", "anio": 2020,
+      "frase": "Un mensaje entre la Tierra y Marte tarda unos 4 minutos cuando están más cerca y unos 24 cuando están más lejos.",
+      "fuente": "https://www.nasa.gov/missions/tech-demonstration/space-communications-7-things-you-need-to-know/",
+      "cita": "At Mars' closest approach … the delay is about four minutes … at their greatest distance … the delay is around 24 minutes."
+    },
+    "tormenta": {
+      "icono": "🌪️", "mision": "Rover Opportunity (Marte)", "anio": 2018,
+      "frase": "Una tormenta de polvo que cubrió todo Marte llegó al lugar del rover Opportunity, y el rover dejó de comunicarse con la Tierra.",
+      "fuente": "https://science.nasa.gov/missions/mer/nasas-opportunity-rover-mission-on-mars-comes-to-end/",
+      "cita": "The Opportunity rover stopped communicating with Earth when a severe Mars-wide dust storm blanketed its location in June 2018."
+    }
+  }
+}

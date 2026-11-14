@@ -14,11 +14,21 @@ import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
 
-test('cada rol tiene 3 emergencias distintas', () => {
+test('cada rol tiene emergencias con minijuegos distintos, diagnóstico y hecho real cuando corresponde', () => {
+  const DIAG = leerJSON('diagnosticos.json').diagnosticos;
+  const HECHOS = leerJSON('hechos_reales.json').hechos;
   for (const rol of ROLES_ID) {
     const delRol = EMERG.emergencias.filter((e) => e.rol === rol);
-    assert.equal(delRol.length, 3, rol);
-    assert.equal(new Set(delRol.map((e) => e.minijuego)).size, 3, `${rol}: minijuegos repetidos`);
+    // El piloto tiene 2 en el viaje; su tercer minijuego es el aterrizaje con alarmas
+    assert.ok(delRol.length >= 2, rol);
+    assert.equal(new Set(delRol.map((e) => e.minijuego)).size, delRol.length, `${rol}: minijuegos repetidos`);
+  }
+  for (const e of EMERG.emergencias) {
+    const d = DIAG[e.id];
+    assert.ok(d && d.opciones.filter((o) => o.correcta).length === 1, `${e.id}: diagnóstico con una sola correcta`);
+  }
+  for (const [id, h] of Object.entries(HECHOS)) {
+    assert.ok(h.mision && h.anio && h.frase && h.fuente.startsWith('https://') && h.cita, `hecho ${id}`);
   }
 });
 

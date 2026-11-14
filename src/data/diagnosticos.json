@@ -73,6 +73,22 @@
         { "texto": "Oscuridad total", "porque": "Sin luz las plantas no pueden fabricar su alimento." }
       ]
     },
+    "co2": {
+      "pregunta": "El dióxido de carbono (CO₂) sube en la cabina. ¿Qué pasa?",
+      "opciones": [
+        { "texto": "El filtro que lo quita del aire se gastó", "correcta": true, "porque": "Al respirar soltamos CO₂: un filtro lo saca del aire. Si se gasta, el CO₂ se acumula." },
+        { "texto": "Entra CO₂ desde afuera", "porque": "La nave está cerrada: el CO₂ viene de la respiración de la tripulación." },
+        { "texto": "Las plantas producen demasiado", "porque": "Con luz, las plantas toman CO₂ y sueltan oxígeno: ayudan, no empeoran." }
+      ]
+    },
+    "unidades": {
+      "pregunta": "Una orden dice \"200 millas\" y la computadora usa kilómetros. ¿Qué haces?",
+      "opciones": [
+        { "texto": "Convertir a kilómetros antes de enviar", "correcta": true, "porque": "Si todos usan la misma unidad no hay confusión: la computadora entiende el número que espera." },
+        { "texto": "Enviar 200 tal cual", "porque": "La computadora leería 200 km en vez de 200 millas: la maniobra quedaría mal." },
+        { "texto": "Borrar la unidad", "porque": "Sin la unidad nadie sabe qué significa el número." }
+      ]
+    },
     "frecuencia": {
       "pregunta": "La radio se llenó de ruido de repente. ¿Por qué?",
       "opciones": [
@@ -82,11 +98,11 @@
       ]
     },
     "senal": {
-      "pregunta": "Se perdió la señal con la Tierra. ¿Qué revisas primero?",
+      "pregunta": "Tu orden tarda en llegar al rover. ¿Cuándo debes enviar \"¡Frena!\"?",
       "opciones": [
-        { "texto": "Que la antena apunte a la Tierra", "correcta": true, "porque": "Las antenas potentes envían un haz angosto: si no apuntan bien, el mensaje no llega." },
-        { "texto": "Subir el volumen de los parlantes", "porque": "El volumen no cambia nada: la señal tiene que llegar a la antena." },
-        { "texto": "Esperar a estar más cerca", "porque": "La nave se aleja cada vez más: hay que apuntar bien la antena." }
+        { "texto": "Antes de que llegue a la zona, para que la orden llegue a tiempo", "correcta": true, "porque": "La señal viaja a la velocidad de la luz, pero las distancias son enormes: hay que anticiparse." },
+        { "texto": "Justo cuando lo veo en la zona", "porque": "Lo que ves ya pasó, y la orden todavía tiene que viajar: llegaría tarde." },
+        { "texto": "Cuando ya está en el cráter", "porque": "Demasiado tarde: la orden llegaría cuando el rover ya cayó." }
       ]
     },
     "paquetes": {

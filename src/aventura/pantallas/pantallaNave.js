@@ -22,7 +22,10 @@ import { crearEfectosViaje } from './efectosViaje.js';
 import { TRIPULACION, miembro, colorDe, hexDe } from '../tripulacion.js';
 import emergenciasJSON from '../../data/emergencias3d.json';
 import diagnosticosJSON from '../../data/diagnosticos.json';
-import { mostrarDiagnostico } from '../ui/tarjetas.js';
+import { mostrarDiagnostico, mostrarTarjeta } from '../ui/tarjetas.js';
+import hechosJSON from '../../data/hechos_reales.json';
+
+const HECHOS = hechosJSON.hechos;
 import { retrasoSenal } from '../../compartido/recomendaciones.js';
 
 const DIAGNOSTICOS = diagnosticosJSON.diagnosticos;
@@ -204,11 +207,15 @@ export function iniciarPantallaNave(ctx) {
     }
     // Paso 3: la solución (minijuego)
     j.astronauta.reproducir('reparar', 1);
-    const c = abrirMinijuego(emergencia, colorDe(emergencia.rol), (resultado) => {
+    const c = abrirMinijuego(emergencia, colorDe(emergencia.rol), async (resultado) => {
       consola = null;
       j.bloqueado = false;
-      if (resultado !== null) conexion.accion('resolver', { uid: emergencia.uid, exito: resultado });
-    });
+      if (resultado === null) return;
+      // Paso 4: resultado → "📜 Esto pasó de verdad" (con pausa real) → después la tarjeta de aprendizaje
+      const h = HECHOS[emergencia.minijuego];
+      if (resultado && h) mostrarTarjeta({ etiqueta: '📜 Esto pasó de verdad', icono: h.icono, titulo: `${h.mision} (${h.anio})`, frase: h.frase, detalle: `“${h.cita}”`, fuente: h.fuente });
+      conexion.accion('resolver', { uid: emergencia.uid, exito: resultado });
+    }, destino.id);
     if (consola) consola.cerrar = c.cerrar;
   }
 

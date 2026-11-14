@@ -132,6 +132,18 @@ export function crearSuperficie(destino, o = {}) {
   esc.visual.add(pantalla);
   esc.mesa = mesa;
   esc.posLaboratorio = new THREE.Vector3(3.6, 0, 0);
+  // Paneles solares del módulo, al otro lado. Brillan según la luz del Sol del destino:
+  // en Marte llega cerca del 43% de la luz, y además el polvo los cubre (más opacos).
+  const brillo = (destino.juego?.factorSolar ?? 1) * (destino.armado?.factorPolvo ?? 1);
+  const matPanel = new THREE.MeshStandardMaterial({ color: marte ? 0x5a4a5a : 0x1d3b8a, emissive: 0x2a6cff, emissiveIntensity: 0.15 + 1.2 * brillo * brillo, metalness: 0.5, roughness: marte ? 0.9 : 0.3 });
+  for (const dz of [-1.1, 1.1]) {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.06, 1.8), matPanel);
+    panel.position.set(-4.2, 1.3, dz); panel.rotation.z = 0.35;
+    panel.castShadow = true;
+    esc.visual.add(panel);
+  }
+  caja(esc, 0.15, 1.3, 0.15, material(0xaaaaaa), -4.2, 0.65, 0, { solida: false });
+  esc.posPaneles = new THREE.Vector3(-4.2, 0, 0);
   esc.puntoInicio = new THREE.Vector3(0, 0.05, 4.5);
 
   esc.actualizar = (dt, t) => {

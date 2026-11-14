@@ -15,6 +15,10 @@ import { colorDeJugador } from './pantallaNave.js';
 import { DESTINOS, TIERRA } from '../datos3d.js';
 import { abrirMinijuego } from '../minijuegos/index.js';
 import { ambiente, efecto } from '../audio.js';
+import { mostrarTarjeta } from '../ui/tarjetas.js';
+import hechosJSON from '../../data/hechos_reales.json';
+
+const HECHOS = hechosJSON.hechos;
 
 const CERCA = 2.2;
 
@@ -123,11 +127,28 @@ export function iniciarPantallaSuperficie(ctx) {
     jugador.bloqueado = true;
     jugador.astronauta.reproducir('interactuar', 1);
     consola = true;
-    abrirMinijuego({ nombre: 'Analizar muestra', descripcion: 'El analizador del módulo estudia de qué está hecha la roca.', minijuego: 'secuencia', restante: 30 }, 0x5be08a, (res) => {
+    abrirMinijuego({ nombre: 'Analizar muestra', descripcion: 'El analizador del módulo estudia de qué está hecha la roca.', minijuego: 'secuencia', restante: 45 }, 0x5be08a, (res) => {
       consola = null;
       jugador.bloqueado = false;
       if (res !== null) conexion.accion('analizar', { i: m.i, exito: res });
-    });
+    }, destino.id);
+  }
+
+  // En Marte: el polvo cubre los paneles del módulo (como le pasó a InSight).
+  // Tarea del ingeniero: limpiarlos y orientarlos al Sol (minijuego "paneles").
+  let panelesListos = destino.id !== 'marte';
+  function limpiarPaneles() {
+    jugador.bloqueado = true;
+    consola = true;
+    abrirMinijuego({ nombre: 'Polvo en los paneles', descripcion: 'El polvo de Marte tapó los paneles del módulo y la batería se vacía.', minijuego: 'paneles', restante: 60 }, 0x7cc4ff, async (res) => {
+      consola = null;
+      jugador.bloqueado = false;
+      if (res) {
+        panelesListos = true;
+        const h = HECHOS.paneles;
+        await mostrarTarjeta({ etiqueta: '📜 Esto pasó de verdad', icono: h.icono, titulo: `${h.mision} (${h.anio})`, frase: h.frase, detalle: `“${h.cita}”`, fuente: h.fuente });
+      }
+    }, destino.id);
   }
 
   const adelante = new THREE.Vector3();
@@ -167,6 +188,8 @@ export function iniciarPantallaSuperficie(ctx) {
       const enLab = Math.hypot(esc.posLaboratorio.x - jugador.pies.x, esc.posLaboratorio.z - jugador.pies.z) < CERCA + 0.6;
       const porAnalizar = sup.muestras.find((m) => m.estado === 'recogida');
       if (!accion && enLab && soyCientifico && porAnalizar) accion = { texto: 'Analizar muestra', fn: () => analizar(porAnalizar) };
+      const enPaneles = esc.posPaneles && Math.hypot(esc.posPaneles.x - jugador.pies.x, esc.posPaneles.z - jugador.pies.z) < CERCA + 0.8;
+      if (!accion && enPaneles && !panelesListos) accion = { texto: 'Limpiar los paneles del módulo', fn: limpiarPaneles };
       $('.aviso-e').style.display = accion && !consola ? 'block' : 'none';
       if (accion && !consola) {
         $('.aviso-e').innerHTML = `<span class="tecla">E</span> ${accion.texto}`;

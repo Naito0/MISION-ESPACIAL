@@ -77,6 +77,38 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .st-pulso { position: absolute; bottom: -9px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: #ff9fdc; box-shadow: 0 0 12px #ff9fdc; }
 #hud .st-cuenta { font-size: var(--t); color: #ffd166; font-weight: bold; }
 #hud .informe .ap-icono { font-size: 26px; }
+/* ---- Minijuegos v5: demo, motivo del fallo y piezas nuevas ---- */
+#hud .demo { padding: 20px 0; }
+#hud .demo-titulo { font-size: var(--th); color: #ffd166; font-weight: bold; }
+#hud .demo-teclas { margin: 12px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+#hud .demo-tecla { font-size: var(--tg); padding: 6px 12px; animation: latir-tecla 0.6s infinite alternate; }
+#hud .demo-cuenta { font-size: 56px; color: #7cf3ff; font-weight: bold; }
+@keyframes latir-tecla { from { transform: scale(1); } to { transform: scale(1.15); background: rgba(124, 243, 255, 0.3); } }
+#hud .consola-motivo { font-size: var(--t); color: #ffe9b0; background: #2a2208; border-radius: 10px; padding: 10px 12px; text-align: left; }
+#hud .interruptores, #hud .filtro, #hud .unidades, #hud .huerto { width: 100%; text-align: left; font-size: var(--tc); }
+#hud .int-estado { line-height: 1.9; }
+#hud .int-sis { display: inline-block; padding: 1px 8px; margin: 2px; border-radius: 8px; }
+#hud .int-sis.on { background: #1f4a3a; border: 1px solid #5be08a; }
+#hud .int-sis.off { background: #5a1f24; border: 1px solid #e5484d; }
+#hud .int-buses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+#hud .consola .int-bus { text-align: left; padding: 6px 8px; font-size: var(--tc); }
+#hud .int-bus small { display: block; color: #c0c8e0; }
+#hud .co2 { display: flex; gap: 8px; align-items: center; font-size: var(--t); }
+#hud .filtro-idea { color: #ffd166; }
+#hud .filtro-objetos { display: flex; flex-wrap: wrap; gap: 6px; }
+#hud .consola .f-obj { display: inline-block; width: auto; margin: 0; padding: 6px 12px; font-size: var(--tc); }
+#hud .consola .u-op, #hud .consola .h-planta { width: auto; flex: 1; margin: 0; }
+#hud .consola .f-obj.elegido { background: #6b4a1f; border-color: #ffd166; }
+#hud .filtro-pasos { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+#hud .consola .f-paso { text-align: left; font-size: var(--tc); background: #1a2342; }
+#hud .consola .f-paso.listo { background: #1f4a3a; }
+#hud .u-tabla { background: #111a33; border-radius: 8px; padding: 6px 10px; color: #ffd166; }
+#hud .u-orden { font-size: var(--t); }
+#hud .riel .zona { position: absolute; top: 2px; height: 24px; background: rgba(60, 196, 110, 0.4); border-radius: 6px; pointer-events: none; }
+#hud .consola .botones4 button.gris { opacity: 0.8; background: #888 !important; }
+/* Aterrizaje con alarmas */
+#hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
+#hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
 /* ---- Aprendizaje: tarjeta, diario y repaso ---- */
 #hud .tarjeta-aprendizaje { position: absolute; right: 12px; top: 64px; width: min(calc(380px * var(--ancho)), 40vw); padding: 12px 16px; border-color: #ffd166; border-width: 3px;
   box-shadow: 0 0 24px rgba(255, 209, 102, 0.5); animation: aparecer 0.4s; z-index: 4; font-size: var(--tc); }

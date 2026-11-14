@@ -67,6 +67,9 @@ export function crearTutorial(hud) {
 
   // Cada 0,25 s: ubica la flecha sobre lo que hay que mirar (la interfaz se redibuja seguido)
   setInterval(() => {
+    // Con una consola o una tarjeta abierta, Orbi se esconde para no tapar nada
+    caja.style.visibility = window.consolaAbierta ? 'hidden' : '';
+    flecha.style.visibility = window.consolaAbierta ? 'hidden' : '';
     const p = pasos[i];
     if (ocultarEn && performance.now() > ocultarEn) { ocultarEn = null; i++; mostrar(); }
     if (!activo || !p || !p.resaltar || caja.style.display === 'none') { flecha.style.display = 'none'; return; }
