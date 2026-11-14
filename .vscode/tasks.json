@@ -1,0 +1,20 @@
+{
+  // Terminal → Ejecutar tarea… → "Jugar (npm run dev)"
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Jugar (npm run dev)",
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Compilar (npm run build)",
+      "type": "npm",
+      "script": "build",
+      "problemMatcher": []
+    }
+  ]
+}

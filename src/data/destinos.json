@@ -1,0 +1,106 @@
+{
+  "_comentario": "Datos físicos tomados de las fichas técnicas de la NASA (NSSDC). El bloque 'juego' contiene valores de balance simplificados: se pueden cambiar sin tocar el código.",
+  "tierra": {
+    "id": "tierra",
+    "nombre": "Tierra",
+    "gravedad": 9.81,
+    "fuente": "NASA Earth Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html"
+  },
+  "destinos": [
+    {
+      "id": "luna",
+      "nombre": "Luna",
+      "color": "#c8c8c8",
+      "gravedad": 1.62,
+      "atmosfera": {
+        "tiene": false,
+        "presionSuperficieMbar": 0,
+        "descripcion": "Prácticamente no tiene atmósfera (solo una exosfera muy tenue)."
+      },
+      "temperatura": {
+        "minC": -173,
+        "maxC": 117,
+        "nota": "Rango aproximado en el ecuador lunar entre la noche y el día (100 K a 390 K)."
+      },
+      "distanciaTexto": "384 400 km de la Tierra (promedio)",
+      "fuente": "NASA Moon Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "juego": {
+        "aproximado": true,
+        "factorSolar": 1.0,
+        "factorComunicacion": 1.0,
+        "consumoCalefaccion": 8,
+        "requiereEscudoEntrada": false,
+        "rutas": {
+          "rapida": {
+            "nombre": "Ruta rápida (transferencia directa)",
+            "dias": 4,
+            "factorCombustible": 0.12,
+            "eventos": 2,
+            "descripcion": "Llega en pocos días, pero las maniobras gastan más combustible."
+          },
+          "lenta": {
+            "nombre": "Ruta lenta (baja energía)",
+            "dias": 90,
+            "factorCombustible": 0.06,
+            "eventos": 3,
+            "descripcion": "Aprovecha la gravedad del Sol y la Tierra: ahorra combustible, pero pasa más tiempo expuesta."
+          }
+        },
+        "aterrizaje": {
+          "altitudInicial": 500,
+          "velocidadVerticalInicial": 15,
+          "velocidadHorizontalMax": 6,
+          "frenadoAtmosferico": 0
+        }
+      }
+    },
+    {
+      "id": "marte",
+      "nombre": "Marte",
+      "color": "#d2693c",
+      "gravedad": 3.71,
+      "atmosfera": {
+        "tiene": true,
+        "presionSuperficieMbar": 6.36,
+        "descripcion": "Atmósfera muy delgada de CO2 (menos del 1% de la presión de la Tierra)."
+      },
+      "temperatura": {
+        "minC": -140,
+        "maxC": 20,
+        "nota": "Rango aproximado según lugar y estación; el promedio es cerca de -63 °C."
+      },
+      "distanciaTexto": "Entre 55 y 400 millones de km de la Tierra",
+      "fuente": "NASA Mars Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "juego": {
+        "aproximado": true,
+        "factorSolar": 0.43,
+        "factorComunicacion": 0.5,
+        "consumoCalefaccion": 6,
+        "requiereEscudoEntrada": true,
+        "rutas": {
+          "rapida": {
+            "nombre": "Ruta rápida",
+            "dias": 180,
+            "factorCombustible": 0.22,
+            "eventos": 2,
+            "descripcion": "Unos 6 meses de viaje. Necesita mucho más combustible para acelerar y frenar."
+          },
+          "lenta": {
+            "nombre": "Ruta lenta (transferencia de Hohmann)",
+            "dias": 260,
+            "factorCombustible": 0.13,
+            "eventos": 3,
+            "descripcion": "La ruta más económica en combustible (unos 8-9 meses), con más tiempo expuesta al espacio."
+          }
+        },
+        "aterrizaje": {
+          "altitudInicial": 1000,
+          "velocidadVerticalInicial": 50,
+          "velocidadHorizontalMax": 10,
+          "frenadoAtmosferico": 0.0004,
+          "_nota": "El descenso empieza después del paracaídas. frenadoAtmosferico es k en a = k·v² (frenado leve)."
+        }
+      }
+    }
+  ]
+}

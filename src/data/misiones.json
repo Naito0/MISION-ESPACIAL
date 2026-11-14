@@ -1,0 +1,47 @@
+{
+  "_comentario": "Misiones disponibles. presupuesto en M$ (incluye piezas + cohete). datosObjetivo: datos del instrumento requerido que deben llegar a la Tierra. factorSolar (opcional) reemplaza al del destino.",
+  "misiones": [
+    {
+      "id": "luna_hielo",
+      "destino": "luna",
+      "nombre": "Hielo en el polo sur lunar",
+      "objetivo": "Buscar hielo de agua dentro de los cráteres en sombra del polo sur.",
+      "instrumentoRequerido": "espectrometro",
+      "datosObjetivo": 60,
+      "presupuesto": 300,
+      "factorSolar": 0.5,
+      "notaSolar": "En el polo sur el Sol está muy bajo en el horizonte: los paneles rinden la mitad.",
+      "inspiradoEn": "Misiones reales de búsqueda de agua en el polo sur lunar (aproximado)."
+    },
+    {
+      "id": "luna_sismos",
+      "destino": "luna",
+      "nombre": "Sismos lunares",
+      "objetivo": "Registrar temblores para entender el interior de la Luna.",
+      "instrumentoRequerido": "sismometro",
+      "datosObjetivo": 40,
+      "presupuesto": 270,
+      "inspiradoEn": "Sismómetros dejados por las misiones Apolo (aproximado)."
+    },
+    {
+      "id": "marte_agua",
+      "destino": "marte",
+      "nombre": "Rastros de agua antigua",
+      "objetivo": "Perforar el suelo de un antiguo lago marciano en busca de minerales formados con agua.",
+      "instrumentoRequerido": "taladro",
+      "datosObjetivo": 50,
+      "presupuesto": 460,
+      "inspiradoEn": "Rovers de exploración de cráteres marcianos (aproximado)."
+    },
+    {
+      "id": "marte_clima",
+      "destino": "marte",
+      "nombre": "Clima marciano",
+      "objetivo": "Medir temperatura, presión y viento durante varios días marcianos.",
+      "instrumentoRequerido": "meteo",
+      "datosObjetivo": 40,
+      "presupuesto": 400,
+      "inspiradoEn": "Estaciones meteorológicas de los módulos de aterrizaje en Marte (aproximado)."
+    }
+  ]
+}

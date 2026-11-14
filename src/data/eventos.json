@@ -1,0 +1,73 @@
+{
+  "_comentario": "Eventos del viaje. 'mitigadoPor' es el efecto de pieza que evita el daño (ver 'efectos' de los escudos en piezas.json); null = no se puede evitar. Tipos de daño: combustible, paneles, bateria, antena (porcentaje que se pierde) e instrumento (uno deja de funcionar).",
+  "eventos": [
+    {
+      "id": "tormenta_solar",
+      "nombre": "Tormenta solar",
+      "probabilidad": 1,
+      "descripcion": "Una eyección de masa coronal lanza partículas de alta energía contra la nave.",
+      "mitigadoPor": "radiacion",
+      "textoMitigado": "El blindaje integral protegió las celdas solares y la electrónica.",
+      "textoDanio": "La radiación degradó las celdas de los paneles solares (-35% de energía).",
+      "danio": [{ "tipo": "paneles", "porcentaje": 35 }],
+      "explicacion": "Las partículas solares dañan celdas y circuitos. Un blindaje contra radiación agrega masa, pero protege el sistema de energía."
+    },
+    {
+      "id": "micrometeorito",
+      "nombre": "Lluvia de micrometeoritos",
+      "probabilidad": 1,
+      "descripcion": "Partículas del tamaño de un grano de arena viajan a decenas de km/s.",
+      "mitigadoPor": "impactos",
+      "textoMitigado": "El escudo de impactos desintegró las partículas.",
+      "textoDanio": "Un micrometeorito perforó el tanque: se perdió el 30% del combustible.",
+      "danio": [{ "tipo": "combustible", "porcentaje": 30 }],
+      "explicacion": "A esas velocidades, un grano de arena tiene la energía de una bala. Los escudos Whipple usan capas separadas para frenarlos."
+    },
+    {
+      "id": "frio_extremo",
+      "nombre": "Frío extremo",
+      "probabilidad": 1,
+      "descripcion": "La nave queda a la sombra durante horas y la temperatura cae por debajo de -150 °C.",
+      "mitigadoPor": "aislamiento",
+      "textoMitigado": "El aislamiento térmico mantuvo calientes los instrumentos.",
+      "textoDanio": "Un instrumento se congeló y quedó fuera de servicio.",
+      "danio": [{ "tipo": "instrumento" }],
+      "explicacion": "La electrónica deja de funcionar si se enfría demasiado. Las mantas térmicas multicapa reducen la pérdida de calor."
+    },
+    {
+      "id": "correccion_trayectoria",
+      "nombre": "Corrección de trayectoria",
+      "probabilidad": 0.7,
+      "descripcion": "La navegación detecta un pequeño desvío y hay que encender el motor.",
+      "mitigadoPor": null,
+      "textoMitigado": "",
+      "textoDanio": "La maniobra de corrección gastó el 10% del combustible.",
+      "danio": [{ "tipo": "combustible", "porcentaje": 10 }],
+      "explicacion": "Las correcciones de rumbo son normales en todo viaje espacial; por eso las misiones llevan combustible de reserva."
+    },
+    {
+      "id": "falla_comunicaciones",
+      "nombre": "Descarga electrostática",
+      "probabilidad": 0.6,
+      "descripcion": "Se acumula carga eléctrica en el casco y se produce una descarga cerca de la antena.",
+      "mitigadoPor": "radiacion",
+      "textoMitigado": "El blindaje integral desvió la descarga.",
+      "textoDanio": "El amplificador de la antena se dañó: transmitirá un 40% menos de datos.",
+      "danio": [{ "tipo": "antena", "porcentaje": 40 }],
+      "explicacion": "El entorno espacial carga eléctricamente la nave. El blindaje y una buena conexión a tierra eléctrica protegen las comunicaciones."
+    }
+  ],
+  "eventosFijos": [
+    {
+      "id": "entrada_atmosferica",
+      "nombre": "Entrada en la atmósfera de Marte",
+      "soloEn": ["marte"],
+      "descripcion": "La nave entra a unos 20 000 km/h y el roce con la atmósfera la calienta a más de 1000 °C.",
+      "mitigadoPor": "entradaAtmosferica",
+      "textoMitigado": "El escudo térmico absorbió el calor y la nave llegó intacta al paracaídas.",
+      "textoDanio": "Sin escudo térmico, el calor quemó la mitad de los paneles y dañó el tanque (-25% de combustible).",
+      "danio": [{ "tipo": "paneles", "porcentaje": 50 }, { "tipo": "combustible", "porcentaje": 25 }],
+      "explicacion": "Toda nave que aterriza en Marte necesita un escudo térmico: aunque la atmósfera es delgada, la velocidad de entrada es enorme."
+    }
+  ]
+}

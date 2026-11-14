@@ -1,0 +1,119 @@
+{
+  "_comentario": "Valores simplificados para balancear el juego. costo en millones de dólares (M$), masa en kg, empuje en newtons (N), consumo en kg/s, energía en unidades por turno (E). 'aproximado': inspirado en órdenes de magnitud reales.",
+  "naveBase": {
+    "nombre": "Estructura y computadora de vuelo",
+    "costo": 50,
+    "masa": 300,
+    "consumoPorTurno": 10,
+    "bateriaInterna": 20,
+    "memoriaDatos": 200,
+    "aproximado": true
+  },
+  "categorias": [
+    {
+      "id": "motor",
+      "nombre": "Motor",
+      "multiple": false,
+      "opciones": [
+        { "id": "motor_chico", "nombre": "Motor pequeño", "costo": 20, "masa": 60, "empuje": 3000, "consumo": 1.2, "aproximado": true,
+          "efecto": "Ligero y barato. Alcanza en la Luna, pero en Marte apenas supera el peso de una nave liviana." },
+        { "id": "motor_medio", "nombre": "Motor mediano", "costo": 40, "masa": 120, "empuje": 6000, "consumo": 2.2, "aproximado": true,
+          "efecto": "Equilibrado. Buen empuje para aterrizar en Marte con una nave mediana." },
+        { "id": "motor_grande", "nombre": "Motor grande", "costo": 70, "masa": 200, "empuje": 11000, "consumo": 4.0, "aproximado": true,
+          "efecto": "Mucho empuje, pero pesa y gasta combustible muy rápido." }
+      ]
+    },
+    {
+      "id": "tanque",
+      "nombre": "Tanque",
+      "multiple": false,
+      "opciones": [
+        { "id": "tanque_chico", "nombre": "Tanque pequeño", "costo": 10, "masa": 30, "capacidad": 150, "aproximado": true,
+          "efecto": "150 kg de combustible. Poca reserva para el viaje y el aterrizaje." },
+        { "id": "tanque_medio", "nombre": "Tanque mediano", "costo": 20, "masa": 50, "capacidad": 300, "aproximado": true,
+          "efecto": "300 kg de combustible. Suficiente para la mayoría de las misiones." },
+        { "id": "tanque_grande", "nombre": "Tanque grande", "costo": 35, "masa": 80, "capacidad": 550, "aproximado": true,
+          "efecto": "550 kg de combustible. Mucha reserva, pero la nave pesa mucho más." }
+      ]
+    },
+    {
+      "id": "escudo",
+      "nombre": "Escudo",
+      "multiple": false,
+      "opciones": [
+        { "id": "escudo_ninguno", "nombre": "Sin escudo", "costo": 0, "masa": 0, "efectos": [],
+          "efecto": "Sin protección. Cualquier evento del viaje puede causar daño." },
+        { "id": "escudo_manta", "nombre": "Manta térmica", "costo": 5, "masa": 20, "efectos": ["aislamiento"], "aproximado": true,
+          "efecto": "Aislamiento multicapa: protege del frío extremo y reduce la calefacción en la superficie." },
+        { "id": "escudo_ablativo", "nombre": "Escudo térmico", "costo": 15, "masa": 80, "efectos": ["aislamiento", "entradaAtmosferica"], "aproximado": true,
+          "efecto": "Escudo ablativo: indispensable para entrar en la atmósfera de Marte. También aísla del frío." },
+        { "id": "escudo_whipple", "nombre": "Escudo Whipple", "costo": 12, "masa": 60, "efectos": ["impactos"], "aproximado": true,
+          "efecto": "Capas separadas que desintegran micrometeoritos antes de que lleguen al tanque." },
+        { "id": "escudo_integral", "nombre": "Blindaje integral", "costo": 40, "masa": 170, "efectos": ["aislamiento", "entradaAtmosferica", "impactos", "radiacion"], "aproximado": true,
+          "efecto": "Protege de todo (frío, entrada, impactos y radiación), pero es caro y muy pesado." }
+      ]
+    },
+    {
+      "id": "paneles",
+      "nombre": "Paneles",
+      "multiple": false,
+      "opciones": [
+        { "id": "paneles_ninguno", "nombre": "Sin paneles", "costo": 0, "masa": 0, "energia": 0,
+          "efecto": "Sin generación: solo tendrás la energía guardada en la batería." },
+        { "id": "paneles_chicos", "nombre": "Paneles chicos", "costo": 10, "masa": 20, "energia": 30, "aproximado": true,
+          "efecto": "+30 E por turno con sol pleno (menos en Marte o en los polos)." },
+        { "id": "paneles_medios", "nombre": "Paneles medianos", "costo": 20, "masa": 40, "energia": 60, "aproximado": true,
+          "efecto": "+60 E por turno con sol pleno." },
+        { "id": "paneles_grandes", "nombre": "Paneles grandes", "costo": 35, "masa": 70, "energia": 100, "aproximado": true,
+          "efecto": "+100 E por turno con sol pleno. Ideales para Marte, donde llega menos luz." }
+      ]
+    },
+    {
+      "id": "bateria",
+      "nombre": "Batería",
+      "multiple": false,
+      "opciones": [
+        { "id": "bateria_ninguna", "nombre": "Sin batería", "costo": 0, "masa": 0, "capacidad": 0,
+          "efecto": "Solo la batería interna de la computadora (20 E)." },
+        { "id": "bateria_chica", "nombre": "Batería chica", "costo": 8, "masa": 20, "capacidad": 60, "aproximado": true,
+          "efecto": "+60 E de almacenamiento." },
+        { "id": "bateria_media", "nombre": "Batería mediana", "costo": 15, "masa": 40, "capacidad": 120, "aproximado": true,
+          "efecto": "+120 E de almacenamiento." },
+        { "id": "bateria_grande", "nombre": "Batería grande", "costo": 28, "masa": 75, "capacidad": 250, "aproximado": true,
+          "efecto": "+250 E de almacenamiento. Permite usar varios instrumentos en el mismo turno." }
+      ]
+    },
+    {
+      "id": "antena",
+      "nombre": "Antena",
+      "multiple": false,
+      "opciones": [
+        { "id": "antena_baja", "nombre": "Antena de baja ganancia", "costo": 5, "masa": 5, "tasa": 10, "energia": -5, "aproximado": true,
+          "efecto": "Envía 10 datos por transmisión (la mitad desde Marte). Gasta 5 E." },
+        { "id": "antena_media", "nombre": "Antena de media ganancia", "costo": 15, "masa": 15, "tasa": 25, "energia": -10, "aproximado": true,
+          "efecto": "Envía 25 datos por transmisión (la mitad desde Marte). Gasta 10 E." },
+        { "id": "antena_alta", "nombre": "Antena de alta ganancia", "costo": 35, "masa": 35, "tasa": 60, "energia": -20, "aproximado": true,
+          "efecto": "Envía 60 datos por transmisión (la mitad desde Marte). Gasta 20 E." }
+      ]
+    },
+    {
+      "id": "instrumentos",
+      "nombre": "Instrumentos",
+      "multiple": true,
+      "opciones": [
+        { "id": "camara", "nombre": "Cámara", "costo": 10, "masa": 8, "datos": 15, "energia": -5, "aproximado": true,
+          "efecto": "Fotografía el terreno. 15 datos por uso, gasta 5 E." },
+        { "id": "espectrometro", "nombre": "Espectrómetro", "costo": 30, "masa": 25, "datos": 20, "energia": -15, "aproximado": true,
+          "efecto": "Detecta la composición química (por ejemplo, hielo de agua). 20 datos por uso, gasta 15 E." },
+        { "id": "sismometro", "nombre": "Sismómetro", "costo": 25, "masa": 20, "datos": 10, "energia": -8, "aproximado": true,
+          "efecto": "Mide temblores para estudiar el interior. 10 datos por uso, gasta 8 E." },
+        { "id": "taladro", "nombre": "Taladro de muestras", "costo": 40, "masa": 50, "datos": 25, "energia": -30, "aproximado": true,
+          "efecto": "Perfora y analiza el subsuelo. 25 datos por uso, gasta 30 E." },
+        { "id": "meteo", "nombre": "Estación meteorológica", "costo": 15, "masa": 10, "datos": 10, "energia": -5, "aproximado": true,
+          "efecto": "Mide temperatura, presión y viento. 10 datos por uso, gasta 5 E." },
+        { "id": "radiacion", "nombre": "Detector de radiación", "costo": 20, "masa": 15, "datos": 12, "energia": -10, "aproximado": true,
+          "efecto": "Mide la radiación en la superficie (clave para futuras misiones humanas). 12 datos por uso, gasta 10 E." }
+      ]
+    }
+  ]
+}

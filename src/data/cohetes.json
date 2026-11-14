@@ -1,0 +1,11 @@
+{
+  "_comentario": "Cohetes ficticios. La capacidad es la masa máxima (kg) que pueden enviar hacia cada destino. Valores aproximados y reducidos para el balance del juego.",
+  "cohetes": [
+    { "id": "ligero", "nombre": "Cohete ligero", "costo": 60, "capacidad": { "luna": 700, "marte": 400 }, "aproximado": true,
+      "descripcion": "Barato, pero solo lleva naves pequeñas." },
+    { "id": "medio", "nombre": "Cohete mediano", "costo": 110, "capacidad": { "luna": 1300, "marte": 800 }, "aproximado": true,
+      "descripcion": "La opción más común para sondas medianas." },
+    { "id": "pesado", "nombre": "Cohete pesado", "costo": 180, "capacidad": { "luna": 2500, "marte": 1600 }, "aproximado": true,
+      "descripcion": "Lleva naves grandes a Marte, pero consume buena parte del presupuesto." }
+  ]
+}

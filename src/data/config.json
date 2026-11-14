@@ -1,0 +1,29 @@
+{
+  "_comentario": "Balance general del juego: umbrales de aterrizaje, reglas de la operación y puntaje. Se puede cambiar sin tocar el código.",
+  "aterrizaje": {
+    "velocidadMaxVertical": 4,
+    "velocidadMaxHorizontal": 3,
+    "anguloMaxGrados": 15,
+    "velocidadRotacionGrados": 90,
+    "escalaTiempo": 1
+  },
+  "operacion": {
+    "turnos": 8,
+    "reduccionCalefaccionConAislamiento": 0.5,
+    "transmisionesPorTurno": 1
+  },
+  "puntaje": {
+    "porDato": 5,
+    "multiplicadorInstrumentoObjetivo": 2,
+    "bonusObjetivoCumplido": 500,
+    "bonusAterrizaje": 300,
+    "bonusPrecisionAterrizaje": 200,
+    "porMillonSobrante": 3,
+    "porKgCombustibleRestante": 1,
+    "penalizacionTurnoSinEnergia": 40
+  },
+  "records": {
+    "claveLocalStorage": "misionEspacial.records",
+    "cantidadGuardada": 5
+  }
+}

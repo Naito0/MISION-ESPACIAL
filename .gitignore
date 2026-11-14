@@ -1,0 +1,20 @@
+# Dependencias (se instalan con npm install)
+node_modules/
+
+# Compilación (la genera npm run build / GitHub Actions)
+dist/
+
+# Registros y archivos temporales
+npm-debug.log*
+*.log
+.vite/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+# De .vscode solo se comparte la configuración del equipo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/settings.json
+.idea/

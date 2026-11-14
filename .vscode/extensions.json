@@ -1,0 +1,12 @@
+{
+  // VS Code ofrece instalar estas extensiones al abrir el proyecto.
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker-spanish"
+  ],
+  // Live Server NO sirve para este proyecto: hay que usar "npm run dev" (Vite).
+  "unwantedRecommendations": ["ritwickdey.liveserver"]
+}
