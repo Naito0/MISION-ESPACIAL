@@ -22,6 +22,19 @@ import { botonAyuda, crearTooltip, conTooltip } from '../ui/ayuda.js';
 import { ANCHO, ALTO, COLORES, texto, titulo, panel, boton, ventana, barraFases } from '../ui/ui.js';
 import { monedas, pesoSimple, etiquetasSimples } from '../ui/textosSimples.js';
 import { esModoExperto } from '../systems/preferencias.js';
+import { fraseRecurso } from '../ui/textosSimples.js';
+import { crearOrbi } from '../ui/orbi.js';
+import { iniciarTutorial } from '../ui/tutorial.js';
+import { obtenerProgreso, marcar } from '../systems/progreso.js';
+
+// Tutorial de la primera misión: Orbi explica lo básico en pocas frases
+const PASOS_TUTORIAL = [
+  { texto: '¡Hola! Soy Orbi 🤖. Vamos a armar tu primera nave: un CubeSat.', emocion: 'feliz' },
+  { texto: 'Elige unos paneles solares: arrástralos hasta la nave (o haz clic).', emocion: 'feliz', esperar: 'piezaColocada' },
+  { texto: '¡Encajó! A la derecha ves si te alcanzan las monedas 🪙 y la energía ⚡.', emocion: 'feliz' },
+  { texto: 'Si algo se pone rojo, pasa el mouse por encima y te digo cómo arreglarlo.', emocion: 'neutral' },
+  { texto: 'Cuando la nave esté lista, toca «Diseño puntual ▶». ¡Tú puedes!', emocion: 'feliz' }
+];
 
 const X_CARTA = [385, 705];
 const Y_CARTA = 178;
@@ -105,6 +118,33 @@ export default class EscenaDiseno extends Phaser.Scene {
 
     // Si el jugador cambia a modo experto (o vuelve al simple), se redibujan las piezas y el panel
     this.events.on('modoExperto', () => this.mostrarCategoria(this.categoriaActual));
+
+    // ---- Orbi, el robot guía ----
+    this.orbi = crearOrbi(this, 262, 538, { escala: 0.75 });
+    this.tutorialActivo = false;
+    if (!obtenerProgreso().tutorialVisto && misionActual().id === 'cubesat_tierra') {
+      this.tutorialActivo = true;
+      iniciarTutorial(this, this.orbi, PASOS_TUTORIAL, () => {
+        this.tutorialActivo = false;
+        marcar('tutorialVisto', true);
+      });
+    } else {
+      this.time.delayedCall(400, () => this.orbi.decir('¡A armar la nave! Si algo se pone rojo, te ayudo.', 'feliz'));
+    }
+  }
+
+  /** Orbi reacciona a la pieza elegida: se preocupa si algo se pone rojo y festeja si se arregla. */
+  reaccionarOrbi(antes, ahora) {
+    if (this.tutorialActivo) return;
+    const principales = ['presupuesto', 'masa', 'energia', 'datos', 'comunicaciones', 'soporte'];
+    const nivelAntes = Object.fromEntries(antes.barras.map((b) => [b.id, b.nivel]));
+    const empeoro = ahora.barras.find((b) => principales.includes(b.id) && b.nivel === 'rojo' && nivelAntes[b.id] !== 'rojo');
+    const mejoro = ahora.barras.find((b) => principales.includes(b.id) && b.nivel !== 'rojo' && nivelAntes[b.id] === 'rojo');
+    const checklist = generarChecklist(ahora, misionActual(), estado.presupuesto);
+    if (empeoro) this.orbi.decir(`¡Uy! ${fraseRecurso(empeoro).frase}`, 'preocupado');
+    else if (mejoro) this.orbi.decir(`¡Bien! ${fraseRecurso(mejoro).frase}`, 'feliz');
+    else if (checklist.every((i) => i.ok)) this.orbi.decir('¡Tu nave cumple todo! Ya puedes seguir. 🚀', 'feliz');
+    else this.orbi.emocion('neutral');
   }
 
   /** La primera vez, elige la opción más simple de cada categoría obligatoria. */
@@ -217,6 +257,8 @@ export default class EscenaDiseno extends Phaser.Scene {
     anularAprobaciones(); // cualquier cambio obliga a volver a aprobar
     const ahora = this.actualizar();
     this.panelRecursos.mostrarCambios(antes, ahora); // textos flotantes: "+0.5 kg", "−2 W"...
+    this.reaccionarOrbi(antes, ahora);
+    this.events.emit('tutorial', 'piezaColocada'); // avisa al tutorial (si está activo)
   }
 
   /** Recalcula todo y refresca la pantalla. Devuelve el análisis actual. */

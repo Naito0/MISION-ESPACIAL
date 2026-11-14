@@ -7,6 +7,7 @@ import { nuevaPartida } from '../systems/estadoMision.js';
 import { asignarRoles } from '../systems/roles.js';
 import { cargarRecords } from '../systems/almacenamiento.js';
 import { ANCHO, COLORES, texto, panel, boton, estrellas } from '../ui/ui.js';
+import { crearOrbi } from '../ui/orbi.js';
 
 export default class EscenaInicio extends Phaser.Scene {
   constructor() {
@@ -62,6 +63,10 @@ export default class EscenaInicio extends Phaser.Scene {
 
     this.elegirModo(opcionesModo[0], 0);
     this.elegirNivel('1');
+
+    // Orbi saluda
+    const orbi = crearOrbi(this, 930, 585, { escala: 0.8, lado: 'izquierda' });
+    this.time.delayedCall(500, () => orbi.decir('¡Hola! Soy Orbi 🤖. Elige un modo y un nivel, ¡y a volar!', 'feliz', { ms: 6000 }));
   }
 
   elegirModo(o, indice) {

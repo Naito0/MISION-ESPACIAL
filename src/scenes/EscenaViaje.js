@@ -19,6 +19,7 @@ import { iniciarMinijuego } from '../minijuegos/index.js';
 import { crearFondoParalaje } from '../efectos/paralaje.js';
 import { estallido } from '../efectos/particulas.js';
 import { crearDibujoNave } from '../ui/dibujoNave.js';
+import { crearOrbi } from '../ui/orbi.js';
 import { ANCHO, ALTO, COLORES, texto, titulo, barra, ventana, barraFases } from '../ui/ui.js';
 
 const NAVE = { x: 560, y: 340 };
@@ -78,6 +79,10 @@ export default class EscenaViaje extends Phaser.Scene {
     this.reaccion = null;  // avería esperando que el jugador haga clic en la pieza
     this.duracionTotal = CONFIG.viaje.msPorTramo * (this.averias.length + 1);
     this.actualizarEstado();
+
+    // Orbi acompaña el viaje
+    this.orbi = crearOrbi(this, 90, 560, { escala: 0.7 });
+    this.time.delayedCall(300, () => this.orbi.decir('¡Rumbo al destino! Atento a las averías 👀', 'feliz', { ms: 3000 }));
   }
 
   update(_t, delta) {
@@ -139,6 +144,7 @@ export default class EscenaViaje extends Phaser.Scene {
     this.mensaje.setColor(COLORES.bien).setText(`🛡️ ${a.nombre}: bloqueado.\n${a.textoMitigado}`);
     estado.viaje = registrarAveria(estado.viaje, a, 'mitigada');
     this.marcasAverias[this.indice - 1].setFillStyle(0x3cc46e);
+    this.orbi.decir('¡El escudo funcionó! Por eso conviene llevar protección.', 'feliz', { ms: 2800 });
     this.time.delayedCall(2900, () => { this.mensaje.setText(''); this.pausado = false; });
   }
 
@@ -194,6 +200,7 @@ export default class EscenaViaje extends Phaser.Scene {
       obj.on('pointerdown', reparar);
     });
     this.reaccion = { averia: a, reparar };
+    this.orbi.decir('¡Una avería! Haz clic en la pieza que parpadea.', 'sorprendido', { ms: 3500 });
   }
 
   resultadoReparacion(a, exito, sinReaccion = false) {
@@ -201,6 +208,7 @@ export default class EscenaViaje extends Phaser.Scene {
     estado.viaje = registrarAveria(estado.viaje, a, exito ? 'reparada' : 'fallida');
     this.marcasAverias[this.indice - 1].setFillStyle(exito ? 0x3cc46e : 0xe5484d);
     this.actualizarEstado();
+    this.orbi.emocion(exito ? 'feliz' : 'preocupado');
     ventana(this, {
       tituloTexto: exito ? '¡Reparado!' : sinReaccion ? '¡No llegaste a tiempo!' : 'No se pudo reparar a tiempo',
       cuerpo: `${exito ? a.textoReparado : a.textoDanio}\n\n${a.explicacion}`,

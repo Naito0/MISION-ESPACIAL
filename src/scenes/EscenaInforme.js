@@ -12,6 +12,7 @@ import { evaluarRequisitos, calcularPuntaje } from '../systems/puntaje.js';
 import { generarExplicaciones, misionesParecidas } from '../systems/informe.js';
 import { guardarRecord } from '../systems/almacenamiento.js';
 import { ANCHO, COLORES, texto, titulo, panel, boton, barra, estrellas, barraFases } from '../ui/ui.js';
+import { crearOrbi } from '../ui/orbi.js';
 
 const X_EXPL = 460;
 const Y_EXPL = 128;
@@ -72,6 +73,12 @@ export default class EscenaInforme extends Phaser.Scene {
     });
 
     // ---- Botones ----
+    // Orbi comenta el resultado
+    const orbi = crearOrbi(this, 395, 625, { escala: 0.65, lado: 'izquierda' });
+    this.time.delayedCall(500, () => orbi.decir(
+      exito ? '¡Lo lograste! Mira qué decisiones funcionaron 🎉' : 'No salió perfecto, ¡pero ahora sabemos qué cambiar!',
+      exito ? 'feliz' : 'preocupado', { ms: 6000 }));
+
     boton(this, 150, 692, 260, 44, 'Rediseñar la nave ↺', () => { nuevoIntento(); this.scene.start('Diseno'); }, { tam: 17 });
     boton(this, 450, 692, 220, 44, 'Otra misión', () => this.scene.start('Mision'), { tam: 16 });
     boton(this, 680, 692, 160, 44, 'Inicio', () => this.scene.start('Inicio'), { tam: 16 });

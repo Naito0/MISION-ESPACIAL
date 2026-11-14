@@ -13,6 +13,7 @@ import {
 import { verificarCohete, calcularInsercion } from '../systems/lanzamiento.js';
 import { guardarDiseno } from '../systems/almacenamiento.js';
 import { esModoExperto } from '../systems/preferencias.js';
+import { crearOrbi } from '../ui/orbi.js';
 import { fraseRecurso } from '../ui/textosSimples.js';
 import { COLORES, texto, titulo, panel, boton, estrellas, barraFases } from '../ui/ui.js';
 
@@ -87,6 +88,14 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
 
     this.actualizar();
     this.events.on('modoExperto', () => this.actualizar()); // al cambiar de modo se reescribe el resumen
+
+    // Orbi: avisa si algo impide lanzar o festeja si está todo listo
+    this.orbi = crearOrbi(this, 395, 585, { escala: 0.65, lado: 'izquierda' });
+    this.time.delayedCall(400, () => {
+      const r = this.revisar(analizarDiseno());
+      if (r.bloqueos.length) this.orbi.decir(`Antes de lanzar: ${r.bloqueos[0]}`, 'preocupado', { ancho: 280 });
+      else this.orbi.decir('¡Todo listo! Elige órbita y cohete, y a despegar 🚀', 'feliz');
+    });
     const o = this.orbitas.find((x) => x.id === estado.orbitaId);
     if (o) this.textoExplicacion.setText(`${o.nombre}: ${o.explicacion}`);
   }

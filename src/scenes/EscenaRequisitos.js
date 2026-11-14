@@ -10,6 +10,7 @@ import { compatibilidadInstrumento } from '../systems/recursos.js';
 import { generarChecklist } from '../systems/checklist.js';
 import { crearChecklist } from '../ui/checklistUI.js';
 import { botonAyuda, crearTooltip } from '../ui/ayuda.js';
+import { crearOrbi } from '../ui/orbi.js';
 import { ANCHO, COLORES, texto, titulo, boton, estrellas, barraFases } from '../ui/ui.js';
 
 export default class EscenaRequisitos extends Phaser.Scene {
@@ -38,6 +39,10 @@ export default class EscenaRequisitos extends Phaser.Scene {
     // Detalle (instrumentos útiles, órbitas, etc.) detrás del botón "?"
     texto(this, ANCHO / 2 - 10, yInfo + 40, '¿Qué instrumentos sirven?', { tam: 15, origen: [1, 0.5], color: COLORES.acento });
     botonAyuda(this, ANCHO / 2 + 10, yInfo + 40, 'Instrumentos y detalles de la misión', () => this.textoDetalle(m));
+
+    // Orbi explica la pantalla en una frase
+    const orbi = crearOrbi(this, 300, 610, { escala: 0.7 });
+    this.time.delayedCall(400, () => orbi.decir('Estas son las metas de tu misión. ¡Se ponen verdes solas cuando las cumples!', 'feliz', { ms: 6000 }));
 
     boton(this, 110, 680, 180, 44, '◀ Concepto', () => this.scene.start('Mision'), { tam: 16 });
     boton(this, ANCHO - 190, 680, 320, 50, 'Diseñar la nave ▶', () => this.scene.start('Diseno'), { tam: 18 });

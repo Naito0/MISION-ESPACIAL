@@ -66,9 +66,7 @@ export function crearDibujoNave(escena, x, y) {
     const pan = de('paneles');
     if (pan) {
       if (pan.id === 'cs_pan_cuerpo') {
-        for (let i = 0; i < 3; i++) {
-          partes.paneles.push(agregar(`panel_${i}`, escena.add.rectangle(0, arriba + 14 + i * 24, ancho - 8, 16, C.panel).setStrokeStyle(1, C.rejilla)));
-        }
+        // Los paneles pegados al cuerpo se dibujan después del casco (más abajo)
       } else {
         const largo = cubesat ? 55 : 30 + 28 * Math.log2(1 + pan.energia / 60);
         const altoAla = alto * 0.55;
@@ -92,6 +90,12 @@ export function crearDibujoNave(escena, x, y) {
     const cuerpo = escena.add.rectangle(0, 0, ancho, alto, aislado ? C.manta : C.casco)
       .setStrokeStyle(blindado ? 6 : 2, blindado ? C.blindaje : 0x8a8f9c);
     partes.casco = agregar(`casco_${est ? est.id : 'x'}_${aislado}`, cuerpo);
+    if (pan && pan.id === 'cs_pan_cuerpo') {
+      // Celdas solares pegadas a los lados del CubeSat (encima del casco)
+      for (let i = 0; i < 3; i++) {
+        partes.paneles.push(agregar(`panel_${i}`, escena.add.rectangle(0, arriba + 14 + i * 24, ancho - 8, 16, C.panel).setStrokeStyle(1, C.rejilla)));
+      }
+    }
     if (cubesat) {
       // Líneas que marcan las "unidades" (U) del CubeSat
       const unidades = Math.round(alto / 27);
