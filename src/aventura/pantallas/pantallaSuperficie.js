@@ -44,6 +44,7 @@ export function iniciarPantallaSuperficie(ctx) {
   esc.puntoInicio = new THREE.Vector3(-1.5 + indice * 1.2, 0.05, 4.5);
   const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDeJugador(yo));
   ambiente(true);
+  ctx.aprendizaje?.evento('superficie:llegada', destino.id); // en Marte: tormentas de polvo
 
   // ---- Muestras (cristales que brillan) ----
   const mallas = e0.superficie.muestras.map((m) => {
@@ -102,7 +103,10 @@ export function iniciarPantallaSuperficie(ctx) {
     if (e.fase !== 'superficie') { ctx.irA('juego'); return; }
     sup = e.superficie;
     if (sup.muestras.some((m) => m.estado !== 'suelo')) ctx.tutorial?.evento('recogida');
-    if (sup.muestras.some((m) => m.estado === 'analizada')) ctx.tutorial?.evento('analizada');
+    if (sup.muestras.some((m) => m.estado === 'analizada')) {
+      ctx.tutorial?.evento('analizada');
+      ctx.aprendizaje?.evento('superficie:analizada', destino.id);
+    }
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
@@ -134,6 +138,8 @@ export function iniciarPantallaSuperficie(ctx) {
     escena, esc, jugador, remotos, mundo,
     actualizar(dt, t) {
       const entrada = jugador.actualizar(dt);
+      // Un salto alto (gravedad baja) enseña el concepto del salto
+      if (jugador.pies.y > 1.2) ctx.aprendizaje?.evento('superficie:salto', destino.id);
       // Enviar mi posición unas 15 veces por segundo
       tiempoEnvio += dt;
       if (tiempoEnvio > 1 / 15) { tiempoEnvio = 0; conexion.enviarPosicion(jugador.estadoRed()); }

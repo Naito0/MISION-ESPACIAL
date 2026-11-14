@@ -60,7 +60,8 @@ export function crearConexionLocal() {
   const PERIODO = 1000 / 15;
   setInterval(() => {
     if (!sala) return;
-    sala.tick(PERIODO / 1000);
+    // Con el menú o el diario abiertos, el tiempo de la misión se detiene
+    if (!window.juegoPausado) sala.tick(PERIODO / 1000);
     if (sala.version !== version) { version = sala.version; c._emitirEstado(sala.estadoPublico()); }
     c._emitirPos(sala.posicionesPublicas());
   }, PERIODO);

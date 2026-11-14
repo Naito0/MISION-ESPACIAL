@@ -311,6 +311,9 @@ export class Sala {
     }, this.datos);
     this.informe.id = `${this.codigo}-${this.version}`; // para que el anfitrión lo guarde una sola vez
     this.informe.destinoId = this.destinoId;
+    this.informe.muestras = this.muestras || 0;
+    this.informe.aterrizaje = this.aterrizaje || null;
+    this.informe.diseno = { ...this.diseno };
     this.fase = 'informe';
     this.cambio('📋 Informe de la misión');
   }

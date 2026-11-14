@@ -200,6 +200,9 @@ export function iniciarPantallaNave(ctx) {
     }
   }
 
+  // Las tarjetas "¿Qué aprendiste?" nunca aparecen durante una emergencia
+  ctx.aprendizaje?.alPoderMostrar(() => !consola && !(viaje && viaje.emergencias.length && !final));
+
   const adelante = new THREE.Vector3();
   const derecha = new THREE.Vector3();
   const mirarA = new THREE.Vector3();
@@ -303,6 +306,7 @@ export function iniciarPantallaNave(ctx) {
     salir() {
       if (consola) consola.cerrar();
       window.removeEventListener('keydown', teclaCambio);
+      ctx.aprendizaje?.alPoderMostrar(null);
       hud.remove(); ambiente(false); quitarEstado();
     }
   };

@@ -12,6 +12,8 @@ import { nuevoEscenario } from '../engine/construccion.js';
 import { NaveModelo } from '../entities/naveModelo.js';
 import { DESTINOS } from '../datos3d.js';
 import { efecto } from '../audio.js';
+import { CONCEPTOS, PREGUNTAS } from '../aprendizaje.js';
+import { resumenAprendizaje } from '../../compartido/resumenAprendizaje.js';
 
 const CLAVE = 'misionEspacial.progreso3d';
 
@@ -79,6 +81,13 @@ export function iniciarPantallaInforme(ctx) {
   const progreso = soyAnfitrion ? guardarInforme(inf) : null;
   // La primera misión a la Luna era el tutorial: queda marcado como hecho
   if (e.destinoId === 'luna' && ctx.tutorial?.activo) ctx.tutorial.terminar();
+  // Resumen de aprendizaje: 3 a 5 conceptos conectados con lo que pasó en esta partida
+  const resumen = resumenAprendizaje({
+    destino, informe: inf, diseno: inf.diseno || e.diseno || {}, aterrizaje: inf.aterrizaje, muestras: inf.muestras || 0,
+    registro: e.viaje ? e.viaje.registro : []
+  }, CONCEPTOS);
+  // 2 preguntas de repaso al azar
+  const preguntas = [...PREGUNTAS].sort(() => Math.random() - 0.5).slice(0, 2);
   const ui = document.createElement('div');
   ui.className = 'panel informe';
   const estrellas = '⭐'.repeat(inf.estrellas) + '☆'.repeat(3 - inf.estrellas);
@@ -91,14 +100,32 @@ export function iniciarPantallaInforme(ctx) {
       <div><span>Vida de la nave</span><b>${inf.vida}</b></div>
       <div><span>Emergencias</span><b>✅ ${inf.resueltas} · ❌ ${inf.fallidas}</b></div>
     </div>
+    <h3>💡 Lo que aprendiste en esta misión</h3>
+    <ul class="causas aprendido">${resumen.map((f) => `<li class="bien"><b>${f.titulo}:</b> ${f.texto}<br><small>🚀 ${f.dato}</small></li>`).join('')}</ul>
     <h3>Causas y efectos</h3>
     <ul class="causas">${inf.causas.map((c) => `<li class="${c.tipo}"><b>${c.tipo === 'bien' ? '👍' : '⚠'} ${c.causa}</b> → ${c.efecto}</li>`).join('') || '<li>Viaje tranquilo, sin sorpresas.</li>'}</ul>
     ${inf.mision ? `<h3>🚀 Una misión real parecida</h3>
       <div class="mision-real"><b>${inf.mision.nombre}</b> (${inf.mision.lanzamiento}) · ${inf.mision.tipo}<br>${inf.mision.descripcion}<br>
       <small>Fuente: <a href="${inf.mision.fuente}" target="_blank" rel="noopener">${inf.mision.fuente}</a></small></div>` : ''}
-    ${progreso ? `<p class="progreso">Créditos acumulados de la tripulación: <b>${progreso.creditos}</b> · misiones: ${progreso.misiones.length} · mejor puntaje: ${progreso.mejorPuntaje}</p>` : ''}
+    <h3>❓ Repaso rápido</h3>
+    <div class="repaso">${preguntas.map((p, i) => `<div class="pregunta" data-q="${i}"><p><b>${p.pregunta}</b></p>
+      ${p.opciones.map((o, k) => `<button class="boton respuesta" data-k="${k}">${o}</button>`).join('')}<p class="explicacion"></p></div>`).join('')}</div>
+    ${progreso ? `<p class="progreso">Créditos acumulados: <b>${progreso.creditos}</b> · misiones: ${progreso.misiones.length} · mejor puntaje: ${progreso.mejorPuntaje} · conceptos: ${ctx.aprendizaje?.cantidad ?? 0} de ${CONCEPTOS.length}</p>` : ''}
     ${soyAnfitrion ? '<button id="volver">🛠 Volver al hangar y mejorar la nave</button>' : '<p class="nota">Esperando al anfitrión…</p>'}`;
   ctx.hud.appendChild(ui);
+  // Repaso: respuesta inmediata con explicación
+  ui.querySelectorAll('.pregunta').forEach((div) => {
+    const p = preguntas[div.dataset.q];
+    div.querySelectorAll('.respuesta').forEach((b) => {
+      b.onclick = () => {
+        const bien = Number(b.dataset.k) === p.correcta;
+        div.querySelectorAll('.respuesta').forEach((x) => { x.disabled = true; x.classList.toggle('correcta', Number(x.dataset.k) === p.correcta); });
+        if (!bien) b.classList.add('incorrecta');
+        div.querySelector('.explicacion').innerHTML = `${bien ? '✅ ¡Correcto!' : '❌ Casi.'} ${p.explicacion}`;
+        efecto(bien ? 'exito' : 'error');
+      };
+    });
+  });
   const volver = ui.querySelector('#volver');
   if (volver) volver.onclick = () => conexion.accion('reiniciar');
   efecto(inf.exito ? 'exito' : 'error');

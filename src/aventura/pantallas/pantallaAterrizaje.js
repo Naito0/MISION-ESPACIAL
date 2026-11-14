@@ -103,6 +103,7 @@ export function iniciarPantallaAterrizaje(ctx) {
     $('.resultado-aterrizaje').innerHTML = `${texto}<br><small>Tocaste el suelo a ${v.toFixed(1)} m/s</small>`;
     $('.resultado-aterrizaje').style.display = 'block';
     efecto(tipo === 'choque' ? 'error' : 'exito');
+    ctx.aprendizaje?.evento('aterrizaje', destino.id);
     // Se espera un momento para ver el resultado y luego se avisa a la sala
     setTimeout(() => conexion.accion('aterrizar', { velocidad: v }), 1800);
   }

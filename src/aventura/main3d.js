@@ -18,6 +18,7 @@ import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
 import { crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { crearTutorial } from './tutorial.js';
+import { crearAprendizaje } from './aprendizaje.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
@@ -36,7 +37,14 @@ hud.innerHTML = `
   <div class="cargando">Cargando…</div>`;
 const capa = document.createElement('div'); // capa de cada pantalla
 hud.appendChild(capa);
-const menu = crearMenuPausa(hud, { alAbrir: () => { motor.pausado = true; }, alCerrar: () => { motor.pausado = false; } });
+// Tarjetas "¿Qué aprendiste?" y diario "Lo que aprendí"
+const aprendizaje = crearAprendizaje(hud);
+const pausar = (si) => { motor.pausado = si; window.juegoPausado = si; };
+const menu = crearMenuPausa(hud, {
+  alAbrir: () => pausar(true),
+  alCerrar: () => pausar(false),
+  extras: [{ texto: '📖 Lo que aprendí', accion: () => { pausar(true); aprendizaje.abrirDiario(() => pausar(false)); } }]
+});
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement && !window.consolaAbierta) menu.alternar(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && !menu.abierto && !window.consolaAbierta) menu.abrir(); });
 
@@ -71,6 +79,9 @@ function irA(nombre) {
 }
 ctx.conexionLocal = crearConexionLocal;
 ctx.tutorial = crearTutorial(hud);
+ctx.aprendizaje = aprendizaje;
+// Cada emergencia resuelta puede enseñar un concepto (ej. 'resuelta:oxigeno')
+ctx.alResolver = (r) => { if (r.resultado === 'resuelta') aprendizaje.evento(`resuelta:${r.id}`, ctx.conexionActiva?.estado?.destinoId); };
 let ultimaPantallaTutorial = null;
 ctx.irA = irA;
 

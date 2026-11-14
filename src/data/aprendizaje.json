@@ -1,0 +1,118 @@
+{
+  "_comentario": "Tarjetas '¿Qué aprendiste?'. Cada concepto: titulo, explicacion (simple), dato (de la NASA), fuente (enlace), momento (eventos del juego que la muestran, ver aventura/aprendizaje.js), destino (opcional: solo en ese destino). 'verificar' = lo que el equipo debe comprobar antes de la demo. Las tarjetas nunca aparecen durante una emergencia.",
+  "conceptos": [
+    {
+      "id": "energia",
+      "titulo": "Balance de energía",
+      "explicacion": "Los paneles tienen que dar al menos la energía que gastan todos los equipos. Si no, algo se apaga.",
+      "dato": "A Marte llega cerca del 43% de la luz del Sol que llega a la Tierra: los mismos paneles dan menos de la mitad de energía.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "verificar": ["Confirmar en la ficha de Marte la irradiancia solar (Marte vs. Tierra) que da el 43%"],
+      "momento": ["hangar:paneles"]
+    },
+    {
+      "id": "masa",
+      "titulo": "Masa y capacidad del cohete",
+      "explicacion": "Cada cohete puede llevar una masa máxima a cada destino. Cada kilo de más necesita más combustible para despegar, por eso se elige con cuidado cada pieza.",
+      "dato": "Los equipos de la NASA anotan la masa, la energía y el costo de cada pieza al diseñar una misión, como en el Mission Design Lab de Goddard.",
+      "fuente": "https://www.nasa.gov/goddard/",
+      "verificar": ["Buscar la página exacta del Mission Design Lab y reemplazar el enlace"],
+      "momento": ["hangar:listo"]
+    },
+    {
+      "id": "gravedad",
+      "titulo": "Gravedad y aterrizaje",
+      "explicacion": "Para aterrizar hay que frenar contra la gravedad. Cuanto más fuerte la gravedad, más combustible hace falta.",
+      "dato": "La gravedad es de 1,62 m/s² en la Luna y de 3,71 m/s² en Marte (en la Tierra, 9,81 m/s²).",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "momento": ["aterrizaje"]
+    },
+    {
+      "id": "salto",
+      "titulo": "Saltar con poca gravedad",
+      "explicacion": "Con el mismo impulso, cuanto más débil es la gravedad, más alto llegas: la altura del salto es inversamente proporcional a la gravedad.",
+      "dato": "La gravedad de la Luna es cerca del 17% de la de la Tierra (1,62 m/s²), así que un salto llega unas 6 veces más alto.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "momento": ["superficie:salto"]
+    },
+    {
+      "id": "retraso",
+      "titulo": "La señal tarda en llegar",
+      "explicacion": "La radio viaja a la velocidad de la luz, pero las distancias en el espacio son enormes. Desde lejos, las órdenes y los datos tardan en llegar.",
+      "dato": "La Luna está a 384 400 km: la señal tarda unos 1,3 segundos. Marte está entre 55 y 400 millones de km: la señal tarda entre 3 y 22 minutos.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "verificar": ["Los tiempos se calculan con distancia ÷ velocidad de la luz (299 792 km/s); confirmar las distancias en las fichas de la NASA"],
+      "momento": ["resuelta:senal", "resuelta:frecuencia", "resuelta:paquetes"]
+    },
+    {
+      "id": "micrometeoritos",
+      "titulo": "Protección contra micrometeoritos",
+      "explicacion": "En el espacio viajan granitos de roca muy rápidos. Un blindaje en capas los frena antes de que perforen la nave.",
+      "dato": "Las naves y estaciones espaciales usan escudos de varias capas para protegerse de micrometeoritos y basura espacial.",
+      "fuente": "https://www.nasa.gov/",
+      "verificar": ["Buscar una página de la NASA sobre escudos contra micrometeoritos (por ejemplo, de la Estación Espacial) y reemplazar el enlace"],
+      "momento": ["resuelta:meteoritos", "resuelta:fuga_casco"]
+    },
+    {
+      "id": "oxigeno",
+      "titulo": "El oxígeno de la tripulación",
+      "explicacion": "Los astronautas respiran oxígeno todo el tiempo. En viajes largos no se puede llevar todo: se recicla el aire.",
+      "dato": "Cada astronauta consume alrededor de 0,8 kg de oxígeno por día.",
+      "fuente": "https://www.nasa.gov/",
+      "verificar": ["Confirmar el consumo diario de oxígeno por astronauta en una página de la NASA y poner el enlace exacto"],
+      "momento": ["resuelta:oxigeno", "resuelta:invernadero"]
+    },
+    {
+      "id": "polvo",
+      "titulo": "Tormentas de polvo en Marte",
+      "explicacion": "En Marte hay tormentas de polvo que pueden cubrir todo el planeta y tapar la luz del Sol. Por eso conviene llevar paneles de sobra.",
+      "dato": "En 2018, una tormenta de polvo global cubrió el lugar donde estaba el rover Opportunity, que funcionaba con paneles solares, y dejó de comunicarse con la Tierra.",
+      "fuente": "https://science.nasa.gov/mission/mer-opportunity/",
+      "verificar": ["Confirmar en la página la relación entre la tormenta y la energía de los paneles"],
+      "destino": "marte",
+      "momento": ["superficie:llegada"]
+    },
+    {
+      "id": "noche",
+      "titulo": "La larga noche lunar",
+      "explicacion": "De noche los paneles no dan energía: las baterías mantienen los equipos encendidos. Cuanto más larga la noche, más baterías.",
+      "dato": "Un día lunar completo dura unos 29,5 días terrestres, así que la noche lunar dura unos 14 días.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "verificar": ["Confirmar el periodo sinódico (29,53 días) en la ficha de la Luna"],
+      "destino": "luna",
+      "momento": ["hangar:baterias"]
+    },
+    {
+      "id": "temperatura",
+      "titulo": "Frío y calor extremos",
+      "explicacion": "Sin una atmósfera gruesa que guarde el calor, la temperatura cambia muchísimo entre el día y la noche. El control térmico protege la nave.",
+      "dato": "En el ecuador de la Luna la temperatura va de unos -173 °C de noche a 117 °C de día.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "destino": "luna",
+      "momento": ["hangar:termica"]
+    },
+    {
+      "id": "muestras",
+      "titulo": "Muestras: la ciencia de la misión",
+      "explicacion": "Analizar rocas y suelo nos cuenta cómo se formó un mundo y si tuvo agua. Es la razón de muchas misiones.",
+      "dato": "En el Apolo 11 (1969) los astronautas recolectaron muestras de rocas y suelo de la Luna y las trajeron a la Tierra.",
+      "fuente": "https://www.nasa.gov/mission/apollo-11/",
+      "momento": ["superficie:analizada"]
+    },
+    {
+      "id": "trayectoria",
+      "titulo": "Corregir el rumbo",
+      "explicacion": "Durante el viaje la nave se desvía un poco: con encendidos cortos del motor se corrige la trayectoria. Por eso se lleva combustible de reserva.",
+      "dato": "Las misiones de la NASA a otros mundos hacen varias maniobras de corrección de trayectoria durante el viaje.",
+      "fuente": "https://www.nasa.gov/",
+      "verificar": ["Buscar una página de la NASA que mencione las maniobras de corrección de trayectoria (por ejemplo, de una misión a Marte) y poner el enlace exacto"],
+      "momento": ["resuelta:trayectoria", "resuelta:frenado"]
+    }
+  ],
+  "preguntas": [
+    { "pregunta": "¿Por qué en Marte hacen falta más paneles que en la Luna?", "opciones": ["Porque a Marte llega menos luz del Sol", "Porque Marte es más grande", "Porque en Marte hace calor"], "correcta": 0, "explicacion": "A Marte llega cerca del 43% de la luz que a la Tierra." },
+    { "pregunta": "¿Dónde hace falta más combustible para aterrizar?", "opciones": ["En la Luna", "En Marte"], "correcta": 1, "explicacion": "La gravedad de Marte (3,71 m/s²) es más del doble que la de la Luna (1,62 m/s²)." },
+    { "pregunta": "¿Cuánto tarda una señal desde Marte?", "opciones": ["1 segundo", "Entre 3 y 22 minutos", "Un día"], "correcta": 1, "explicacion": "Depende de la distancia: entre 55 y 400 millones de km." },
+    { "pregunta": "¿Por qué en la Luna se necesitan más baterías?", "opciones": ["Porque la noche lunar dura unos 14 días", "Porque la Luna no tiene Sol"], "correcta": 0, "explicacion": "De noche los paneles no dan energía y la noche lunar es muy larga." }
+  ]
+}

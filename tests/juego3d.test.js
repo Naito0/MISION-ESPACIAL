@@ -9,6 +9,7 @@ import { clasificarAterrizaje } from '../src/compartido/superficie.js';
 import { recomendaciones, dependencias, retrasoSenal, textoRetraso } from '../src/compartido/recomendaciones.js';
 import { resumenDiseno, seleccionVacia } from '../src/compartido/hangar.js';
 const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
+import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -225,6 +226,26 @@ test('recomendaciones: dependen del destino (paneles, combustible, baterías, an
   // Dependencia: baterías grandes con paneles que no alcanzan
   const sel2 = { ...sel, baterias: ['bat_grande'] };
   assert.ok(dependencias(sel2, s.catalogo, marte, resumenDiseno(sel2, s.catalogo, marte, datosCompletos.hangar)).some((t) => t.includes('baterías grandes')));
+});
+
+test('aprendizaje: 12 conceptos con fuente y momento; el resumen da 3 a 5 conceptos de lo que pasó', () => {
+  const AP = leerJSON('aprendizaje.json');
+  assert.equal(AP.conceptos.length, 12);
+  for (const c of AP.conceptos) {
+    assert.ok(c.titulo && c.explicacion && c.dato && c.fuente.startsWith('https://') && c.momento.length, c.id);
+  }
+  const marte = leerJSON('destinos.json').destinos.find((d) => d.id === 'marte');
+  const r = resumenAprendizaje({
+    destino: marte, diseno: { energia: false, blindaje: false }, aterrizaje: 'choque', muestras: 2,
+    registro: [{ id: 'meteoritos', resultado: 'fallida' }, { id: 'senal', resultado: 'resuelta' }]
+  }, AP.conceptos);
+  assert.ok(r.length >= 3 && r.length <= 5);
+  assert.match(r[0].texto, /43%/, 'los paneles en Marte, conectado con lo que pasó');
+  assert.ok(r.some((f) => f.id === 'gravedad' && f.texto.includes('3.71')));
+  assert.ok(r.some((f) => f.id === 'micrometeoritos' && f.texto.includes('Sin blindaje')));
+  // Una partida tranquila en la Luna también da al menos 3
+  const luna = leerJSON('destinos.json').destinos.find((d) => d.id === 'luna');
+  assert.ok(resumenAprendizaje({ destino: luna, diseno: { energia: true }, aterrizaje: null, muestras: 0, registro: [] }, AP.conceptos).length >= 3);
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {

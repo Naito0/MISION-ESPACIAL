@@ -224,6 +224,8 @@ export function iniciarPantallaHangar(ctx) {
         const cat = CATALOGO.find((c) => c.opciones.some((o) => o.id === id));
         catFoco = cat.id;
         consejoExtra = res.quitada ? '' : consecuencia(rNuevo[cat.id], cat.opciones.find((o) => o.id === id));
+        // Elegir paneles, baterías o control térmico enseña un concepto
+        if (!res.quitada) ctx.aprendizaje?.evento(`hangar:${cat.id}`, e.destinoId);
         dibujar(e2);
       };
     });
@@ -251,7 +253,7 @@ export function iniciarPantallaHangar(ctx) {
       holograma.querySelector('#listo').onclick = async () => {
         const res = await conexion.accion('listo');
         if (res.error) { efecto('error'); mensajeError = `${res.error} ${(res.problemas || []).join(' ')}`; dibujar(conexion.estado); }
-        else efecto('clic');
+        else { efecto('clic'); ctx.aprendizaje?.evento('hangar:listo', e.destinoId); }
       };
       // Tutorial: cuando no falta ninguna categoría, pasa al paso "¡Listo!"
       if (!r.problemas.some((p) => p.texto.startsWith('Falta elegir'))) ctx.tutorial?.evento('completo');
