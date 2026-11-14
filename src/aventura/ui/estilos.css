@@ -1,173 +1,190 @@
 /* =============================================================
    Estilos de la interfaz 2D (HTML) de la aventura 3D.
    Estética "holográfica": fondos oscuros translúcidos y bordes cian.
+
+   TAMAÑO DE TEXTO: todos los tamaños salen de estas variables.
+   "Grande" (por defecto) se lee desde 2 metros o en un proyector:
+     --t   texto normal  (20 px)
+     --tc  texto chico / HUD (mínimo 18 px)
+     --th  títulos (30 px)
+     --tg  números grandes (26 px)
+   "Normal" usa la clase .texto-normal en <html> (se cambia en el menú Esc).
+   Si un texto no cabe: acortarlo, NO achicarlo.
    ============================================================= */
-html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; font-family: Arial, Helvetica, sans-serif; color: #e8ecff; }
+:root { --t: 20px; --tc: 18px; --th: 30px; --tg: 26px; --ancho: 1.25; }
+:root.texto-normal { --t: 16px; --tc: 14px; --th: 24px; --tg: 20px; --ancho: 1; }
+
+html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; font-family: Arial, Helvetica, sans-serif; color: #f2f5ff; }
 #mundo3d { position: fixed; inset: 0; }
 #mundo3d canvas { display: block; }
-#hud { position: fixed; inset: 0; pointer-events: none; }
-#hud .panel { pointer-events: auto; background: rgba(10, 18, 40, 0.82); border: 1px solid #3fd0ff; border-radius: 10px; box-shadow: 0 0 18px rgba(63, 208, 255, 0.25); }
-#hud .ayuda { position: absolute; left: 12px; bottom: 12px; padding: 8px 12px; font-size: 13px; line-height: 1.5; }
-#hud .titulo { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); padding: 6px 16px; font-size: 16px; font-weight: bold; color: #7cf3ff; }
-#hud .fps { position: absolute; right: 12px; top: 10px; font-size: 12px; color: #9aa6c8; }
-#hud .aviso { position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%); padding: 8px 16px; font-size: 16px; display: none; }
-#hud .menu { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 20px 28px; min-width: 320px; display: none; text-align: center; }
-#hud .menu h2 { margin: 0 0 12px; color: #7cf3ff; }
-#hud .menu button, #hud .boton { pointer-events: auto; display: block; width: 100%; margin: 6px 0; padding: 9px; font-size: 15px; color: #fff;
-  background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
+#hud { position: fixed; inset: 0; pointer-events: none; font-size: var(--t); line-height: 1.3; }
+#hud .panel { pointer-events: auto; background: rgba(6, 12, 30, 0.88); border: 2px solid #3fd0ff; border-radius: 12px; box-shadow: 0 0 18px rgba(63, 208, 255, 0.25); box-sizing: border-box; }
+#hud button { font-family: inherit; }
+#hud small { font-size: var(--tc); }
+#hud .ayuda { position: absolute; left: 12px; bottom: 12px; padding: 8px 14px; font-size: var(--tc); line-height: 1.5; max-width: calc(100% - 24px); }
+#hud .titulo { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); padding: 6px 18px; font-size: var(--tg); font-weight: bold; color: #7cf3ff; white-space: nowrap; }
+#hud .fps { position: absolute; right: 12px; bottom: 8px; font-size: 13px; color: #9aa6c8; }
+#hud .aviso { position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%); padding: 8px 16px; font-size: var(--t); display: none; }
+#hud .menu { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 20px 28px; min-width: calc(380px * var(--ancho)); max-height: 92vh; overflow-y: auto; display: none; text-align: center; }
+#hud .menu h2 { margin: 0 0 12px; color: #7cf3ff; font-size: var(--th); }
+#hud .menu h3 { margin: 12px 0 4px; font-size: var(--t); color: #9dd0ff; }
+#hud .menu button, #hud .boton { pointer-events: auto; display: block; width: 100%; margin: 6px 0; padding: 10px; font-size: var(--t); color: #fff;
+  background: #2b5cab; border: 2px solid #7cc4ff; border-radius: 10px; cursor: pointer; }
 #hud .menu button:hover, #hud .boton:hover { background: #3d77d8; }
 #hud .menu button.activo { background: #2f9e5b; }
 #hud .fila { display: flex; gap: 6px; }
 #hud .fila button { flex: 1; }
-#hud .tecla { display: inline-block; min-width: 18px; padding: 0 5px; border: 1px solid #7cc4ff; border-radius: 4px; text-align: center; font-size: 12px; }
+#hud .tecla { display: inline-block; min-width: 22px; padding: 0 6px; border: 2px solid #7cc4ff; border-radius: 6px; text-align: center; font-size: var(--tc); font-weight: bold; }
 /* ---- HUD del viaje ---- */
-#hud .hud-viaje { position: absolute; left: 12px; top: 10px; width: 260px; padding: 10px 12px; font-size: 14px; }
+#hud .hud-viaje { position: absolute; left: 12px; top: 10px; width: calc(290px * var(--ancho)); padding: 10px 14px; font-size: var(--tc); }
 #hud .hv-fila { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-#hud .hv-barra { flex: 1; height: 14px; background: #1a2342; border-radius: 7px; overflow: hidden; }
+#hud .hv-barra { flex: 1; height: 18px; background: #1a2342; border-radius: 9px; overflow: hidden; }
 #hud .hv-vida { height: 100%; width: 100%; background: #3cc46e; transition: width 0.4s, background 0.4s; }
-#hud .hv-tiempo { font-size: 18px; color: #ffd166; }
-#hud .hv-roles { font-size: 12px; color: #b8c3e0; }
-#hud .hud-tareas { position: absolute; right: 12px; top: 34px; width: 280px; padding: 8px 12px; font-size: 14px; }
-#hud .hud-tareas h4 { margin: 0 0 6px; color: #7cf3ff; }
-#hud .tarea { display: flex; gap: 10px; align-items: center; padding: 6px; margin-bottom: 6px; border-radius: 8px; background: rgba(229, 72, 77, 0.18); border: 1px solid #e5484d; }
+#hud .hv-tiempo { font-size: var(--tg); color: #ffd166; }
+#hud .hv-num { font-size: var(--t); }
+#hud .hv-roles { font-size: var(--tc); color: #c8d2ec; }
+#hud .hud-tareas { position: absolute; right: 12px; top: 60px; width: calc(300px * var(--ancho)); padding: 8px 12px; font-size: var(--tc); }
+#hud .hud-tareas h4 { margin: 0 0 6px; color: #7cf3ff; font-size: var(--t); }
+#hud .tarea { display: flex; gap: 10px; align-items: center; padding: 6px 8px; margin-bottom: 6px; border-radius: 8px; background: rgba(229, 72, 77, 0.22); border: 2px solid #e5484d; }
 #hud .tarea.urgente { animation: latir 0.6s infinite alternate; }
-#hud .flecha { display: inline-block; font-size: 26px; color: #ffd166; transition: transform 0.12s linear; }
-#hud .otras { display: block; margin-top: 4px; color: #9aa6c8; }
-#hud .aviso-e { position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%); padding: 10px 18px; font-size: 18px; display: none; border-color: #ffd166; }
-#hud .avisos { position: absolute; left: 50%; top: 56px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
-#hud .aviso-flotante { padding: 6px 14px; font-size: 15px; animation: aparecer 0.3s; }
+#hud .flecha { display: inline-block; font-size: 32px; color: #ffd166; transition: transform 0.12s linear; }
+#hud .otras { display: block; margin-top: 4px; color: #b8c3e0; }
+#hud .aviso-e { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); padding: 12px 22px; font-size: var(--tg); display: none; border-color: #ffd166; white-space: nowrap; }
+#hud .avisos { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; }
+#hud .aviso-flotante { padding: 8px 16px; font-size: var(--t); animation: aparecer 0.3s; white-space: nowrap; }
 #hud .vineta { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 rgba(255, 0, 0, 0); transition: box-shadow 0.3s; }
 #hud .vineta.golpe { box-shadow: inset 0 0 160px rgba(255, 30, 30, 0.8); }
-#hud .final { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 420px; padding: 20px 26px; text-align: center; }
-#hud .final h1 { margin: 0 0 8px; color: #7cf3ff; }
+#hud .final { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(460px * var(--ancho)); padding: 20px 26px; text-align: center; }
+#hud .final h1 { margin: 0 0 8px; color: #7cf3ff; font-size: var(--th); }
 #hud .final ul { text-align: left; }
 @keyframes latir { from { background: rgba(229, 72, 77, 0.15); } to { background: rgba(229, 72, 77, 0.5); } }
 @keyframes aparecer { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 /* ---- Consola holográfica (minijuegos) ---- */
-#hud .consola-capa { position: absolute; inset: 0; background: rgba(0, 5, 15, 0.45); display: flex; align-items: center; justify-content: center; pointer-events: auto; }
-#hud .consola { width: 480px; padding: 14px 18px; border-width: 2px; text-align: center; background: rgba(6, 20, 40, 0.92);
+#hud .consola-capa { position: absolute; inset: 0; background: rgba(0, 5, 15, 0.5); display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+#hud .consola { width: min(calc(560px * var(--ancho)), 96vw); max-height: 96vh; overflow-y: auto; padding: 14px 20px; border-width: 3px; text-align: center; background: rgba(6, 20, 40, 0.95);
   background-image: repeating-linear-gradient(0deg, rgba(124, 243, 255, 0.05) 0 2px, transparent 2px 4px); }
-#hud .consola-cab { font-size: 20px; font-weight: bold; margin-bottom: 6px; }
-#hud .consola-inst { font-size: 14px; color: #c8d4f0; margin-bottom: 10px; }
+#hud .consola-cab { font-size: var(--th); font-weight: bold; margin-bottom: 6px; }
+#hud .consola-inst { font-size: var(--t); color: #e0e8ff; margin-bottom: 10px; }
 #hud .consola-area { min-height: 120px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-#hud .consola-lienzo { max-width: 100%; border: 1px solid #3fd0ff; border-radius: 6px; }
-#hud .consola-tiempo { height: 6px; background: #1a2342; border-radius: 3px; margin: 10px 0; overflow: hidden; }
+/* El lienzo se estira al ancho de la consola: así su texto también se ve más grande */
+#hud .consola-lienzo { width: 100%; height: auto; border: 2px solid #3fd0ff; border-radius: 8px; }
+#hud .consola-tiempo { height: 10px; background: #1a2342; border-radius: 5px; margin: 10px 0; overflow: hidden; }
 #hud .consola-tiempo > div { height: 100%; width: 100%; }
-#hud .consola button { pointer-events: auto; cursor: pointer; color: #fff; background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; padding: 8px 14px; font-size: 15px; }
+#hud .consola button { pointer-events: auto; cursor: pointer; color: #fff; background: #2b5cab; border: 2px solid #7cc4ff; border-radius: 10px; padding: 10px 16px; font-size: var(--t); }
 #hud .consola .consola-cerrar { background: #1a2342; }
-#hud .consola .consola-grande { font-size: 18px; padding: 10px 20px; }
+#hud .consola .consola-grande { font-size: var(--tg); padding: 12px 22px; }
 #hud .consola-botones { display: flex; gap: 10px; }
-#hud .consola-resultado { font-size: 26px; padding: 40px 0; }
-#hud .consola-msg { margin: 4px 0; color: #ffd166; min-height: 18px; }
+#hud .consola-resultado { font-size: var(--th); padding: 40px 0; }
+#hud .consola-msg { margin: 4px 0; color: #ffd166; min-height: 24px; font-size: var(--t); }
 #hud .cables { display: flex; align-items: center; }
 #hud .cables .col { display: flex; flex-direction: column; }
-#hud .consola .cables button { width: 60px; height: 34px; margin: 8px 0; padding: 0; border: 3px solid #0b1328; }
+#hud .consola .cables button { width: 80px; height: 40px; margin: 5px 0; padding: 0; border: 3px solid #0b1328; }
 #hud .consola .cables button.elegido { border-color: #fff; box-shadow: 0 0 10px #fff; }
 #hud .consola .cables button.mal { border-color: #ff2020; }
 #hud .consola .cables button:disabled { opacity: 0.5; }
 #hud .deslizadores { width: 100%; text-align: left; }
-#hud .deslizadores label { display: block; margin: 6px 0; font-size: 14px; }
+#hud .deslizadores label { display: block; margin: 8px 0; font-size: var(--t); }
 #hud .riel { position: relative; }
-#hud .riel input { width: 100%; }
-#hud .riel .meta { position: absolute; top: -4px; width: 4px; height: 26px; margin-left: -2px; background: #ffd166; pointer-events: none; }
-#hud .botones4 { display: grid; grid-template-columns: 90px 90px; gap: 10px; }
-#hud .consola .botones4 button { height: 70px; opacity: 0.45; border: 2px solid #0b1328; }
+#hud .riel input { width: 100%; height: 28px; }
+#hud .riel .meta { position: absolute; top: -4px; width: 6px; height: 34px; margin-left: -3px; background: #ffd166; pointer-events: none; }
+#hud .botones4 { display: grid; grid-template-columns: 110px 110px; gap: 12px; }
+#hud .consola .botones4 button { height: 84px; opacity: 0.45; border: 3px solid #0b1328; }
 #hud .consola .botones4 button.luz { opacity: 1; box-shadow: 0 0 20px #fff; }
 #hud .plantas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
 #hud .plantas .consola-msg { grid-column: 1 / -1; }
-#hud .consola .plantas button { background: #13301f; font-size: 30px; padding: 6px; }
-#hud .agua { height: 6px; background: #1a2342; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+#hud .consola .plantas button { background: #13301f; font-size: 36px; padding: 6px; }
+#hud .agua { height: 10px; background: #1a2342; border-radius: 5px; overflow: hidden; margin-top: 4px; }
 #hud .agua > div { height: 100%; }
-#hud .dial { width: 90%; }
+#hud .dial { width: 90%; height: 30px; }
 #hud .paquetes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
 #hud .paquetes .consola-msg { grid-column: 1 / -1; }
-#hud .consola .paquetes button { font-size: 20px; padding: 14px 0; }
+#hud .consola .paquetes button { font-size: var(--tg); padding: 14px 0; }
 #hud .consola .paquetes button.ok { background: #2f9e5b; }
 /* ---- Aterrizaje y superficie ---- */
-#hud .hud-aterrizaje { position: absolute; left: 12px; top: 54px; width: 300px; padding: 10px 14px; font-size: 15px; }
+#hud .hud-aterrizaje { position: absolute; left: 12px; top: 64px; width: calc(320px * var(--ancho)); padding: 10px 14px; font-size: var(--t); }
 #hud .ha-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; }
-#hud .ha-fila b { font-size: 22px; }
-#hud .ha-fila .hv-barra { width: 150px; }
+#hud .ha-fila b { font-size: var(--th); }
+#hud .ha-fila .hv-barra { width: 50%; flex: none; }
 #hud .ha-comb { height: 100%; }
-#hud .ha-ayuda { font-size: 13px; color: #c8d4f0; }
-#hud .boton-motor { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); padding: 14px 30px; font-size: 20px; color: #fff; background: #8a3a12; border-color: #ffa040; cursor: pointer; user-select: none; }
-#hud .resultado-aterrizaje { display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 30px; font-size: 30px; text-align: center; }
-#hud .hs-muestras { font-size: 22px; margin: 6px 0; }
+#hud .ha-ayuda { font-size: var(--tc); color: #e0e8ff; }
+#hud .boton-motor { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); padding: 16px 34px; font-size: var(--tg); color: #fff; background: #8a3a12; border-color: #ffa040; cursor: pointer; user-select: none; }
+#hud .resultado-aterrizaje { display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 30px; font-size: var(--th); text-align: center; }
+#hud .hs-muestras { font-size: var(--tg); margin: 6px 0; }
 #hud .hud-viaje .boton { margin-top: 8px; }
 /* ---- Informe ---- */
-#hud .informe { position: absolute; right: 16px; top: 16px; bottom: 16px; width: 470px; overflow-y: auto; padding: 14px 20px; font-size: 14px; }
-#hud .informe h1 { margin: 0; color: #7cf3ff; font-size: 24px; }
-#hud .informe h3 { margin: 12px 0 4px; color: #9dd0ff; }
-#hud .informe .estrellas { font-size: 30px; letter-spacing: 4px; margin: 4px 0; }
+#hud .informe { position: absolute; right: 16px; top: 16px; bottom: 16px; width: min(calc(500px * var(--ancho)), 60vw); overflow-y: auto; padding: 14px 20px; font-size: var(--t); }
+#hud .informe h1 { margin: 0; color: #7cf3ff; font-size: var(--th); }
+#hud .informe h3 { margin: 14px 0 4px; color: #9dd0ff; font-size: var(--t); }
+#hud .informe .estrellas { font-size: 38px; letter-spacing: 4px; margin: 4px 0; }
 #hud .informe .cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 #hud .informe .cifras div { background: #111a33; border-radius: 8px; padding: 6px 10px; }
-#hud .informe .cifras span { display: block; font-size: 11px; color: #9dd0ff; text-transform: uppercase; }
-#hud .informe .cifras b { font-size: 20px; color: #ffd166; }
+#hud .informe .cifras span { display: block; font-size: var(--tc); color: #9dd0ff; }
+#hud .informe .cifras b { font-size: var(--tg); color: #ffd166; }
 #hud .informe .causas { margin: 0; padding-left: 0; list-style: none; }
-#hud .informe .causas li { margin: 4px 0; padding: 6px 8px; border-radius: 6px; }
-#hud .informe .causas li.bien { background: rgba(47, 158, 91, 0.2); border-left: 3px solid #5be08a; }
-#hud .informe .causas li.mal { background: rgba(229, 72, 77, 0.18); border-left: 3px solid #e5484d; }
-#hud .informe .mision-real { background: #111a33; border: 1px solid #7cc4ff; border-radius: 8px; padding: 8px 10px; }
-#hud .informe a { color: #7cc4ff; word-break: break-all; }
+#hud .informe .causas li { margin: 6px 0; padding: 8px 10px; border-radius: 8px; }
+#hud .informe .causas li.bien { background: rgba(47, 158, 91, 0.25); border-left: 4px solid #5be08a; }
+#hud .informe .causas li.mal { background: rgba(229, 72, 77, 0.22); border-left: 4px solid #e5484d; }
+#hud .informe .mision-real { background: #111a33; border: 2px solid #7cc4ff; border-radius: 8px; padding: 8px 10px; }
+#hud .informe a { color: #9dd0ff; word-break: break-all; }
 #hud .informe .progreso { color: #ffd166; }
-#hud .informe button#volver { display: block; width: 100%; margin-top: 10px; padding: 11px; font-size: 16px; color: #fff; background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
+#hud .informe button#volver { display: block; width: 100%; margin-top: 10px; padding: 12px; font-size: var(--t); color: #fff; background: #2b5cab; border: 2px solid #7cc4ff; border-radius: 10px; cursor: pointer; }
 /* ---- Sistema solar ---- */
-#hud .lista-planetas { position: absolute; left: 12px; top: 54px; width: 210px; padding: 8px 12px; }
-#hud .lista-planetas h3 { margin: 0 0 6px; color: #7cf3ff; }
-#hud .lista-planetas button { display: block; width: 100%; margin: 4px 0; padding: 7px; text-align: left; color: #fff; background: #111a33; border: 1px solid #2c3a66; border-radius: 6px; cursor: pointer; font-size: 14px; }
+#hud .lista-planetas { position: absolute; left: 12px; top: 64px; width: calc(240px * var(--ancho)); padding: 8px 12px; }
+#hud .lista-planetas h3 { margin: 0 0 6px; color: #7cf3ff; font-size: var(--tg); }
+#hud .lista-planetas button { display: block; width: 100%; margin: 5px 0; padding: 8px; text-align: left; color: #fff; background: #111a33; border: 2px solid #2c3a66; border-radius: 8px; cursor: pointer; font-size: var(--t); }
 #hud .lista-planetas button.activo { border-color: #5be08a; background: #1f4a3a; }
-#hud .lista-planetas button.pronto { color: #8a93ad; }
-#hud .lista-planetas .nota, #hud .tarjeta-planeta .nota { font-size: 12px; color: #9aa6c8; }
-#hud .tarjeta-planeta { position: absolute; right: 12px; top: 54px; width: 360px; max-height: 84vh; overflow-y: auto; padding: 12px 16px; font-size: 14px; }
-#hud .tarjeta-planeta h2 { margin: 0 0 8px; font-size: 26px; }
-#hud .tarjeta-planeta h3 { margin: 10px 0 4px; }
-#hud .tarjeta-planeta ul { margin: 0; padding-left: 18px; }
+#hud .lista-planetas button.pronto { color: #a8b0c8; }
+#hud .lista-planetas .nota, #hud .tarjeta-planeta .nota { font-size: var(--tc); color: #b8c3e0; }
+#hud .tarjeta-planeta { position: absolute; right: 12px; top: 64px; width: min(calc(400px * var(--ancho)), 46vw); max-height: 86vh; overflow-y: auto; padding: 12px 16px; font-size: var(--t); }
+#hud .tarjeta-planeta h2 { margin: 0 0 8px; font-size: var(--th); }
+#hud .tarjeta-planeta h3 { margin: 10px 0 4px; font-size: var(--t); }
+#hud .tarjeta-planeta ul { margin: 0; padding-left: 22px; }
 #hud .ficha > div { padding: 5px 0; border-bottom: 1px solid #22305a; }
-#hud .ficha span { display: block; font-size: 11px; color: #9dd0ff; text-transform: uppercase; }
+#hud .ficha span { display: block; font-size: var(--tc); color: #9dd0ff; }
 #hud .ficha small { display: block; color: #ffd166; }
-#hud .tarjeta-planeta .fuente { font-size: 11px; color: #8a93ad; }
-#hud .tarjeta-planeta .pronto-txt { font-size: 22px; color: #ffd166; }
-#hud .tarjeta-planeta button#ir { display: block; width: 100%; margin-top: 8px; padding: 11px; font-size: 17px; color: #fff; background: #2f9e5b; border: 1px solid #5be08a; border-radius: 8px; cursor: pointer; }
-#hud .tarjeta-planeta .error { color: #ff6b6b; }
-#hud .nota-escala { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font-size: 12px; color: #8a93ad; }
+#hud .tarjeta-planeta .fuente { font-size: var(--tc); color: #a8b0c8; }
+#hud .tarjeta-planeta .pronto-txt { font-size: var(--th); color: #ffd166; }
+#hud .tarjeta-planeta button#ir { display: block; width: 100%; margin-top: 8px; padding: 12px; font-size: var(--tg); color: #fff; background: #2f9e5b; border: 2px solid #5be08a; border-radius: 10px; cursor: pointer; }
+#hud .tarjeta-planeta .error { color: #ff8080; }
+#hud .nota-escala { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font-size: var(--tc); color: #b8c3e0; }
 /* ---- Hangar ---- */
-#hud .tienda, #hud .holograma { position: absolute; top: 54px; bottom: 60px; overflow-y: auto; padding: 10px 14px; font-size: 13px; }
-#hud .tienda { left: 12px; width: 380px; }
-#hud .holograma { right: 12px; width: 330px; border-color: #5be08a; box-shadow: 0 0 18px rgba(91, 224, 138, 0.25);
+#hud .tienda, #hud .holograma { position: absolute; top: 64px; bottom: 20px; overflow-y: auto; padding: 10px 14px; font-size: var(--tc); }
+#hud .tienda { left: 12px; width: min(calc(400px * var(--ancho)), 40vw); }
+#hud .holograma { right: 12px; width: min(calc(350px * var(--ancho)), 34vw); border-color: #5be08a; box-shadow: 0 0 18px rgba(91, 224, 138, 0.25);
   background-image: repeating-linear-gradient(0deg, rgba(91, 224, 138, 0.05) 0 2px, transparent 2px 4px); }
-#hud .tienda h2, #hud .holograma h2 { margin: 0 0 6px; font-size: 18px; color: #7cf3ff; }
-#hud .tienda .sub, #hud .holograma .nota { color: #b8c3e0; font-size: 12px; margin: 4px 0; }
-#hud .categoria { border-left: 4px solid; padding-left: 8px; margin: 10px 0; }
-#hud .categoria h3 { margin: 0 0 4px; font-size: 14px; }
-#hud .categoria .falta { color: #ff9a6b; font-size: 11px; font-weight: normal; }
-#hud .opcion { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; color: #e8ecff; background: #111a33; border: 1px solid #2c3a66; border-radius: 6px; cursor: pointer; font-size: 13px; }
+#hud .tienda h2, #hud .holograma h2 { margin: 0 0 6px; font-size: var(--tg); color: #7cf3ff; }
+#hud .tienda .sub, #hud .holograma .nota { color: #d0d8f0; font-size: var(--tc); margin: 4px 0; }
+#hud .categoria { border-left: 5px solid; padding-left: 10px; margin: 12px 0; }
+#hud .categoria h3 { margin: 0 0 4px; font-size: var(--t); }
+#hud .categoria .falta { color: #ffad85; font-size: var(--tc); font-weight: normal; }
+#hud .opcion { display: block; width: 100%; text-align: left; margin: 5px 0; padding: 8px 10px; color: #f2f5ff; background: #111a33; border: 2px solid #2c3a66; border-radius: 8px; cursor: pointer; font-size: var(--t); }
 #hud .opcion:hover { border-color: #7cc4ff; }
 #hud .opcion.elegida { background: #1f4a3a; border-color: #5be08a; box-shadow: 0 0 8px rgba(91, 224, 138, 0.5); }
-#hud .opcion span { display: block; color: #ffd166; font-size: 12px; }
-#hud .opcion small { display: block; color: #9aa6c8; font-size: 11px; }
-#hud .holograma h3 { margin: 10px 0 4px; font-size: 14px; color: #9dd0ff; }
-#hud .hg-dato { display: flex; justify-content: space-between; margin-top: 8px; }
-#hud .hg-barra { height: 10px; background: #1a2342; border-radius: 5px; overflow: hidden; }
+#hud .opcion span { display: block; color: #ffd166; font-size: var(--tc); }
+#hud .opcion small { display: block; color: #c0c8e0; font-size: var(--tc); }
+#hud .holograma h3 { margin: 12px 0 4px; font-size: var(--t); color: #9dd0ff; }
+#hud .hg-dato { display: flex; justify-content: space-between; gap: 6px; margin-top: 8px; }
+#hud .hg-barra { height: 14px; background: #1a2342; border-radius: 7px; overflow: hidden; }
 #hud .hg-barra > div { height: 100%; transition: width 0.3s; }
-#hud .protecciones { display: flex; flex-wrap: wrap; gap: 4px; }
-#hud .protecciones span { padding: 2px 6px; border-radius: 10px; font-size: 11px; }
-#hud .protecciones .si { background: #1f4a3a; border: 1px solid #5be08a; }
-#hud .protecciones .no { background: #3a1f24; border: 1px solid #e5484d; opacity: 0.8; }
-#hud .problemas { margin: 0; padding-left: 18px; color: #ffb4a0; }
+#hud .protecciones { display: flex; flex-wrap: wrap; gap: 5px; }
+#hud .protecciones span { padding: 3px 8px; border-radius: 12px; font-size: var(--tc); }
+#hud .protecciones .si { background: #1f4a3a; border: 2px solid #5be08a; }
+#hud .protecciones .no { background: #3a1f24; border: 2px solid #e5484d; }
+#hud .problemas { margin: 0; padding-left: 22px; color: #ffc4b4; }
 #hud .holograma .ok { color: #5be08a; font-weight: bold; }
-#hud .listos { margin: 0; padding-left: 18px; }
-#hud .holograma button#listo { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 17px; color: #fff; background: #2f9e5b; border: 1px solid #5be08a; border-radius: 8px; cursor: pointer; }
+#hud .listos { margin: 0; padding-left: 22px; }
+#hud .holograma button#listo { display: block; width: 100%; margin-top: 10px; padding: 12px; font-size: var(--tg); color: #fff; background: #2f9e5b; border: 2px solid #5be08a; border-radius: 10px; cursor: pointer; }
 #hud .holograma button#listo.activo { background: #6b4a1f; border-color: #ffd166; }
-#hud .holograma .error { color: #ff6b6b; }
-#hud .holograma button.secundario { display: block; width: 100%; margin-top: 6px; padding: 7px; color: #fff; background: #1a2342; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
-/* ---- Sala de espera (lobby) ---- */
+#hud .holograma .error { color: #ff8080; }
+#hud .holograma button.secundario { display: block; width: 100%; margin-top: 6px; padding: 9px; font-size: var(--t); color: #fff; background: #1a2342; border: 2px solid #7cc4ff; border-radius: 10px; cursor: pointer; }
+/* ---- Sala de espera (lobby: desactivada, se conserva para el modo en red) ---- */
 #hud .lobby { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); width: 430px; max-height: 92vh; overflow-y: auto; padding: 18px 22px; }
-#hud .lobby h1 { margin: 0 0 6px; font-size: 26px; color: #7cf3ff; }
-#hud .lobby h3 { margin: 14px 0 6px; font-size: 15px; color: #9dd0ff; }
-#hud .lobby .sub, #hud .lobby .nota { color: #b8c3e0; font-size: 14px; }
-#hud .lobby label { display: block; margin: 10px 0; font-size: 14px; }
-#hud .lobby input { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px; font-size: 16px; border-radius: 6px; border: 1px solid #7cc4ff; background: #0b1328; color: #fff; }
-#hud .lobby button { display: block; width: 100%; margin: 8px 0; padding: 10px; font-size: 16px; color: #fff; background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
+#hud .lobby h1 { margin: 0 0 6px; font-size: var(--th); color: #7cf3ff; }
+#hud .lobby h3 { margin: 14px 0 6px; font-size: var(--t); color: #9dd0ff; }
+#hud .lobby .sub, #hud .lobby .nota { color: #b8c3e0; font-size: var(--tc); }
+#hud .lobby label { display: block; margin: 10px 0; font-size: var(--t); }
+#hud .lobby input { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px; font-size: var(--t); border-radius: 6px; border: 1px solid #7cc4ff; background: #0b1328; color: #fff; }
+#hud .lobby button { display: block; width: 100%; margin: 8px 0; padding: 10px; font-size: var(--t); color: #fff; background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
 #hud .lobby button:hover:not([disabled]) { background: #3d77d8; }
 #hud .lobby button[disabled] { opacity: 0.45; cursor: not-allowed; }
 #hud .lobby button.secundario { background: #1a2342; }
@@ -175,9 +192,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .lobby .fila input { margin: 0; flex: 1; text-transform: uppercase; }
 #hud .lobby .fila button { width: auto; padding: 9px 16px; }
 #hud .lobby .codigo { font-size: 34px; letter-spacing: 6px; color: #ffd166; }
-#hud .lobby .jugadores { margin: 0; padding-left: 18px; font-size: 14px; }
+#hud .lobby .jugadores { margin: 0; padding-left: 18px; font-size: var(--tc); }
 #hud .lobby .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-#hud .lobby .rol { margin: 0; text-align: left; background: #111a33; border-width: 2px; font-size: 14px; }
+#hud .lobby .rol { margin: 0; text-align: left; background: #111a33; border-width: 2px; font-size: var(--tc); }
 #hud .lobby .rol.activo { background: #1f4a3a; box-shadow: 0 0 12px rgba(91, 224, 138, 0.5); }
 #hud .lobby .error { color: #ff6b6b; min-height: 18px; }
-#hud .cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #05070f; }
+#hud .cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--th); background: #05070f; }

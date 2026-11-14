@@ -27,10 +27,9 @@ const control = crearControlTeclado('teclado1', motor.renderer.domElement);
 // ---- Interfaz fija: ayuda de controles, FPS y menú ----
 hud.innerHTML = `
   <div class="panel ayuda">
-    Clic: controlar la cámara con el mouse ·
-    <span class="tecla">WASD</span>/<span class="tecla">flechas</span> moverse ·
+    Clic + mouse: cámara · <span class="tecla">WASD</span> moverse ·
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
-    <span class="tecla">E</span> interactuar · rueda: zoom · <span class="tecla">ESC</span> menú
+    <span class="tecla">E</span> usar · <span class="tecla">Esc</span> menú
   </div>
   <div class="fps"></div>
   <div class="cargando">Cargando…</div>`;

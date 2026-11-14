@@ -45,6 +45,20 @@ export function setSensibilidad3D(valor) {
   guardar();
 }
 
+/** Tamaño del texto: 'grande' (por defecto, para proyector) o 'normal'. */
+export const tamanoTexto = () => prefs.tamanoTexto || 'grande';
+export function setTamanoTexto(valor) {
+  prefs.tamanoTexto = valor === 'normal' ? 'normal' : 'grande';
+  guardar();
+}
+
+/** Dificultad: 'facil' (por defecto) o 'normal'. Los valores están en src/data/dificultad.json. */
+export const dificultad = () => prefs.dificultad || 'facil';
+export function setDificultad(valor) {
+  prefs.dificultad = valor === 'normal' ? 'normal' : 'facil';
+  guardar();
+}
+
 export function setSilencio(valor) {
   prefs.silencio = !!valor;
   guardar();
