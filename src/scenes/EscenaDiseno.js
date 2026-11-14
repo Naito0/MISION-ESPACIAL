@@ -20,6 +20,8 @@ import { crearDibujoNave } from '../ui/dibujoNave.js';
 import { crearChecklist } from '../ui/checklistUI.js';
 import { botonAyuda, crearTooltip, conTooltip } from '../ui/ayuda.js';
 import { ANCHO, ALTO, COLORES, texto, titulo, panel, boton, ventana, barraFases } from '../ui/ui.js';
+import { monedas, pesoSimple, etiquetasSimples } from '../ui/textosSimples.js';
+import { esModoExperto } from '../systems/preferencias.js';
 
 const X_CARTA = [385, 705];
 const Y_CARTA = 178;
@@ -100,6 +102,9 @@ export default class EscenaDiseno extends Phaser.Scene {
 
     this.categoriaActual = this.categorias[0];
     this.mostrarCategoria(this.categoriaActual);
+
+    // Si el jugador cambia a modo experto (o vuelve al simple), se redibujan las piezas y el panel
+    this.events.on('modoExperto', () => this.mostrarCategoria(this.categoriaActual));
   }
 
   /** La primera vez, elige la opción más simple de cada categoría obligatoria. */
@@ -169,15 +174,17 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.actualizar();
   }
 
-  /** Etiqueta corta de cada pieza: nombre + costo y masa (el resto va en el tooltip). */
+  /** Etiqueta corta de cada pieza. Modo simple: monedas y peso en palabras; experto: números. */
   etiquetaCarta(op, comp) {
     const marca = !comp.ok ? '🚫 ' : op.confiabilidad === 'nuevo' ? '⚠ ' : '';
-    return `${marca}${op.nombre}\n${op.costo} M$ · ${op.masa} kg`;
+    if (esModoExperto()) return `${marca}${op.nombre}\n${op.costo} M$ · ${op.masa} kg`;
+    return `${marca}${op.nombre}\n${monedas(op.costo, estado.presupuesto)} · ${pesoSimple(op.masa, op.escala === 'cubesat')}`;
   }
 
-  /** Todo el detalle de una pieza, para el tooltip. */
+  /** Detalle de una pieza para el tooltip (simple o con todos los números). */
   textoTooltip(op, comp) {
     if (!comp.ok) return `🚫 ${op.nombre}: no sirve en esta misión.\n${comp.razon}`;
+    if (!esModoExperto()) return `${op.nombre}\n${op.tooltip}\n\n${etiquetasSimples(op)}`;
     const extra = [`${op.costo} M$`, `${op.masa} kg`];
     if (op.energia) extra.push(op.energia > 0 ? `genera ${op.energia} W` : `consume ${-op.energia} W`);
     if (op.datos) extra.push(`${op.datos} GB/día`);

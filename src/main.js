@@ -12,6 +12,7 @@
 // =============================================================
 import * as Phaser from 'phaser';
 import { ANCHO, ALTO, COLORES } from './ui/ui.js';
+import { instalarControlesGlobales } from './ui/controlesGlobales.js';
 
 import EscenaInicio from './scenes/EscenaInicio.js';
 import EscenaMision from './scenes/EscenaMision.js';
@@ -52,6 +53,14 @@ const config = {
 };
 
 const juego = new Phaser.Game(config);
+
+// Cuando cualquier escena termina de crearse, se le agregan los botones
+// 🔬 Modo experto y 🔊 sonido (ver ui/controlesGlobales.js).
+juego.events.once('ready', () => {
+  juego.scene.scenes.forEach((escena) => {
+    escena.sys.events.on('create', () => instalarControlesGlobales(escena));
+  });
+});
 
 // Para depurar desde la consola del navegador: window.juego
 window.juego = juego;

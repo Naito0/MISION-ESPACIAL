@@ -12,6 +12,8 @@ import {
 } from '../systems/estadoMision.js';
 import { verificarCohete, calcularInsercion } from '../systems/lanzamiento.js';
 import { guardarDiseno } from '../systems/almacenamiento.js';
+import { esModoExperto } from '../systems/preferencias.js';
+import { fraseRecurso } from '../ui/textosSimples.js';
 import { COLORES, texto, titulo, panel, boton, estrellas, barraFases } from '../ui/ui.js';
 
 const DIAGRAMA = { x: 220, y: 478, radioPlaneta: 42 };
@@ -84,6 +86,7 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
     this.botonDestinos = boton(this, 640, 693, 400, 40, '🌍 Probar en otros destinos', () => this.scene.start('ComparacionDestinos'), { tam: 16 });
 
     this.actualizar();
+    this.events.on('modoExperto', () => this.actualizar()); // al cambiar de modo se reescribe el resumen
     const o = this.orbitas.find((x) => x.id === estado.orbitaId);
     if (o) this.textoExplicacion.setText(`${o.nombre}: ${o.explicacion}`);
   }
@@ -203,7 +206,14 @@ export default class EscenaDisenoPuntual extends Phaser.Scene {
 
     // Resumen
     const r = this.revisar(a);
-    this.textoResumen.setText(
+    // Modo simple: una frase por recurso (con icono) en lugar de números
+    if (!esModoExperto()) {
+      const iconos = { presupuesto: '🪙', masa: '🚀', energia: '⚡', datos: '📦', bateria: '🔋', comunicaciones: '📶', desarrollo: '⏳', vida: '🛰️', riesgo: '🎲', soporte: '🧑‍🚀' };
+      // Los 4 principales siempre; de los demás, solo los que tienen problemas (máx. 6 líneas)
+      const principales = ['presupuesto', 'masa', 'energia', 'datos'];
+      const lineas = a.barras.filter((b) => principales.includes(b.id) || b.nivel !== 'verde').slice(0, 6);
+      this.textoResumen.setText(lineas.map((b) => `${iconos[b.id] || '•'} ${fraseRecurso(b).frase}`).join('\n'));
+    } else this.textoResumen.setText(
       `Masa: ${a.diseno.masaSeca} kg + ${a.diseno.combustible} kg de combustible = ${a.diseno.masaTotal} kg\n` +
       `Energía: genera ${Math.round(a.operativo.generacionMedia * 10) / 10} W, consume ${Math.round(a.diseno.consumo * 10) / 10} W\n` +
       `Costo: componentes ${a.diseno.costoComponentes} + cohete ${estado.coheteId ? a.costoCohete : '—'}` +

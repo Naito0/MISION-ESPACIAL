@@ -100,10 +100,10 @@ export default class EscenaAterrizaje extends Phaser.Scene {
   crearHud(destino) {
     panel(this, 15, 15, 330, 200);
     this.hud = texto(this, 28, 25, '', { tam: 16 });
-    texto(this, ANCHO - 20, 20,
+    texto(this, ANCHO - 20, 50,
       `${destino.nombre} · gravedad ${destino.gravedad} m/s²` + (this.k > 0 ? ' · atmósfera delgada' : ''),
       { tam: 16, origen: [1, 0], color: COLORES.textoSuave });
-    texto(this, ANCHO - 20, 45,
+    texto(this, ANCHO - 20, 74,
       `Para aterrizar: vertical < ${this.cfg.velocidadMaxVertical} m/s · horizontal < ${this.cfg.velocidadMaxHorizontal} m/s · inclinación < ${this.cfg.anguloMaxGrados}°`,
       { tam: 14, origen: [1, 0], color: COLORES.textoSuave });
     // Barra de combustible

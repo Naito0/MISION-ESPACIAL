@@ -56,7 +56,8 @@ export function titulo(escena, contenido, subtitulo) {
  * @param actual índice de la fase actual (0 a 5)
  */
 export function barraFases(escena, fases, actual) {
-  const ancho = ANCHO / fases.length;
+  // Se deja libre la esquina derecha para los botones 🔬 y 🔊 (controlesGlobales.js)
+  const ancho = (ANCHO - 76) / fases.length;
   fases.forEach((f, i) => {
     const color = i < actual ? 0x1f5a3a : i === actual ? COLORES.boton : 0x1a2038;
     escena.add.rectangle(i * ancho + 2, 2, ancho - 4, 34, color).setOrigin(0, 0)
