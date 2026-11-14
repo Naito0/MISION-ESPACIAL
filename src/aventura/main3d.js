@@ -11,6 +11,7 @@ import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
 import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
 import { conectarServidor, crearConexionLocal } from './red/conexion.js';
+import { abrirMinijuego } from './minijuegos/index.js';
 import { calidad3D } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
@@ -31,7 +32,7 @@ hud.innerHTML = `
 const capa = document.createElement('div'); // capa de cada pantalla
 hud.appendChild(capa);
 const menu = crearMenuPausa(hud, { alAbrir: () => { motor.pausado = true; }, alCerrar: () => { motor.pausado = false; } });
-window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement) menu.alternar(); });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement && !window.consolaAbierta) menu.alternar(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && !menu.abierto && !window.consolaAbierta) menu.abrir(); });
 
 let cuadros = 0;
@@ -64,7 +65,7 @@ motor.renderer.setAnimationLoop(() => {
   if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · calidad ${motor.calidad.nombre}`; cuadros = 0; acumulado = 0; }
 });
 
-window.aventura = { motor, THREE, irA };
+window.aventura = { motor, THREE, irA, ctx, abrirMinijuego };
 // Primero se intenta cargar el modelo GLB del astronauta (si existe) y después arranca el juego
 Promise.all([prepararModelos(), conectarServidor()]).then(([hayModelo, conexion]) => {
   hud.querySelector('.cargando').remove();

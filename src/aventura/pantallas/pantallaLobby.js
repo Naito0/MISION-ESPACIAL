@@ -62,6 +62,7 @@ export function iniciarPantallaLobby(ctx) {
   let conexion = null;
   let codigoSala = null;
   let info = null;
+  let quitarEstado = null;
 
   function vistaInicio(error = '') {
     const servidor = !!ctx.conexion;
@@ -87,9 +88,10 @@ export function iniciarPantallaLobby(ctx) {
       conexion = c;
       codigoSala = r.codigo;
       ctx.conexionActiva = c;
-      c.alEstado(alEstado);
+      quitarEstado = c.alEstado(alEstado);
       if (!c.enRed) await c.accion('tomarLibres');
       info = c.enRed ? await c.infoServidor() : null;
+      ctx.infoServidor = info;
       alEstado(c.estado);
     };
     panel.querySelector('#solo').onclick = () => { const c = ctx.conexionLocal(); entrar(c, c.crear(nombre())); };
@@ -135,7 +137,13 @@ export function iniciarPantallaLobby(ctx) {
     if (empezar) empezar.onclick = async () => mostrarError(await conexion.accion('empezar'));
   }
 
-  vistaInicio();
+  // Si ya estamos en una sala (volvimos de una misión), se retoma directamente
+  if (ctx.conexionActiva && ctx.conexionActiva.estado) {
+    conexion = ctx.conexionActiva;
+    info = ctx.infoServidor || null;
+    quitarEstado = conexion.alEstado(alEstado);
+    alEstado(conexion.estado);
+  } else vistaInicio();
   return {
     actualizar(dt, t) {
       // La cámara gira despacio alrededor de la plataforma
@@ -145,6 +153,6 @@ export function iniciarPantallaLobby(ctx) {
       aro.material.emissiveIntensity = 1.6 + Math.sin(t * 2) * 0.5;
       figuras.forEach((f, i) => f.a.actualizar(dt, { velocidad: 0, apoyado: true, velocidadVertical: 0, giro: 0 }) || (f.a.raiz.position.y = Math.sin(t * 1.5 + i) * 0.03));
     },
-    salir() { panel.remove(); }
+    salir() { panel.remove(); if (quitarEstado) quitarEstado(); }
   };
 }

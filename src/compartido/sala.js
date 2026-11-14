@@ -8,6 +8,8 @@
 // Cada vez que algo cambia, sube "version" y quien la use envía el estado.
 // =============================================================
 
+import { nuevoViaje, avanzarViaje, resolverEmergencia } from './viaje.js';
+
 export const ROLES_ID = ['comandante', 'ingeniero', 'cientifico', 'comunicaciones'];
 
 /** Código de 4 letras fácil de dictar (sin letras que se confunden como O/0, I/1). */
@@ -34,6 +36,17 @@ export class Sala {
     this.posiciones = new Map(); // id → { x, y, z, ry, v, ap, acc }
     this.version = 0;
     this.mensajes = []; // avisos cortos para mostrar a todos (ej. "Ana se unió")
+    this.destinoId = 'marte';
+    this.diseno = {};   // piezas compradas en el hangar (true = protegido)
+    this.viaje = null;
+    this.acumulado = 0;
+  }
+
+  /** Empieza el viaje con el diseño actual. */
+  iniciarViaje() {
+    this.viaje = nuevoViaje(this.datos.emergencias.config, this.diseno);
+    this.fase = 'viaje';
+    this.cambio('🚀 ¡Despegamos! Atentos a las emergencias.');
   }
 
   cambio(mensaje) {
@@ -119,9 +132,25 @@ export class Sala {
     empezar(j) {
       if (!j.anfitrion) return { error: 'Solo el anfitrión puede empezar.' };
       if (!this.puedeEmpezar()) return { error: `Faltan roles: ${this.rolesLibres().join(', ')}.` };
-      this.fase = 'nave';
-      this.cambio('¡Comienza la misión!');
+      this.iniciarViaje();
       return { ok: true };
+    },
+    /** Volver a la sala de espera (después de llegar o fracasar). Se conservan los roles. */
+    reiniciar(j) {
+      if (!j.anfitrion) return { error: 'Solo el anfitrión puede reiniciar.' };
+      if (this.fase === 'lobby') return { ok: true };
+      this.fase = 'lobby';
+      this.viaje = null;
+      this.posiciones.clear();
+      this.cambio('Volvemos a la base');
+      return { ok: true };
+    },
+    /** Resultado del minijuego de una emergencia. */
+    resolver(j, { uid, exito }) {
+      if (this.fase !== 'viaje' || !this.viaje) return { error: 'No hay viaje en curso.' };
+      const r = resolverEmergencia(this.viaje, uid, j.roles, !!exito);
+      if (r.ok && exito) this.cambio(`✅ ${j.nombre} resolvió una emergencia`);
+      return r;
     }
   };
 
@@ -130,8 +159,23 @@ export class Sala {
     if (this.jugadores.has(id) && p && Number.isFinite(p.x)) this.posiciones.set(id, p);
   }
 
-  /** Avanza el tiempo (lo usan los pasos siguientes: viaje, emergencias…). */
-  tick(_dt) {}
+  /** Avanza el tiempo: emergencias del viaje, vida de la nave, llegada o fracaso. */
+  tick(dt, rng = Math.random) {
+    if (this.fase !== 'viaje' || !this.viaje) return;
+    const sucesos = avanzarViaje(this.viaje, dt, this.datos.emergencias.emergencias, this.datos.emergencias.config, rng);
+    for (const s of sucesos) {
+      if (s.tipo === 'nueva') this.cambio(`⚠ ${s.nombre}`);
+      if (s.tipo === 'fallida') this.cambio(`💥 ${s.nombre}: la nave perdió ${s.danio} de vida`);
+    }
+    if (this.viaje.terminado) {
+      this.fase = this.viaje.terminado; // 'llegada' o 'fracaso'
+      this.cambio(this.fase === 'llegada' ? '🪐 ¡Llegamos al destino!' : '💫 La nave se quedó sin vida…');
+      return;
+    }
+    // Una vez por segundo se avisa el tiempo que queda (para el HUD)
+    this.acumulado += dt;
+    if (this.acumulado >= 1) { this.acumulado = 0; this.cambio(); }
+  }
 
   /** Estado que se envía a todos (sin posiciones). */
   estadoPublico() {
@@ -142,7 +186,14 @@ export class Sala {
       jugadores: [...this.jugadores.values()],
       rolesLibres: this.rolesLibres(),
       puedeEmpezar: this.puedeEmpezar(),
-      mensajes: this.mensajes
+      mensajes: this.mensajes,
+      destinoId: this.destinoId,
+      diseno: this.diseno,
+      viaje: this.viaje && {
+        duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
+        emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),
+        registro: this.viaje.registro, terminado: this.viaje.terminado
+      }
     };
   }
 

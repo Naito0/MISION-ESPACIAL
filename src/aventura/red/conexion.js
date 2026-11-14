@@ -78,5 +78,6 @@ export function crearConexionLocal() {
   };
   c.enviarPosicion = (p) => sala && sala.posicion(c.id, p);
   c.infoServidor = async () => null;
+  c.sala = () => sala; // para depurar y para las pruebas automáticas
   return c;
 }

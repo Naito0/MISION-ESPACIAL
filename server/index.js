@@ -23,7 +23,7 @@ const carpetaJuego = join(raiz, 'dist');
 /** Lee un JSON de src/data (los mismos datos que usa el navegador). */
 const leer = (nombre) => JSON.parse(readFileSync(join(raiz, 'src', 'data', nombre), 'utf8'));
 export function datosDelJuego() {
-  return { destinos: leer('destinos.json').destinos, misionesReales: leer('misiones_reales.json').misiones };
+  return { destinos: leer('destinos.json').destinos, misionesReales: leer('misiones_reales.json').misiones, emergencias: leer('emergencias3d.json') };
 }
 
 /** IPs de esta computadora en la red local (para que los demás se conecten). */

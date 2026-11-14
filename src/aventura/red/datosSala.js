@@ -4,7 +4,8 @@
 // =============================================================
 import destinos from '../../data/destinos.json';
 import misionesReales from '../../data/misiones_reales.json';
+import emergencias from '../../data/emergencias3d.json';
 
 export function datosParaSala() {
-  return { destinos: destinos.destinos, misionesReales: misionesReales.misiones };
+  return { destinos: destinos.destinos, misionesReales: misionesReales.misiones, emergencias };
 }
