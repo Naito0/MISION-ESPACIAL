@@ -90,7 +90,12 @@ function irA() {
 ctx.tutorial = crearTutorial(hud);
 ctx.aprendizaje = aprendizaje;
 // Cada emergencia resuelta puede enseñar un concepto (ej. 'resuelta:oxigeno')
-ctx.alResolver = (r) => { if (r.resultado === 'resuelta') aprendizaje.evento(`resuelta:${r.id}`, ctx.conexionActiva?.estado?.destinoId); };
+ctx.alResolver = (r) => {
+  if (r.resultado !== 'resuelta') return;
+  const destinoId = ctx.conexionActiva?.estado?.destinoId;
+  aprendizaje.evento(`resuelta:${r.id}`, destinoId);
+  aprendizaje.evento(`resuelta:${r.rol}`, destinoId);
+};
 let ultimaPantallaTutorial = null;
 ctx.irA = irA;
 

@@ -22,7 +22,7 @@ const PASOS = {
   viaje: [
     { texto: 'Controlas al <b>Piloto</b>. Pulsa <span class="tecla">2</span> para ir con el Ingeniero (o toca su retrato).', resaltar: '.retrato[data-i="1"]', hasta: 'cambio' },
     { texto: '¡Bien! Cada astronauta trabaja en su sala. Espera una emergencia: el aviso rojo dirá a quién le toca.', hasta: 'emergencia' },
-    { texto: '¡Emergencia! Pulsa la tecla que dice el aviso, camina a la consola con <b>"!"</b> y pulsa <span class="tecla">E</span>.', resaltar: '.alerta-grande', hasta: 'resuelta' },
+    { texto: '¡Emergencia! Pulsa la tecla que dice el aviso, camina a la consola con <b>"!"</b> y pulsa <span class="tecla">E</span>. Primero piensas la causa y después la arreglas.', resaltar: '.alerta-grande', hasta: 'resuelta' },
     { texto: '¡Excelente! Así se resuelven todas. Aguanta hasta llegar a la Luna.', dura: 7 }
   ],
   aterrizaje: [

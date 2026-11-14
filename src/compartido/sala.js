@@ -62,7 +62,10 @@ export class Sala {
 
   /** Configuración del viaje: la base de emergencias3d.json con los valores de la dificultad. */
   get configViaje() {
-    const base = this.datos.emergencias.config;
+    const config = this.datos.emergencias.config;
+    // Modo misión: pocas emergencias por viaje según el destino (emergencias3d.json)
+    const porViaje = config.emergenciasPorDestino ? config.emergenciasPorDestino[this.destinoId] : undefined;
+    const base = { ...config, emergenciasPorViaje: porViaje };
     const d = this.valoresNivel;
     if (!d) return base;
     return { ...base, maxSimultaneas: d.maxSimultaneas, tiempoParaResolver: d.tiempoParaResolver, intervaloMin: d.intervaloMin, intervaloMax: d.intervaloMax, factorDanio: d.factorDanio };

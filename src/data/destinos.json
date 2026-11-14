@@ -43,9 +43,9 @@
       "armado": {
         "_comentario": "Datos para las recomendaciones del hangar (compartido/recomendaciones.js). 'nocheDias' es dato real; 'horasReservaBaterias' es un valor del juego (reducido) que crece con la noche.",
         "nocheDias": 14.8,
-        "nocheTexto": "La noche lunar dura unos 14 días terrestres (la mitad de un día lunar de 29,5 días).",
-        "fuenteNoche": "NASA Moon Fact Sheet (NSSDC), periodo sinódico 29,53 días: https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
-        "verificar": ["nocheDias: confirmar el periodo sinódico (29,53 días) en la ficha de la NASA; la página no respondió al revisarla"],
+        "nocheTexto": "La noche lunar dura casi 15 días terrestres.",
+        "fuenteNoche": "NASA, Lunar Surface Technology: \"Lunar days and nights are each nearly 15 Earth days long.\" https://www.nasa.gov/lunar-surface-technology/",
+        "fuenteRetraso": "NASA Science: la luz recorre la distancia Tierra-Luna en 1,3 segundos. https://science.nasa.gov/mission/voyager/voyager-1/voyager-1-what-is-a-light-day/",
         "horasReservaBaterias": 6,
         "factorPolvo": 1.0,
         "aproximado": true
@@ -81,6 +81,10 @@
         "nocheTexto": "La noche en Marte dura unas 12 horas (un día marciano dura 24 h 37 min).",
         "fuenteNoche": "NASA Mars Fact Sheet (NSSDC): https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
         "horasReservaBaterias": 3,
+        "retrasoMinSeg": 240,
+        "retrasoMaxSeg": 1440,
+        "fuenteRetraso": "NASA, Space Communications: 7 Things You Need to Know: \"At Mars' closest approach … the delay is about four minutes … at their greatest distance … around 24 minutes.\" https://www.nasa.gov/missions/tech-demonstration/space-communications-7-things-you-need-to-know/",
+        "fuenteAtmosfera": "NASA Science: \"On Mars, the pressure is 6 to 10 millibars, or 1/100th that of our planet.\" https://science.nasa.gov/resource/wind-flow-on-mars/",
         "factorPolvo": 0.75,
         "polvoTexto": "Las tormentas de polvo de Marte tapan la luz del Sol: en 2018 una tormenta global dejó sin contacto al rover Opportunity, que funcionaba con paneles solares.",
         "fuentePolvo": "NASA, misión Opportunity: https://science.nasa.gov/mission/mer-opportunity/",

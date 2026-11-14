@@ -1,47 +1,42 @@
 // =============================================================
-// resumenAprendizaje.js — Resumen de lo aprendido al final de una misión
-// (función pura, con pruebas). Elige de 3 a 5 conceptos conectados con lo
-// que REALMENTE pasó en esa partida y arma una frase para cada uno.
+// resumenAprendizaje.js — "Hoy aprendiste 3 cosas" (función pura, con pruebas).
+// Devuelve los 3 conceptos de la misión (aprendizaje.json → porDestino),
+// cada uno con una frase conectada con lo que REALMENTE pasó en la partida.
 //
-// m = { destino (de destinos.json), informe (de calcularInforme), diseno,
-//       aterrizaje ('suave'|'duro'|'choque'|null), muestras (0..3), registro (viaje) }
-// conceptos = aprendizaje.json → conceptos
+// m = { destino (destinos.json), diseno, aterrizaje ('suave'|'duro'|'choque'|null),
+//       muestras, registro (viaje), estados (opcional: estado de las barras
+//       de recomendación del hangar, ej. { paneles: 'bajo', baterias: 'ok' }),
+//       prediccion (opcional: true si acertó la predicción del hangar) }
+// datos = aprendizaje.json
 // =============================================================
 
-export function resumenAprendizaje(m, conceptos) {
-  const d = m.destino;
-  const nombre = d.id === 'luna' ? 'la Luna' : 'Marte';
-  const fallo = (id) => m.registro.some((r) => r.id === id && r.resultado === 'fallida');
-  const resolvio = (ids) => m.registro.some((r) => ids.includes(r.id) && r.resultado === 'resuelta');
-  const frases = [];
-  const agregar = (id, texto) => {
-    const c = conceptos.find((x) => x.id === id);
-    if (c && !frases.some((f) => f.id === id)) frases.push({ id, titulo: c.titulo, texto, dato: c.dato, fuente: c.fuente });
+export function resumenAprendizaje(m, datos) {
+  const ids = datos.porDestino[m.destino.id] || [];
+  const est = m.estados || {};
+  const comms = m.registro.filter((r) => r.rol === 'comunicaciones');
+  const resolvioComms = comms.some((r) => r.resultado === 'resuelta');
+  const como = { suave: 'aterrizaste suave', duro: 'aterrizaste fuerte', choque: 'el módulo chocó al aterrizar' }[m.aterrizaje] || 'no llegaste a aterrizar';
+  const pred = m.prediccion === true ? ' ¡Y lo predijiste bien en el hangar!' : m.prediccion === false ? ' En el hangar lo predijiste al revés: ahora ya lo sabes.' : '';
+
+  const frases = {
+    gravedad_luna: () => `En la Luna la gravedad es baja (1,62 m/s²) y ${como}: con poca gravedad se frena con poco combustible.`,
+    noche_luna: () => (est.baterias === 'bajo'
+      ? `Llevaste pocas baterías: la noche lunar dura casi 15 días terrestres y los equipos se habrían apagado.${pred}`
+      : `Llevaste baterías para aguantar la noche lunar, que dura casi 15 días terrestres.${pred}`),
+    senal_luna: () => (resolvioComms
+      ? 'Recuperaste el contacto con la Tierra: desde la Luna la señal tarda solo 1,3 segundos.'
+      : 'Desde la Luna la señal tarda unos 1,3 segundos: por eso se puede hablar casi en vivo.'),
+    luz_marte: () => (est.paneles === 'bajo' || est.paneles === 'justo' || !m.diseno.energia
+      ? `Tus paneles quedaron justos en Marte porque allí llega cerca del 43% de la luz que a la Tierra.${pred}`
+      : `Llevaste paneles de sobra: a Marte llega cerca del 43% de la luz que a la Tierra.${pred}`),
+    senal_marte: () => (resolvioComms
+      ? 'Recuperaste el contacto con la Tierra, pero cada mensaje desde Marte tarda entre unos 4 y 24 minutos.'
+      : 'Desde Marte cada mensaje tarda entre unos 4 y 24 minutos: la nave tiene que decidir sola muchas cosas.'),
+    atmosfera_marte: () => `El aire de Marte es muy delgado (cerca de 1/100 de la presión de la Tierra) y casi no frena: ${como}.`
   };
 
-  // 1) Energía: si faltó margen de energía, o si es Marte (menos luz)
-  if (!m.diseno.energia && d.id === 'marte') agregar('energia', `Tus paneles quedaron justos en Marte porque allí llega cerca del ${Math.round(d.juego.factorSolar * 100)}% de la luz solar que a la Tierra.`);
-  else if (!m.diseno.energia) agregar('energia', 'La nave tuvo poca energía de sobra: por eso hubo más cortocircuitos y sobrecargas.');
-  // 2) Aterrizaje y gravedad
-  if (m.aterrizaje) {
-    const como = { suave: 'aterrizaste suave', duro: 'aterrizaste fuerte', choque: 'el módulo chocó' }[m.aterrizaje];
-    agregar('gravedad', `En ${nombre} la gravedad es de ${d.gravedad} m/s² y ${como}: frenar a tiempo depende de esa gravedad.`);
-  }
-  // 3) Micrometeoritos
-  if (fallo('meteoritos') || fallo('fuga_casco')) agregar('micrometeoritos', m.diseno.blindaje ? 'Los micrometeoritos golpearon la nave: el blindaje ayudó, pero hay que reaccionar rápido.' : 'Sin blindaje, los micrometeoritos causaron más daño: un escudo en capas los frena.');
-  else if (resolvio(['meteoritos', 'fuga_casco'])) agregar('micrometeoritos', 'Esquivaste o reparaste los daños de micrometeoritos: en el espacio la protección es clave.');
-  // 4) Comunicaciones
-  if (resolvio(['senal', 'frecuencia', 'paquetes']) || fallo('senal') || fallo('frecuencia')) {
-    agregar('retraso', d.id === 'marte' ? 'Recuperaste la señal con la Tierra: desde Marte cada mensaje tarda entre 3 y 22 minutos.' : 'Recuperaste la señal con la Tierra: desde la Luna tarda solo 1,3 segundos.');
-  }
-  // 5) Oxígeno
-  if (resolvio(['oxigeno', 'invernadero']) || fallo('oxigeno')) agregar('oxigeno', m.diseno.reciclador ? 'El reciclador de aire ayudó a mantener el oxígeno estable.' : 'Sin reciclador, el oxígeno tuvo problemas: en viajes largos el aire se recicla.');
-  // 6) Ciencia
-  if (m.muestras > 0) agregar('muestras', `Analizaste ${m.muestras} muestra${m.muestras > 1 ? 's' : ''} de ${nombre}: esa es la ciencia que justifica la misión.`);
-  // Relleno (si hay menos de 3): conceptos del destino
-  if (d.id === 'marte') agregar('polvo', 'En Marte las tormentas de polvo pueden tapar la luz del Sol: por eso se llevan paneles de sobra.');
-  else agregar('noche', 'En la Luna la noche dura unos 14 días: las baterías tienen que aguantar mucho.');
-  agregar('retraso', d.id === 'marte' ? 'Desde Marte una señal tarda entre 3 y 22 minutos en llegar a la Tierra.' : 'Desde la Luna una señal tarda unos 1,3 segundos en llegar a la Tierra.');
-  agregar('masa', 'Cada pieza suma masa y el cohete tiene un límite: diseñar es elegir lo justo.');
-  return frases.slice(0, 5);
+  return ids.map((id) => {
+    const c = datos.conceptos.find((x) => x.id === id);
+    return { id, icono: c.icono, titulo: c.titulo, texto: (frases[id] || (() => c.corta))(), pregunta: c.pregunta, fuente: c.fuente };
+  });
 }

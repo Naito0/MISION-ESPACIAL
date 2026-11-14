@@ -13,14 +13,21 @@ import { buscarOpcion } from './hangar.js';
 
 const LUZ_KM_S = 299792; // velocidad de la luz en km/s (la radio viaja a esta velocidad)
 
-/** Segundos que tarda una señal de radio en llegar desde el destino: distancia ÷ velocidad de la luz. */
+/**
+ * Segundos que tarda una señal de radio en llegar desde el destino.
+ * Si destinos.json trae el retraso publicado por la NASA (armado.retrasoMinSeg/MaxSeg,
+ * Marte: 4 a 24 minutos), se usa ese; si no, se calcula: distancia ÷ velocidad de la luz
+ * (Luna: 384 400 km → ≈ 1,3 s).
+ */
 export function retrasoSenal(destino) {
+  const a = destino.armado || {};
+  if (a.retrasoMinSeg && a.retrasoMaxSeg) return { min: a.retrasoMinSeg, max: a.retrasoMaxSeg };
   const min = (destino.distanciaMinKm ?? destino.distanciaTierraKm) / LUZ_KM_S;
   const max = (destino.distanciaMaxKm ?? destino.distanciaTierraKm) / LUZ_KM_S;
   return { min, max };
 }
 
-/** "1.3 s" o "entre 3 y 22 minutos" */
+/** "1.3 segundos" o "entre 4 y 24 minutos" */
 export function textoRetraso(destino) {
   const r = retrasoSenal(destino);
   if (r.max < 60) return `${r.max.toFixed(1)} segundos`;

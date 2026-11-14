@@ -21,6 +21,11 @@ import { abrirMinijuego } from '../minijuegos/index.js';
 import { crearEfectosViaje } from './efectosViaje.js';
 import { TRIPULACION, miembro, colorDe, hexDe } from '../tripulacion.js';
 import emergenciasJSON from '../../data/emergencias3d.json';
+import diagnosticosJSON from '../../data/diagnosticos.json';
+import { mostrarDiagnostico } from '../ui/tarjetas.js';
+import { retrasoSenal } from '../../compartido/recomendaciones.js';
+
+const DIAGNOSTICOS = diagnosticosJSON.diagnosticos;
 
 const DISTANCIA_CONSOLA = 2.4; // metros para poder usar una consola
 
@@ -88,6 +93,7 @@ export function iniciarPantallaNave(ctx) {
         <span class="r-icono">${m.icono}</span><span class="r-txt"><b>${m.tecla}</b> ${m.corto}</span>
       </button>`).join('')}</div>
     <div class="alertas"></div>
+    <div class="panel senal-tierra" hidden></div>
     <div class="panel aviso-e"></div>
     <div class="avisos"></div>
     <div class="vineta"></div>`;
@@ -151,17 +157,53 @@ export function iniciarPantallaNave(ctx) {
     if (antes && viaje) {
       for (const r of viaje.registro.slice(antes.registro.length)) {
         if (r.resultado === 'resuelta') ctx.tutorial?.evento('resuelta');
+        // Mostrarlo en el mundo: el mensaje a la Tierra viaja con cuenta regresiva
+        if (r.resultado === 'resuelta' && r.rol === 'comunicaciones') enviarSenal();
         ctx.alResolver?.(r);
       }
     }
-    if ((e.fase === 'llegada' || e.fase === 'fracaso') && !final) mostrarFinal(e);
+    if ((e.fase === 'llegada' || e.fase === 'fracaso') && !final) {
+      if (e.fase === 'llegada') ctx.aprendizaje?.evento('llegada', e.destinoId);
+      mostrarFinal(e);
+    }
   });
 
-  function abrir(emergencia) {
+  // ---- Mensaje a la Tierra: se ve viajar, con el retraso real de la señal ----
+  // Luna: ~1,3 s (se muestra tal cual). Marte: entre unos 4 y 24 minutos según la distancia;
+  // en el juego 1 minuto real = 1 segundo, para que se vea sin esperar tanto.
+  let senal = null;
+  function enviarSenal() {
+    const r = retrasoSenal(destino);
+    const segundosReales = r.min + Math.random() * (r.max - r.min);
+    const enJuego = segundosReales < 60 ? segundosReales : segundosReales / 60;
+    const texto = segundosReales < 60 ? `${segundosReales.toFixed(1)} s` : `${Math.round(segundosReales / 60)} min`;
+    senal = { total: Math.max(1.3, enJuego), resta: Math.max(1.3, enJuego), texto, minutos: segundosReales >= 60 };
+    $('.senal-tierra').hidden = false;
+  }
+  function actualizarSenal(dt) {
+    if (!senal) return;
+    senal.resta = Math.max(0, senal.resta - dt);
+    const f = 1 - senal.resta / senal.total;
+    $('.senal-tierra').innerHTML = `📡 Mensaje a la Tierra: tarda <b>${senal.texto}</b>${senal.minutos ? ' <small>(1 min = 1 s en el juego)</small>' : ''}
+      <div class="st-camino"><span>🚀</span><div class="st-pulso" style="left:${f * 100}%"></div><span>🌍</span></div>
+      <div class="st-cuenta">${senal.resta > 0 ? `Llega en ${senal.resta.toFixed(1)} s` : '✅ ¡Llegó!'}</div>`;
+    if (senal.resta <= 0) { senal.fin = (senal.fin || 0) + dt; if (senal.fin > 2.5) { senal = null; $('.senal-tierra').hidden = true; } }
+  }
+
+  // Paso 2 de cada emergencia: el DIAGNÓSTICO (una sola vez por emergencia)
+  const diagnosticadas = new Set();
+  async function abrir(emergencia) {
     const j = actual().jugador;
     j.bloqueado = true;
-    j.astronauta.reproducir('reparar', 1);
     consola = { uid: emergencia.uid, cerrar: () => {} };
+    const diag = DIAGNOSTICOS[emergencia.id];
+    if (diag && !diagnosticadas.has(emergencia.uid)) {
+      await mostrarDiagnostico(diag, emergencia.nombre); // pausa real hasta acertar
+      diagnosticadas.add(emergencia.uid);
+      if (!viaje || !viaje.emergencias.some((x) => x.uid === emergencia.uid)) { consola = null; j.bloqueado = false; return; }
+    }
+    // Paso 3: la solución (minijuego)
+    j.astronauta.reproducir('reparar', 1);
     const c = abrirMinijuego(emergencia, colorDe(emergencia.rol), (resultado) => {
       consola = null;
       j.bloqueado = false;
@@ -201,7 +243,8 @@ export function iniciarPantallaNave(ctx) {
   }
 
   // Las tarjetas "¿Qué aprendiste?" nunca aparecen durante una emergencia
-  ctx.aprendizaje?.alPoderMostrar(() => !consola && !(viaje && viaje.emergencias.length && !final));
+  // (tampoco mientras el mensaje a la Tierra está viajando: primero se ve llegar)
+  ctx.aprendizaje?.alPoderMostrar(() => !consola && !senal && !(viaje && viaje.emergencias.length && !final));
 
   const adelante = new THREE.Vector3();
   const derecha = new THREE.Vector3();
@@ -239,6 +282,7 @@ export function iniciarPantallaNave(ctx) {
       if (consola) yo.jugador.astronauta.mantener('reparar');
       esc.puertas.forEach((p) => p.actualizar(dt, astronautas.map((a) => a.jugador.pies)));
       esc.actualizar(dt, t);
+      actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];
       efectos.actualizar(dt, t, activas, [yo.rol]);
       if (activas.length) ctx.tutorial?.evento('emergencia');

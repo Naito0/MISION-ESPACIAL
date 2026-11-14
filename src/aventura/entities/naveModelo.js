@@ -53,6 +53,7 @@ function piezaDe(id) {
       add(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 6), mat(0xaaaaaa), s * 1.4, 3.2, 0, 0, 0, Math.PI / 2);
       add(new THREE.BoxGeometry(largo, 0.06, 1.1), m, s * (1.7 + largo / 2), 3.2, 0);
     }
+    g.userData.panel = m; // su brillo depende de la luz del Sol del destino (ver luzSolar)
     return g;
   }
   // ---- Baterías ----
@@ -121,8 +122,13 @@ export class NaveModelo {
     }
   }
 
-  /** Animación de "aparecer" de las piezas nuevas (rebote). */
+  /** Animación de "aparecer" de las piezas nuevas (rebote) y brillo de los paneles. */
   actualizar(dt) {
+    // Los paneles brillan según la luz del Sol del destino: en Marte (~43%) brillan menos
+    const luz = this.luzSolar ?? 1;
+    for (const p of this.piezas.values()) {
+      if (p.grupo.userData.panel) { p.grupo.userData.panel.emissive.setHex(0x2a6cff); p.grupo.userData.panel.emissiveIntensity = 0.1 + 1.3 * luz * luz; }
+    }
     for (const p of this.piezas.values()) {
       if (p.t >= 1) continue;
       p.t = Math.min(1, p.t + dt * 2.2);

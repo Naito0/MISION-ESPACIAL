@@ -5,7 +5,7 @@
     "facil": {
       "nombre": "Fácil",
       "maxSimultaneas": 1,
-      "tiempoParaResolver": 60,
+      "tiempoParaResolver": 100,
       "intervaloMin": 14,
       "intervaloMax": 22,
       "factorDanio": 0.6,
@@ -27,8 +27,8 @@
     },
     "normal": {
       "nombre": "Normal",
-      "maxSimultaneas": 2,
-      "tiempoParaResolver": 40,
+      "maxSimultaneas": 1,
+      "tiempoParaResolver": 75,
       "intervaloMin": 10,
       "intervaloMax": 16,
       "factorDanio": 1,

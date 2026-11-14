@@ -23,6 +23,8 @@ import componentes from '../../data/componentes.json';
 import configHangar from '../../data/hangar3d.json';
 import { ROLES, DESTINOS, colorRol } from '../datos3d.js';
 import { efecto } from '../audio.js';
+import { mostrarPrediccion, mostrarTarjeta } from '../ui/tarjetas.js';
+import { CONCEPTOS, PREDICCIONES } from '../aprendizaje.js';
 
 const CATALOGO = crearCatalogo(componentes, configHangar);
 const hex = (n) => `#${n.toString(16).padStart(6, '0')}`;
@@ -279,6 +281,28 @@ export function iniciarPantallaHangar(ctx) {
     dibujar(e);
   });
   dibujar(conexion.estado);
+
+  // Mostrarlo en el mundo: en Marte los paneles de la nave brillan menos (llega menos luz)
+  const destinoHangar = DESTINOS.find((d) => d.id === conexion.estado.destinoId);
+  nave.luzSolar = destinoHangar?.juego?.factorSolar ?? 1;
+
+  // Una misión nueva: sus 3 conceptos se pueden enseñar otra vez.
+  // PREDECIR ANTES DE ACTUAR: una pregunta antes de comprar; después se ve si acertó.
+  ctx.aprendizaje?.nuevaMision();
+  const pred = PREDICCIONES[conexion.estado.destinoId];
+  if (pred && !ctx.prediccionHecha?.[conexion.estado.destinoId + conexion.estado.version]) {
+    ctx.prediccionHecha = { [conexion.estado.destinoId + conexion.estado.version]: true };
+    setTimeout(async () => {
+      const acerto = await mostrarPrediccion(pred);
+      ctx.prediccion = { destinoId: conexion.estado.destinoId, acerto };
+      const c = CONCEPTOS.find((x) => x.id === pred.concepto);
+      ctx.aprendizaje?.marcar(c.id);
+      await mostrarTarjeta({
+        etiqueta: acerto ? '✅ ¡Acertaste!' : '❌ Era al revés', icono: c.icono, titulo: c.titulo,
+        frase: c.corta, detalle: c.detalle, fuente: c.fuente
+      });
+    }, 600);
+  }
 
   return {
     nave,

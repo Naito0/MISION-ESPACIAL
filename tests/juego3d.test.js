@@ -195,8 +195,31 @@ test('dificultad: Fácil da 1 emergencia a la vez, más tiempo, menos daño y m�
   const n = new Sala('DIF2', { ...datosCompletos, dificultad: DIF });
   n.unir('a', 'Ana');
   assert.deepEqual(n.accion('a', 'dificultad', { nivel: 'normal' }), { ok: true });
-  assert.equal(n.configViaje.maxSimultaneas, 2);
+  assert.equal(n.configViaje.maxSimultaneas, 1);
   assert.ok(n.configViaje.tiempoParaResolver < s.configViaje.tiempoParaResolver);
+});
+
+test('viaje (modo misión): 3-4 emergencias, una por rol, de a una y con 30-45 s de calma', () => {
+  const config = { ...EMERG.config, emergenciasPorViaje: 4, maxSimultaneas: 1, tiempoParaResolver: 60 };
+  const v = nuevoViaje(config, {});
+  let ultimaFin = null;
+  const calmas = [];
+  let t = 0;
+  while (!v.terminado && t < 1000) {
+    avanzarViaje(v, 0.5, EMERG.emergencias, config, Math.random);
+    t += 0.5;
+    assert.ok(v.emergencias.length <= 1, 'de a una');
+    // Resolver enseguida cada emergencia (como si el jugador fuera rápido)
+    if (v.emergencias.length) {
+      if (ultimaFin !== null) calmas.push(t - ultimaFin);
+      resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true);
+      ultimaFin = t;
+    }
+  }
+  assert.equal(v.terminado, 'llegada');
+  assert.ok(v.registro.length >= 3 && v.registro.length <= 4, `hubo ${v.registro.length}`);
+  assert.equal(new Set(v.registro.map((r) => r.rol)).size, v.registro.length, 'una por rol');
+  for (const c of calmas) assert.ok(c >= 30, `calma de ${c} s`);
 });
 
 test('recomendaciones: dependen del destino (paneles, combustible, baterías, antena)', () => {
@@ -222,30 +245,32 @@ test('recomendaciones: dependen del destino (paneles, combustible, baterías, an
   assert.notEqual(rL.antena.estado, 'bajo');
   // Retraso de la señal: Luna ~1,3 s; Marte entre ~3 y ~22 minutos
   assert.ok(Math.abs(retrasoSenal(luna).max - 1.28) < 0.05);
-  assert.equal(textoRetraso(marte), 'entre 3 y 22 minutos');
+  assert.equal(textoRetraso(marte), 'entre 4 y 24 minutos'); // dato publicado por la NASA
   // Dependencia: baterías grandes con paneles que no alcanzan
   const sel2 = { ...sel, baterias: ['bat_grande'] };
   assert.ok(dependencias(sel2, s.catalogo, marte, resumenDiseno(sel2, s.catalogo, marte, datosCompletos.hangar)).some((t) => t.includes('baterías grandes')));
 });
 
-test('aprendizaje: 12 conceptos con fuente y momento; el resumen da 3 a 5 conceptos de lo que pasó', () => {
+test('aprendizaje: 3 conceptos por destino, con fuente, momento y pregunta; "Hoy aprendiste 3 cosas"', () => {
   const AP = leerJSON('aprendizaje.json');
-  assert.equal(AP.conceptos.length, 12);
+  for (const d of ['luna', 'marte']) assert.equal(AP.porDestino[d].length, 3, d);
   for (const c of AP.conceptos) {
-    assert.ok(c.titulo && c.explicacion && c.dato && c.fuente.startsWith('https://') && c.momento.length, c.id);
+    assert.ok(c.titulo && c.corta && c.detalle && c.fuente.startsWith('https://') && c.momento.length, c.id);
+    assert.ok(c.pregunta && c.pregunta.opciones[c.pregunta.correcta], `${c.id}: pregunta`);
   }
   const marte = leerJSON('destinos.json').destinos.find((d) => d.id === 'marte');
   const r = resumenAprendizaje({
-    destino: marte, diseno: { energia: false, blindaje: false }, aterrizaje: 'choque', muestras: 2,
-    registro: [{ id: 'meteoritos', resultado: 'fallida' }, { id: 'senal', resultado: 'resuelta' }]
-  }, AP.conceptos);
-  assert.ok(r.length >= 3 && r.length <= 5);
-  assert.match(r[0].texto, /43%/, 'los paneles en Marte, conectado con lo que pasó');
-  assert.ok(r.some((f) => f.id === 'gravedad' && f.texto.includes('3.71')));
-  assert.ok(r.some((f) => f.id === 'micrometeoritos' && f.texto.includes('Sin blindaje')));
-  // Una partida tranquila en la Luna también da al menos 3
+    destino: marte, diseno: { energia: false }, aterrizaje: 'choque', muestras: 2, prediccion: true,
+    registro: [{ id: 'senal', rol: 'comunicaciones', resultado: 'resuelta' }], estados: { paneles: 'bajo' }
+  }, AP);
+  assert.equal(r.length, 3);
+  assert.match(r.find((f) => f.id === 'luz_marte').texto, /43%.*predijiste bien/);
+  assert.match(r.find((f) => f.id === 'senal_marte').texto, /Recuperaste/);
+  assert.match(r.find((f) => f.id === 'atmosfera_marte').texto, /chocó/);
   const luna = leerJSON('destinos.json').destinos.find((d) => d.id === 'luna');
-  assert.ok(resumenAprendizaje({ destino: luna, diseno: { energia: true }, aterrizaje: null, muestras: 0, registro: [] }, AP.conceptos).length >= 3);
+  const rl = resumenAprendizaje({ destino: luna, diseno: { energia: true }, aterrizaje: 'suave', muestras: 0, registro: [], estados: { baterias: 'bajo' } }, AP);
+  assert.deepEqual(rl.map((f) => f.id), ['gravedad_luna', 'noche_luna', 'senal_luna']);
+  assert.match(rl[1].texto, /pocas baterías/);
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {
