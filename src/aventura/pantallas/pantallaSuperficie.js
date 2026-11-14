@@ -16,6 +16,8 @@ import { DESTINOS, TIERRA } from '../datos3d.js';
 import { abrirMinijuego } from '../minijuegos/index.js';
 import { ambiente, efecto } from '../audio.js';
 import { mostrarTarjeta } from '../ui/tarjetas.js';
+import { crearAstronautasFondo } from '../entities/astronautasFondo.js';
+import { colorDe } from '../tripulacion.js';
 import hechosJSON from '../../data/hechos_reales.json';
 
 const HECHOS = hechosJSON.hechos;
@@ -47,7 +49,9 @@ export function iniciarPantallaSuperficie(ctx) {
   const indice = Math.max(0, e0.jugadores.indexOf(yo));
   // Empieza junto a la escotilla del módulo (en la esclusa)
   esc.puntoInicio = new THREE.Vector3(-0.6 + indice * 1.2, 0.05, 2.8);
-  const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDeJugador(yo));
+  // En la superficie el jugador controla al CIENTÍFICO (analiza las muestras);
+  // los otros 3 trabajan de fondo (astronautasFondo.js)
+  const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, soyCientifico ? colorDe('cientifico') : colorDeJugador(yo));
   ambiente(true);
   ctx.aprendizaje?.evento('superficie:llegada', destino.id); // en Marte: tormentas de polvo
 
@@ -71,6 +75,9 @@ export function iniciarPantallaSuperficie(ctx) {
   const afuera = destino.id === 'luna' ? 'el vacío de la Luna' : 'el aire muy delgado de Marte';
   ctx.aprendizaje?.alPoderMostrar(() => !enEsclusa); // primero se sale; después, las tarjetas
   const CLAVE_ESCLUSA = 'misionEspacial.esclusaExplicada';
+
+  // ---- Los otros 3 astronautas trabajan de fondo (sin física: no bloquean) ----
+  const fondo = crearAstronautasFondo(escena);
 
   // ---- Muestras (cristales que brillan) ----
   const mallas = e0.superficie.muestras.map((m) => {
@@ -182,6 +189,7 @@ export function iniciarPantallaSuperficie(ctx) {
     escena, esc, jugador, remotos, mundo,
     actualizar(dt, t) {
       const entrada = jugador.actualizar(dt);
+      fondo.actualizar(dt, t);
       // ---- Esclusa: pulsar E, despresurizar y salir ----
       if (enEsclusa) {
         const panel = ui.querySelector('.esclusa');
