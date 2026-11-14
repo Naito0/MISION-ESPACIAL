@@ -1,7 +1,11 @@
 // =============================================================
 // main3d.js — Arranque del juego 3D (Three.js).
-// Maneja las "pantallas" del juego (lobby, sistema solar, hangar, nave,
-// superficie, informe). Cada pantalla tiene actualizar(dt, t) y salir().
+// Maneja las "pantallas" del juego (sistema solar, hangar, nave,
+// aterrizaje, superficie, informe). Cada pantalla tiene actualizar(dt, t) y salir().
+//
+// El juego es un SITIO ESTÁTICO: todo corre en el navegador, sin servidor.
+// (El modo en red quedó en el código pero NO se carga: pantallaLobby.js,
+//  pantallaNaveRed.js, red/conexion.js y server/.)
 // =============================================================
 import * as THREE from 'three';
 import { Motor3D } from './engine/Motor3D.js';
@@ -9,18 +13,27 @@ import { crearControlTeclado, finDeCuadro } from './engine/entrada.js';
 import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
-import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
 import { iniciarPantallaHangar } from './pantallas/pantallaHangar.js';
 import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
 import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
-import { crearConexionLocal } from './red/conexion.js';
+import { crearPartidaLocal } from './red/partidaLocal.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { crearTutorial } from './tutorial.js';
 import { crearAprendizaje } from './aprendizaje.js';
+import { pausar, reanudar, estaPausado } from './pausa.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
+
+// ---- Pantalla de carga (está en index.html): barra de progreso ----
+const carga = document.getElementById('carga');
+function progresoCarga(fraccion, texto) {
+  if (!carga) return;
+  carga.querySelector('.relleno').style.width = `${Math.round(Math.min(1, fraccion) * 100)}%`;
+  if (texto) carga.querySelector('.texto').textContent = texto;
+}
+progresoCarga(0.35, 'Preparando el motor 3D…'); // si llegamos aquí, el código del juego ya bajó
 
 const hud = document.getElementById('hud');
 const motor = new Motor3D(document.getElementById('mundo3d'), calidad3D());
@@ -33,17 +46,15 @@ hud.innerHTML = `
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
     <span class="tecla">E</span> usar · <span class="tecla">1-4</span> astronauta · <span class="tecla">Esc</span> menú
   </div>
-  <div class="fps"></div>
-  <div class="cargando">Cargando…</div>`;
+  <div class="fps"></div>`;
 const capa = document.createElement('div'); // capa de cada pantalla
 hud.appendChild(capa);
 // Tarjetas "¿Qué aprendiste?" y diario "Lo que aprendí"
 const aprendizaje = crearAprendizaje(hud);
-const pausar = (si) => { motor.pausado = si; window.juegoPausado = si; };
 const menu = crearMenuPausa(hud, {
-  alAbrir: () => pausar(true),
-  alCerrar: () => pausar(false),
-  extras: [{ texto: '📖 Lo que aprendí', accion: () => { pausar(true); aprendizaje.abrirDiario(() => pausar(false)); } }]
+  alAbrir: () => pausar('menu'),
+  alCerrar: () => reanudar('menu'),
+  extras: [{ texto: '📖 Lo que aprendí', accion: () => { pausar('diario'); aprendizaje.abrirDiario(() => reanudar('diario')); } }]
 });
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement && !window.consolaAbierta) menu.alternar(); });
 document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && !menu.abierto && !window.consolaAbierta) menu.abrir(); });
@@ -56,18 +67,17 @@ const fps = hud.querySelector('.fps');
 let pantalla = null;
 const ctx = { motor, hud: capa, control, colorRol: 0x7cc4ff, colorPlaneta: parseInt(MARTE.color.replace('#', ''), 16) };
 
-function irA(nombre) {
+function irA() {
   if (pantalla) pantalla.salir();
   capa.innerHTML = '';
-  // 'juego' = la pantalla que corresponde a la fase actual de la sala
+  // La pantalla que corresponde a la fase actual de la partida
   const fase = ctx.conexionActiva?.estado?.fase;
-  if (nombre === 'lobby' || fase === 'lobby' || !fase) pantalla = iniciarPantallaLobby(ctx);
-  else if (fase === 'sistema') pantalla = iniciarPantallaSistema(ctx);
-  else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
+  if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
   else if (fase === 'informe') pantalla = iniciarPantallaInforme(ctx);
   else if (fase === 'aterrizaje') pantalla = iniciarPantallaAterrizaje(ctx);
   else if (fase === 'superficie') pantalla = iniciarPantallaSuperficie(ctx);
-  else pantalla = iniciarPantallaNave(ctx); // viaje, llegada o fracaso
+  else if (['viaje', 'llegada', 'fracaso'].includes(fase)) pantalla = iniciarPantallaNave(ctx);
+  else pantalla = iniciarPantallaSistema(ctx);
   window.aventura.pantalla = pantalla;
   // El tutorial (Orbi) muestra los pasos de esta pantalla
   const nombreTutorial = { sistema: 'sistema', hangar: 'hangar', viaje: 'viaje', llegada: 'viaje', fracaso: 'viaje', aterrizaje: 'aterrizaje', superficie: 'superficie', informe: 'informe' }[fase];
@@ -77,7 +87,6 @@ function irA(nombre) {
   window.capturarMouse = !!pantalla.jugador;
   hud.querySelector('.ayuda').style.display = window.capturarMouse ? '' : 'none';
 }
-ctx.conexionLocal = crearConexionLocal;
 ctx.tutorial = crearTutorial(hud);
 ctx.aprendizaje = aprendizaje;
 // Cada emergencia resuelta puede enseñar un concepto (ej. 'resuelta:oxigeno')
@@ -85,12 +94,12 @@ ctx.alResolver = (r) => { if (r.resultado === 'resuelta') aprendizaje.evento(`re
 let ultimaPantallaTutorial = null;
 ctx.irA = irA;
 
-motor.alActualizarGlobal = true;
 const reloj = new THREE.Clock();
 motor.renderer.setAnimationLoop(() => {
   const dt = Math.min(reloj.getDelta(), 0.05);
   const t = reloj.elapsedTime;
-  if (!motor.pausado && pantalla) pantalla.actualizar(dt, t);
+  // PAUSA REAL: con una tarjeta, una explicación o el menú abiertos, el mundo no se mueve
+  if (!estaPausado() && pantalla) pantalla.actualizar(dt, t);
   finDeCuadro();
   motor.renderer.render(motor.escena, motor.camara);
   cuadros++; acumulado += dt;
@@ -98,15 +107,14 @@ motor.renderer.setAnimationLoop(() => {
 });
 
 window.aventura = { motor, THREE, irA, ctx, abrirMinijuego };
-// Primero se intenta cargar el modelo GLB del astronauta (si existe) y después arranca el juego
-// Un solo jugador controla a los 4 astronautas: la partida corre dentro del navegador
-// (sin servidor ni lobby). El modo en red sigue en el código pero está desactivado:
-// pantallaLobby.js, pantallaNaveRed.js, red/conexion.js (conectarServidor) y server/.
-prepararModelos().then(async (hayModelo) => {
-  hud.querySelector('.cargando').remove();
+
+// ---- Arranque: modelos → partida → primera pantalla ----
+(async () => {
+  progresoCarga(0.45, 'Cargando los astronautas…');
+  const hayModelo = await prepararModelos((f) => progresoCarga(0.45 + f * 0.35, 'Cargando los astronautas…'));
   window.aventura.modeloGLB = hayModelo;
-  ctx.conexion = null;
-  const partida = crearConexionLocal();
+  progresoCarga(0.85, 'Preparando la misión…');
+  const partida = crearPartidaLocal();
   await partida.crear('Tripulación');
   await partida.accion('tomarLibres');  // el jugador tiene los 4 roles
   await partida.accion('dificultad', { nivel: dificultad() });
@@ -114,5 +122,9 @@ prepararModelos().then(async (hayModelo) => {
   ctx.conexionActiva = partida;
   // Si el jugador cambia la dificultad (menú o sistema solar), se avisa a la partida
   window.addEventListener('cambio-dificultad', () => partida.accion('dificultad', { nivel: dificultad() }));
-  irA('juego');
-});
+  irA();
+  progresoCarga(0.95, 'Encendiendo los motores…');
+  motor.renderer.compile(motor.escena, motor.camara); // prepara los gráficos para que no se trabe al empezar
+  progresoCarga(1, '¡Listo!');
+  setTimeout(() => { carga.style.opacity = '0'; setTimeout(() => carga.remove(), 600); }, 250);
+})();

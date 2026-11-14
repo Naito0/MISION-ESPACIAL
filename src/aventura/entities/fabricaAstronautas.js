@@ -12,16 +12,21 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as clonarConEsqueleto } from 'three/addons/utils/SkeletonUtils.js';
 import { Astronauta } from './Astronauta.js';
 
-const RUTA_MODELO = 'models/astronauta.glb';
+// Ruta RELATIVA a donde está publicado el juego (BASE_URL = './'), así funciona
+// aunque el link esté dentro de una subcarpeta (por ejemplo en GitHub Pages).
+const RUTA_MODELO = `${import.meta.env.BASE_URL}models/astronauta.glb`;
 let plantilla = null; // { scene, animations } cargado una sola vez
 
-/** Intenta cargar el modelo GLB. Devuelve true si hay modelo. */
-export async function prepararModelos() {
+/**
+ * Intenta cargar el modelo GLB. Devuelve true si hay modelo.
+ * alProgreso(fraccion 0..1) se llama mientras baja el archivo (para la barra de carga).
+ */
+export async function prepararModelos(alProgreso = () => {}) {
   try {
     const r = await fetch(RUTA_MODELO, { method: 'HEAD' });
     const tipo = r.headers.get('content-type') || '';
     if (!r.ok || tipo.includes('html')) return false; // no está (el servidor devolvió la página)
-    plantilla = await new GLTFLoader().loadAsync(RUTA_MODELO);
+    plantilla = await new GLTFLoader().loadAsync(RUTA_MODELO, (x) => { if (x.total) alProgreso(x.loaded / x.total); });
     return true;
   } catch {
     plantilla = null;

@@ -55,12 +55,49 @@ npm run build
 npm run preview    # el juego en http://localhost:4173
 ```
 
-Todo corre dentro del navegador: no hace falta servidor ni internet.
+Todo corre dentro del navegador: no hace falta servidor ni internet. El juego compilado es un **sitio estático**: la carpeta `dist` (pesa menos de 1 MB) es todo lo que hay que subir.
 
-### Publicar en GitHub Pages
+## 3. Publicar: un link para que cualquiera juegue
 
-1. En GitHub: **Settings → Pages → Source: GitHub Actions** (una sola vez).
-2. Cada `git push` a las ramas **main** o **juego-3d** publica el juego (pestaña **Actions**). Si GitHub dice que la rama no tiene permiso: **Settings → Environments → github-pages** → agregar `juego-3d` en *Deployment branches*.
+Antes de publicar, siempre:
+
+```powershell
+npm run build      # crea la carpeta dist
+npm run preview    # abrir http://localhost:4173 y comprobar que el juego carga
+```
+
+### Opción A: GitHub Pages (con el workflow que ya existe)
+
+Requiere que el repositorio de GitHub sea **público** (en cuentas gratuitas, Pages no funciona con repositorios privados). Se publica el código y el juego.
+
+1. Sube el proyecto a GitHub (una sola vez):
+   ```powershell
+   git remote add origin https://github.com/USUARIO/REPOSITORIO.git
+   git push -u origin juego-3d
+   ```
+2. En GitHub, en el repositorio: **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
+3. Si GitHub dice que la rama no tiene permiso: **Settings → Environments → github-pages → Deployment branches** → agregar `juego-3d`.
+4. Cada `git push` a `main` o a `juego-3d` compila y publica el juego. Mira el avance en la pestaña **Actions** (círculo amarillo = trabajando, ✔ verde = listo).
+5. El link queda así: `https://USUARIO.github.io/REPOSITORIO/`.
+
+### Opción B: subir solo el juego compilado (el código NO se publica)
+
+Sirve aunque el repositorio sea privado: solo se sube la carpeta `dist`.
+
+**Netlify Drop:**
+1. Ejecuta `npm run build`.
+2. Abre https://app.netlify.com/drop en el navegador.
+3. Abre el Explorador de archivos de Windows, entra a la carpeta del proyecto y **arrastra la carpeta `dist`** completa a la página.
+4. Al terminar, Netlify muestra el link del juego (algo como `https://nombre-al-azar.netlify.app`). Si te pide crear una cuenta gratuita para conservar el sitio, créala.
+5. Para actualizar el juego: `npm run build` y vuelve a arrastrar `dist` en la página de tu sitio (pestaña **Deploys**).
+
+**Cloudflare Pages (subida directa):**
+1. Ejecuta `npm run build`.
+2. Entra a https://dash.cloudflare.com (cuenta gratuita) → **Workers & Pages** → **Create** → pestaña **Pages** → **Upload assets** (subir archivos).
+3. Escribe un nombre para el proyecto y **arrastra la carpeta `dist`**. Pulsa **Deploy**.
+4. El link queda así: `https://nombre-del-proyecto.pages.dev`.
+
+> Todas las rutas del juego son relativas (`base: './'` en `vite.config.js`), así que funciona en cualquier carpeta o subcarpeta.
 
 ### Otros comandos
 
@@ -70,7 +107,7 @@ npm test           # pruebas de las reglas (hangar, viaje, recomendaciones, apre
 
 ---
 
-## 3. Controles
+## 4. Controles
 
 | Acción | Teclado y mouse |
 |---|---|
