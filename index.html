@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Misión Espacial — Borrador</title>
-    <style>
-      html, body { margin: 0; height: 100%; background: #05070f; overflow: hidden; }
-      #juego { width: 100%; height: 100%; }
-    </style>
+    <title>Misión Espacial 3D</title>
+    <link rel="stylesheet" href="/src/aventura/ui/estilos.css" />
   </head>
   <body>
-    <div id="juego"></div>
-    <script type="module" src="/src/main.js"></script>
+    <!-- Aquí Three.js crea el canvas 3D -->
+    <div id="mundo3d"></div>
+    <!-- Interfaz (HTML) superpuesta al mundo 3D: HUD, menús, consolas holográficas -->
+    <div id="hud"></div>
+    <script type="module" src="/src/aventura/main3d.js"></script>
   </body>
 </html>

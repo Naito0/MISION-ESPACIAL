@@ -17,6 +17,8 @@ export class MundoFisico {
     this.octree = new Octree();
     this.octree.fromGraphNode(grupoColisiones);
     this.gravedad = gravedad; // m/s² (Tierra 9,81 · Marte 3,71 · Luna 1,62, de destinos.json)
+    // Obstáculos que se mueven (puertas): { bloqueo: THREE.Box3, cerrada: bool }
+    this.dinamicos = [];
   }
 }
 
@@ -89,8 +91,31 @@ export class CuerpoJugador {
     if (this.capsula.start.y < -30) this.ubicar(this.inicio);
   }
 
+  /** Puertas cerradas: empuja la cápsula fuera de su caja (mirando solo el plano del piso). */
+  resolverDinamicos() {
+    const c = this.capsula.start;
+    for (const d of this.mundo.dinamicos) {
+      if (!d.cerrada) continue;
+      const b = d.bloqueo;
+      if (c.y > b.max.y || this.capsula.end.y < b.min.y) continue;
+      const px = THREE.MathUtils.clamp(c.x, b.min.x, b.max.x);
+      const pz = THREE.MathUtils.clamp(c.z, b.min.z, b.max.z);
+      const dx = c.x - px;
+      const dz = c.z - pz;
+      const dist = Math.hypot(dx, dz);
+      if (dist >= RADIO) continue;
+      // Dentro o tocando: se empuja hacia afuera por el lado más cercano
+      let nx = dx; let nz = dz;
+      if (dist < 1e-6) { const haciaX = Math.abs(c.x - (b.min.x + b.max.x) / 2) > Math.abs(c.z - (b.min.z + b.max.z) / 2); nx = haciaX ? Math.sign(c.x - (b.min.x + b.max.x) / 2) : 0; nz = haciaX ? 0 : Math.sign(c.z - (b.min.z + b.max.z) / 2); }
+      const largo = Math.hypot(nx, nz) || 1;
+      const empuje = RADIO - dist;
+      this.capsula.translate(new THREE.Vector3((nx / largo) * empuje, 0, (nz / largo) * empuje));
+    }
+  }
+
   /** Empuja la cápsula fuera de lo que esté tocando. Devuelve true si tocó un PISO. */
   resolverColisiones() {
+    this.resolverDinamicos();
     const r = this.mundo.octree.capsuleIntersect(this.capsula);
     if (!r) return false;
     const esPiso = r.normal.y > 0.5; // superficie casi horizontal = piso (también rampas suaves)

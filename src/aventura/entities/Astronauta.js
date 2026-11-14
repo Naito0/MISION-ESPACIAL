@@ -43,7 +43,8 @@ export class Astronauta {
     const traje = new THREE.MeshStandardMaterial({ color: BLANCO_TRAJE, roughness: 0.7, metalness: 0.05 });
     const rol = new THREE.MeshStandardMaterial({ color: colorRol, roughness: 0.5, metalness: 0.2, emissive: colorRol, emissiveIntensity: 0.15 });
     const gris = new THREE.MeshStandardMaterial({ color: 0x6c7385, roughness: 0.6, metalness: 0.4 });
-    const visor = new THREE.MeshStandardMaterial({ color: 0x1a2a55, roughness: 0.08, metalness: 1, emissive: 0x0b2244, emissiveIntensity: 0.6 });
+    // Visor dorado y reflectante, como el de los trajes reales
+    const visor = new THREE.MeshStandardMaterial({ color: 0xd9a63a, roughness: 0.12, metalness: 1, emissive: 0x3a2400, emissiveIntensity: 0.5 });
 
     // ---- Cadera y torso ----
     this.cadera = articulacion(0, 0.95, 0);
@@ -85,9 +86,20 @@ export class Astronauta {
     this.cabeza.add(casco);
     // Visor: una esfera aplastada que asoma por el frente del casco
     const vidrio = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 16), visor);
-    vidrio.scale.set(0.95, 0.72, 0.6);
-    vidrio.position.set(0, 0.01, 0.13);
+    vidrio.scale.set(0.92, 0.75, 0.75);
+    vidrio.position.set(0, 0.01, 0.135); // asoma ~3 cm por delante del casco (sin "pelearse" con él)
     this.cabeza.add(vidrio);
+    // Luz del casco y mangueras de la mochila al casco
+    const lampara = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff3c0, emissiveIntensity: 2 }));
+    lampara.position.set(0.16, 0.13, 0.13);
+    this.cabeza.add(lampara);
+    for (const lado of [-1, 1]) {
+      const manguera = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.025, 6, 12, Math.PI), gris);
+      manguera.position.set(lado * 0.2, 0.62, -0.12);
+      manguera.rotation.y = Math.PI / 2;
+      this.torso.add(manguera);
+    }
     const anilloCuello = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.045, 8, 20), rol);
     anilloCuello.rotation.x = Math.PI / 2;
     anilloCuello.position.y = -0.2;

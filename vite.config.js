@@ -1,22 +1,15 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
 
-// base relativa ('./') para que el juego funcione en GitHub Pages
-// sin importar el nombre del repositorio.
-// Dos páginas:
-//   index.html    → modo clásico (Phaser, 2D)
-//   aventura.html → aventura 3D (Three.js)
+// base relativa ('./') para que el juego funcione servido desde el anfitrión
+// (server/) o desde cualquier carpeta.
 export default defineConfig({
   base: './',
   build: {
     outDir: 'dist',
-    // Phaser y Three.js son librerías grandes; subimos el límite del aviso de tamaño.
-    chunkSizeWarningLimit: 2000,
-    rollupOptions: {
-      input: {
-        clasico: resolve(import.meta.dirname, 'index.html'),
-        aventura: resolve(import.meta.dirname, 'aventura.html')
-      }
-    }
+    chunkSizeWarningLimit: 2000
+  },
+  server: {
+    // En desarrollo, la conexión en tiempo real va al servidor del juego (puerto 3000)
+    proxy: { '/socket.io': { target: 'http://localhost:3000', ws: true } }
   }
 });

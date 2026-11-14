@@ -83,6 +83,7 @@ export function habitacion(esc, cx, cz, ancho, prof, alto, matPared, matPiso, o 
   if (o.techo) caja(esc, ancho, 0.2, prof, matPared, cx, alto + 0.1, cz, { sombra: false });
   const huecos = Object.fromEntries((o.huecos || []).map((h) => [h.lado, h.ancho]));
   const pared = (lado, largo, px, pz, vertical) => {
+    if ((o.sinPared || []).includes(lado)) return; // ese lado lo pone otra pieza (ej. el pasillo)
     const hueco = huecos[lado];
     if (!hueco) {
       caja(esc, vertical ? grosor : largo, alto, vertical ? largo : grosor, matPared, px, alto / 2, pz);

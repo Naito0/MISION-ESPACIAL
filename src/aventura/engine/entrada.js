@@ -28,8 +28,8 @@ export function finDeCuadro() {
 
 const DISTRIBUCIONES = {
   teclado1: {
-    nombre: 'Teclado (WASD + mouse)',
-    arriba: 'KeyW', abajo: 'KeyS', izquierda: 'KeyA', derecha: 'KeyD',
+    nombre: 'Teclado (WASD o flechas + mouse)',
+    arriba: ['KeyW', 'ArrowUp'], abajo: ['KeyS', 'ArrowDown'], izquierda: ['KeyA', 'ArrowLeft'], derecha: ['KeyD', 'ArrowRight'],
     camIzq: 'KeyQ', camDer: 'KeyR', camArriba: null, camAbajo: null,
     saltar: 'Space', correr: 'ShiftLeft', interactuar: 'KeyE', usaMouse: true
   },
@@ -55,8 +55,10 @@ export function crearControlTeclado(distribucion = 'teclado1', elementoMouse = n
     });
     elementoMouse.addEventListener('wheel', (e) => { rueda += Math.sign(e.deltaY); }, { passive: true });
   }
-  const p = (codigo) => (codigo ? teclasPulsadas.has(codigo) : false);
-  const r = (codigo) => (codigo ? teclasRecien.has(codigo) : false);
+  // Cada acción puede tener una tecla o una lista de teclas
+  const lista = (codigo) => (Array.isArray(codigo) ? codigo : codigo ? [codigo] : []);
+  const p = (codigo) => lista(codigo).some((c) => teclasPulsadas.has(c));
+  const r = (codigo) => lista(codigo).some((c) => teclasRecien.has(c));
   return {
     tipo: 'teclado', nombre: d.nombre,
     leer() {

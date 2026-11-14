@@ -4,7 +4,7 @@
 // Cambiar la calidad recarga la página (el renderizador se crea con ella).
 // =============================================================
 import { NIVELES_CALIDAD } from '../engine/calidad.js';
-import { calidad3D, setCalidad3D, sensibilidad3D, setSensibilidad3D } from '../../systems/preferencias.js';
+import { calidad3D, setCalidad3D, sensibilidad3D, setSensibilidad3D, estaSilenciado, setSilencio } from '../../systems/preferencias.js';
 
 /**
  * Crea el menú dentro de #hud. alAbrir/alCerrar pausan y reanudan el juego.
@@ -22,7 +22,7 @@ export function crearMenuPausa(hud, { alAbrir, alCerrar }) {
     <div class="fila">${botonesCalidad}</div>
     <p>Sensibilidad del mouse: <span data-valor>${sensibilidad3D().toFixed(1)}</span></p>
     <input type="range" min="0.3" max="2.5" step="0.1" value="${sensibilidad3D()}" style="width:100%">
-    <button data-accion="clasico">⬅ Volver al modo clásico</button>`;
+    <button data-accion="sonido">🔊 Sonido: sí / no</button>`;
   hud.appendChild(menu);
 
   const estado = { abierto: false };
@@ -30,7 +30,7 @@ export function crearMenuPausa(hud, { alAbrir, alCerrar }) {
   const cerrar = () => { estado.abierto = false; menu.style.display = 'none'; alCerrar?.(); };
 
   menu.querySelector('[data-accion="continuar"]').onclick = cerrar;
-  menu.querySelector('[data-accion="clasico"]').onclick = () => { window.location.href = './index.html'; };
+  menu.querySelector('[data-accion="sonido"]').onclick = () => { setSilencio(!estaSilenciado()); };
   menu.querySelectorAll('[data-calidad]').forEach((b) => {
     b.onclick = () => { setCalidad3D(b.dataset.calidad); window.location.reload(); };
   });
