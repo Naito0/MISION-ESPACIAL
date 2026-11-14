@@ -119,7 +119,7 @@ export function iniciarPantallaNave(ctx) {
   let consola = null; // minijuego abierto: { uid, cerrar }
   let final = null;
   const quitarEstado = conexion.alEstado((e) => {
-    if (e.fase === 'lobby') { ctx.irA('lobby'); return; }
+    if (e.fase === 'lobby' || e.fase === 'hangar') { ctx.irA('juego'); return; }
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;

@@ -10,6 +10,7 @@ import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
 import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
+import { iniciarPantallaHangar } from './pantallas/pantallaHangar.js';
 import { conectarServidor, crearConexionLocal } from './red/conexion.js';
 import { abrirMinijuego } from './minijuegos/index.js';
 import { calidad3D } from '../systems/preferencias.js';
@@ -46,8 +47,11 @@ const ctx = { motor, hud: capa, control, colorRol: 0x7cc4ff, colorPlaneta: parse
 function irA(nombre) {
   if (pantalla) pantalla.salir();
   capa.innerHTML = '';
-  if (nombre === 'lobby') pantalla = iniciarPantallaLobby(ctx);
-  else pantalla = iniciarPantallaNave(ctx); // 'juego' (los pasos siguientes agregan más pantallas)
+  // 'juego' = la pantalla que corresponde a la fase actual de la sala
+  const fase = ctx.conexionActiva?.estado?.fase;
+  if (nombre === 'lobby' || fase === 'lobby' || !fase) pantalla = iniciarPantallaLobby(ctx);
+  else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
+  else pantalla = iniciarPantallaNave(ctx); // viaje, llegada o fracaso
   window.aventura.pantalla = pantalla;
 }
 ctx.conexionLocal = crearConexionLocal;

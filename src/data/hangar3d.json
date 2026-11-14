@@ -1,0 +1,27 @@
+{
+  "_comentario": "Hangar del juego 3D. Las piezas salen de componentes.json (mismos costos en M$, masas en kg y energía en W). 'categorias' dice qué rol compra cada categoría. 'presupuesto' y 'capacidadCohete' son valores de balance del juego (aproximados): la capacidad es la del 'Cohete pesado' de cohetes.json hacia luna_baja / marte_baja. 'protege' dice qué pieza evita que una emergencia del viaje salga agravada (ver emergencias3d.json → agravante). 'margenEnergia' = W de sobra mínimos para que la nave no tenga apagones.",
+  "presupuesto": { "luna": 230, "marte": 270 },
+  "capacidadCohete": { "luna": 1300, "marte": 900 },
+  "orbitaCohete": { "luna": "luna_baja", "marte": "marte_baja" },
+  "margenEnergia": 50,
+  "categorias": [
+    { "id": "propulsion", "rol": "comandante", "nombre": "Motor y combustible", "icono": "🔥" },
+    { "id": "termica", "rol": "comandante", "nombre": "Escudo térmico", "icono": "🛡" },
+    { "id": "estructura", "rol": "ingeniero", "nombre": "Estructura y blindaje", "icono": "🧱" },
+    { "id": "paneles", "rol": "ingeniero", "nombre": "Paneles solares", "icono": "🔆" },
+    { "id": "baterias", "rol": "ingeniero", "nombre": "Baterías", "icono": "🔋" },
+    { "id": "instrumentos", "rol": "cientifico", "nombre": "Instrumentos (puedes llevar varios)", "icono": "🔬", "multiple": true, "maximo": 3 },
+    { "id": "soporte", "rol": "cientifico", "nombre": "Soporte vital y reciclador de O₂", "icono": "🫁" },
+    { "id": "antena", "rol": "comunicaciones", "nombre": "Antena", "icono": "📡" },
+    { "id": "estaciones", "rol": "comunicaciones", "nombre": "Red de estaciones en tierra", "icono": "🌐" },
+    { "id": "avionica", "rol": "comunicaciones", "nombre": "Computadora", "icono": "💻" }
+  ],
+  "protege": {
+    "motor": ["prop_media", "prop_grande"],
+    "blindaje": ["estr_blindada"],
+    "reciclador": ["sv_reciclaje"],
+    "laboratorio": ["espectrometro", "radar"],
+    "antena": ["ant_media", "ant_alta"],
+    "computadora": ["comp_estandar", "comp_resistente"]
+  }
+}

@@ -83,6 +83,35 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .paquetes .consola-msg { grid-column: 1 / -1; }
 #hud .consola .paquetes button { font-size: 20px; padding: 14px 0; }
 #hud .consola .paquetes button.ok { background: #2f9e5b; }
+/* ---- Hangar ---- */
+#hud .tienda, #hud .holograma { position: absolute; top: 54px; bottom: 60px; overflow-y: auto; padding: 10px 14px; font-size: 13px; }
+#hud .tienda { left: 12px; width: 380px; }
+#hud .holograma { right: 12px; width: 330px; border-color: #5be08a; box-shadow: 0 0 18px rgba(91, 224, 138, 0.25);
+  background-image: repeating-linear-gradient(0deg, rgba(91, 224, 138, 0.05) 0 2px, transparent 2px 4px); }
+#hud .tienda h2, #hud .holograma h2 { margin: 0 0 6px; font-size: 18px; color: #7cf3ff; }
+#hud .tienda .sub, #hud .holograma .nota { color: #b8c3e0; font-size: 12px; margin: 4px 0; }
+#hud .categoria { border-left: 4px solid; padding-left: 8px; margin: 10px 0; }
+#hud .categoria h3 { margin: 0 0 4px; font-size: 14px; }
+#hud .categoria .falta { color: #ff9a6b; font-size: 11px; font-weight: normal; }
+#hud .opcion { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; color: #e8ecff; background: #111a33; border: 1px solid #2c3a66; border-radius: 6px; cursor: pointer; font-size: 13px; }
+#hud .opcion:hover { border-color: #7cc4ff; }
+#hud .opcion.elegida { background: #1f4a3a; border-color: #5be08a; box-shadow: 0 0 8px rgba(91, 224, 138, 0.5); }
+#hud .opcion span { display: block; color: #ffd166; font-size: 12px; }
+#hud .opcion small { display: block; color: #9aa6c8; font-size: 11px; }
+#hud .holograma h3 { margin: 10px 0 4px; font-size: 14px; color: #9dd0ff; }
+#hud .hg-dato { display: flex; justify-content: space-between; margin-top: 8px; }
+#hud .hg-barra { height: 10px; background: #1a2342; border-radius: 5px; overflow: hidden; }
+#hud .hg-barra > div { height: 100%; transition: width 0.3s; }
+#hud .protecciones { display: flex; flex-wrap: wrap; gap: 4px; }
+#hud .protecciones span { padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+#hud .protecciones .si { background: #1f4a3a; border: 1px solid #5be08a; }
+#hud .protecciones .no { background: #3a1f24; border: 1px solid #e5484d; opacity: 0.8; }
+#hud .problemas { margin: 0; padding-left: 18px; color: #ffb4a0; }
+#hud .holograma .ok { color: #5be08a; font-weight: bold; }
+#hud .listos { margin: 0; padding-left: 18px; }
+#hud .holograma button#listo { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 17px; color: #fff; background: #2f9e5b; border: 1px solid #5be08a; border-radius: 8px; cursor: pointer; }
+#hud .holograma button#listo.activo { background: #6b4a1f; border-color: #ffd166; }
+#hud .holograma .error { color: #ff6b6b; }
 /* ---- Sala de espera (lobby) ---- */
 #hud .lobby { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); width: 430px; max-height: 92vh; overflow-y: auto; padding: 18px 22px; }
 #hud .lobby h1 { margin: 0 0 6px; font-size: 26px; color: #7cf3ff; }

@@ -9,6 +9,7 @@
 // =============================================================
 
 import { nuevoViaje, avanzarViaje, resolverEmergencia } from './viaje.js';
+import { crearCatalogo, seleccionVacia, resumenDiseno, comprar } from './hangar.js';
 
 export const ROLES_ID = ['comandante', 'ingeniero', 'cientifico', 'comunicaciones'];
 
@@ -37,13 +38,35 @@ export class Sala {
     this.version = 0;
     this.mensajes = []; // avisos cortos para mostrar a todos (ej. "Ana se unió")
     this.destinoId = 'marte';
-    this.diseno = {};   // piezas compradas en el hangar (true = protegido)
+    this.diseno = {};   // protecciones de la nave (true = protegido), sale del hangar
     this.viaje = null;
     this.acumulado = 0;
+    // Hangar: catálogo de piezas, lo comprado y quién está listo
+    this.catalogo = datos.componentes && datos.hangar ? crearCatalogo(datos.componentes, datos.hangar) : [];
+    this.seleccion = seleccionVacia(this.catalogo);
+    this.listos = new Set();
+  }
+
+  get destino() {
+    return (this.datos.destinos || []).find((d) => d.id === this.destinoId);
+  }
+
+  resumen() {
+    return this.destino && this.datos.hangar ? resumenDiseno(this.seleccion, this.catalogo, this.destino, this.datos.hangar) : null;
+  }
+
+  /** Abre el hangar (sin compras y sin nadie listo). */
+  abrirHangar() {
+    this.fase = 'hangar';
+    this.seleccion = seleccionVacia(this.catalogo);
+    this.listos.clear();
+    this.cambio(`🛠 Hangar: armen la nave para ir a ${this.destino ? this.destino.nombre : 'su destino'}`);
   }
 
   /** Empieza el viaje con el diseño actual. */
   iniciarViaje() {
+    const r = this.resumen();
+    if (r) this.diseno = r.diseno;
     this.viaje = nuevoViaje(this.datos.emergencias.config, this.diseno);
     this.fase = 'viaje';
     this.cambio('🚀 ¡Despegamos! Atentos a las emergencias.');
@@ -132,17 +155,34 @@ export class Sala {
     empezar(j) {
       if (!j.anfitrion) return { error: 'Solo el anfitrión puede empezar.' };
       if (!this.puedeEmpezar()) return { error: `Faltan roles: ${this.rolesLibres().join(', ')}.` };
-      this.iniciarViaje();
+      this.abrirHangar();
+      return { ok: true };
+    },
+    /** Hangar: comprar, cambiar o quitar una pieza (solo las de tus roles). */
+    comprar(j, { opcion }) {
+      if (this.fase !== 'hangar') return { error: 'Ahora no se puede comprar.' };
+      const r = comprar(this.seleccion, this.catalogo, j.roles, opcion, this.destino, this.datos.hangar);
+      if (r.ok) { this.listos.clear(); this.cambio(); } // si cambia la nave, todos revisan de nuevo
+      return r;
+    },
+    /** Hangar: "¡Listo!". Si la nave no puede despegar, explica por qué. Cuando todos están listos, despega. */
+    listo(j) {
+      if (this.fase !== 'hangar') return { error: 'No estamos en el hangar.' };
+      if (this.listos.has(j.id)) { this.listos.delete(j.id); this.cambio(); return { ok: true }; }
+      const r = this.resumen();
+      if (r.problemas.length) return { error: 'La nave todavía no puede despegar:', problemas: r.problemas.map((p) => p.texto) };
+      this.listos.add(j.id);
+      this.cambio(`✔ ${j.nombre} está listo`);
+      if ([...this.jugadores.keys()].every((id) => this.listos.has(id))) this.iniciarViaje();
       return { ok: true };
     },
     /** Volver a la sala de espera (después de llegar o fracasar). Se conservan los roles. */
     reiniciar(j) {
       if (!j.anfitrion) return { error: 'Solo el anfitrión puede reiniciar.' };
-      if (this.fase === 'lobby') return { ok: true };
-      this.fase = 'lobby';
+      if (this.fase === 'lobby' || this.fase === 'hangar') return { ok: true };
       this.viaje = null;
       this.posiciones.clear();
-      this.cambio('Volvemos a la base');
+      this.abrirHangar(); // de vuelta al hangar para mejorar la nave
       return { ok: true };
     },
     /** Resultado del minijuego de una emergencia. */
@@ -189,6 +229,9 @@ export class Sala {
       mensajes: this.mensajes,
       destinoId: this.destinoId,
       diseno: this.diseno,
+      seleccion: this.seleccion,
+      listos: [...this.listos],
+      resumen: this.fase === 'hangar' ? this.resumen() : null,
       viaje: this.viaje && {
         duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
         emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),

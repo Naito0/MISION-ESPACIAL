@@ -33,7 +33,76 @@ test('lobby: no se puede empezar sin los 4 roles y un rol es de una sola persona
   assert.equal(s.puedeEmpezar(), true);
   assert.ok(s.accion('b', 'empezar').error, 'solo el anfitrión empieza');
   assert.deepEqual(s.accion('a', 'empezar'), { ok: true });
+  assert.equal(s.fase, 'hangar');
+});
+
+// ---------- Hangar ----------
+const leerJSON = (n) => JSON.parse(readFileSync(new URL(`../src/data/${n}`, import.meta.url), 'utf8'));
+const datosCompletos = {
+  emergencias: EMERG, misionesReales: [],
+  destinos: leerJSON('destinos.json').destinos, componentes: leerJSON('componentes.json'), hangar: leerJSON('hangar3d.json')
+};
+function salaEnHangar() {
+  const s = new Sala('HANG', datosCompletos);
+  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  s.accion('a', 'rol', { rol: 'comandante' }); s.accion('a', 'rol', { rol: 'ingeniero' });
+  s.accion('b', 'tomarLibres');
+  s.accion('a', 'empezar');
+  return s;
+}
+const NAVE_MARTE_OK = {
+  a: ['prop_chica', 'term_pintura', 'estr_ligera', 'pan_grandes', 'bat_chica'],
+  b: ['cam_simple', 'sv_basico', 'ant_media', 'est_una', 'comp_basica']
+};
+
+test('hangar: cada rol solo compra sus piezas y el presupuesto es compartido', () => {
+  const s = salaEnHangar();
+  assert.ok(s.accion('b', 'comprar', { opcion: 'prop_chica' }).error, 'el motor es del comandante');
+  assert.deepEqual(s.accion('a', 'comprar', { opcion: 'prop_chica' }), { ok: true, quitada: false });
+  assert.equal(s.resumen().costo, 15);
+  // Volver a tocar la misma pieza la quita
+  assert.equal(s.accion('a', 'comprar', { opcion: 'prop_chica' }).quitada, true);
+  assert.equal(s.resumen().costo, 0);
+});
+
+test('hangar: no se puede despegar si falta algo, y explica por qué', () => {
+  const s = salaEnHangar();
+  const r = s.accion('a', 'listo');
+  assert.ok(r.error);
+  assert.ok(r.problemas.some((p) => p.includes('Falta elegir')));
+});
+
+test('hangar: en Marte los paneles chicos no alcanzan (llega 43% de la luz)', () => {
+  const s = salaEnHangar();
+  for (const o of NAVE_MARTE_OK.a) s.accion('a', 'comprar', { opcion: o });
+  for (const o of NAVE_MARTE_OK.b) s.accion('b', 'comprar', { opcion: o });
+  assert.deepEqual(s.resumen().problemas, []);
+  s.accion('a', 'comprar', { opcion: 'pan_chicos' }); // reemplaza los grandes
+  const p = s.resumen().problemas.map((x) => x.texto).join(' ');
+  assert.match(p, /Falta energía/);
+  assert.match(p, /43%/);
+});
+
+test('hangar: con todo en orden y todos listos, despega con el diseño calculado', () => {
+  const s = salaEnHangar();
+  for (const o of NAVE_MARTE_OK.a) s.accion('a', 'comprar', { opcion: o });
+  for (const o of NAVE_MARTE_OK.b) s.accion('b', 'comprar', { opcion: o });
+  assert.deepEqual(s.accion('a', 'listo'), { ok: true });
+  assert.equal(s.fase, 'hangar', 'falta Beto');
+  assert.deepEqual(s.accion('b', 'listo'), { ok: true });
   assert.equal(s.fase, 'viaje');
+  assert.equal(s.diseno.blindaje, false, 'sin estructura blindada');
+  assert.equal(s.diseno.antena, true, 'antena media');
+});
+
+test('hangar: no deja pasarse del presupuesto', () => {
+  const s = salaEnHangar();
+  s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120
+  s.accion('a', 'comprar', { opcion: 'estr_blindada' }); // 45
+  s.accion('a', 'comprar', { opcion: 'prop_grande' }); // 45
+  s.accion('b', 'comprar', { opcion: 'radar' }); // 35 → 245
+  const r = s.accion('b', 'comprar', { opcion: 'ant_alta' }); // 30 → 275 > 270
+  assert.ok(r.error && r.error.includes('No alcanza'));
 });
 
 test('viaje: aparecen emergencias, se resuelven y, si no, la nave pierde vida', () => {
