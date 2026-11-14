@@ -20,4 +20,24 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .fila { display: flex; gap: 6px; }
 #hud .fila button { flex: 1; }
 #hud .tecla { display: inline-block; min-width: 18px; padding: 0 5px; border: 1px solid #7cc4ff; border-radius: 4px; text-align: center; font-size: 12px; }
+/* ---- Sala de espera (lobby) ---- */
+#hud .lobby { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); width: 430px; max-height: 92vh; overflow-y: auto; padding: 18px 22px; }
+#hud .lobby h1 { margin: 0 0 6px; font-size: 26px; color: #7cf3ff; }
+#hud .lobby h3 { margin: 14px 0 6px; font-size: 15px; color: #9dd0ff; }
+#hud .lobby .sub, #hud .lobby .nota { color: #b8c3e0; font-size: 14px; }
+#hud .lobby label { display: block; margin: 10px 0; font-size: 14px; }
+#hud .lobby input { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px; font-size: 16px; border-radius: 6px; border: 1px solid #7cc4ff; background: #0b1328; color: #fff; }
+#hud .lobby button { display: block; width: 100%; margin: 8px 0; padding: 10px; font-size: 16px; color: #fff; background: #2b5cab; border: 1px solid #7cc4ff; border-radius: 8px; cursor: pointer; }
+#hud .lobby button:hover:not([disabled]) { background: #3d77d8; }
+#hud .lobby button[disabled] { opacity: 0.45; cursor: not-allowed; }
+#hud .lobby button.secundario { background: #1a2342; }
+#hud .lobby .fila { display: flex; gap: 8px; align-items: center; }
+#hud .lobby .fila input { margin: 0; flex: 1; text-transform: uppercase; }
+#hud .lobby .fila button { width: auto; padding: 9px 16px; }
+#hud .lobby .codigo { font-size: 34px; letter-spacing: 6px; color: #ffd166; }
+#hud .lobby .jugadores { margin: 0; padding-left: 18px; font-size: 14px; }
+#hud .lobby .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#hud .lobby .rol { margin: 0; text-align: left; background: #111a33; border-width: 2px; font-size: 14px; }
+#hud .lobby .rol.activo { background: #1f4a3a; box-shadow: 0 0 12px rgba(91, 224, 138, 0.5); }
+#hud .lobby .error { color: #ff6b6b; min-height: 18px; }
 #hud .cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #05070f; }

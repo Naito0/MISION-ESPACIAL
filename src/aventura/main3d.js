@@ -9,6 +9,8 @@ import { crearControlTeclado, finDeCuadro } from './engine/entrada.js';
 import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
+import { iniciarPantallaLobby } from './pantallas/pantallaLobby.js';
+import { conectarServidor, crearConexionLocal } from './red/conexion.js';
 import { calidad3D } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
@@ -43,9 +45,11 @@ const ctx = { motor, hud: capa, control, colorRol: 0x7cc4ff, colorPlaneta: parse
 function irA(nombre) {
   if (pantalla) pantalla.salir();
   capa.innerHTML = '';
-  if (nombre === 'nave') pantalla = iniciarPantallaNave(ctx);
+  if (nombre === 'lobby') pantalla = iniciarPantallaLobby(ctx);
+  else pantalla = iniciarPantallaNave(ctx); // 'juego' (los pasos siguientes agregan más pantallas)
   window.aventura.pantalla = pantalla;
 }
+ctx.conexionLocal = crearConexionLocal;
 ctx.irA = irA;
 
 motor.alActualizarGlobal = true;
@@ -62,8 +66,9 @@ motor.renderer.setAnimationLoop(() => {
 
 window.aventura = { motor, THREE, irA };
 // Primero se intenta cargar el modelo GLB del astronauta (si existe) y después arranca el juego
-prepararModelos().then((hayModelo) => {
+Promise.all([prepararModelos(), conectarServidor()]).then(([hayModelo, conexion]) => {
   hud.querySelector('.cargando').remove();
   window.aventura.modeloGLB = hayModelo;
-  irA('nave');
+  ctx.conexion = conexion; // null si no hay servidor (entonces solo se puede jugar solo)
+  irA('lobby');
 });

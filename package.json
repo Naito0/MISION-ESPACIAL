@@ -2,15 +2,19 @@
   "name": "mision-espacial",
   "private": true,
   "version": "0.1.0",
-  "description": "Borrador de juego educativo: diseña, lanza, aterriza y opera una misión a la Luna o a Marte (NASA Space Apps Challenge 2026).",
+  "description": "Juego educativo 3D cooperativo: diseña, viaja, aterriza y explora una misión a la Luna o a Marte (NASA Space Apps Challenge 2026).",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/"
+    "test": "node --test tests/",
+    "servidor": "vite build && node server/index.js"
   },
   "dependencies": {
+    "express": "5.1.0",
+    "socket.io": "4.8.1",
+    "socket.io-client": "4.8.1",
     "three": "0.187.0"
   },
   "devDependencies": {

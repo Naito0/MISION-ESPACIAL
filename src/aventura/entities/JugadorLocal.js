@@ -24,7 +24,9 @@ export class JugadorLocal {
     this.control = control;
     this.bloqueado = false; // true mientras usa una consola (no camina)
     this.pies = new THREE.Vector3();
-    this.anguloAnterior = 0;
+    // Empieza mirando hacia -z (hacia la cabina), de espaldas a la cámara
+    this.astronauta.raiz.rotation.y = Math.PI;
+    this.anguloAnterior = Math.PI;
     this._deseo = new THREE.Vector3();
     this._adelante = new THREE.Vector3();
     this._derecha = new THREE.Vector3();
