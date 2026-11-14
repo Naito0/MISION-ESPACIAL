@@ -18,6 +18,23 @@ import { generarExplicaciones, misionesParecidas } from '../src/systems/informe.
 import { calcularSoporte } from '../src/systems/soporteVital.js';
 import { sortearAverias, viajeIntacto, registrarAveria, estaMitigada } from '../src/systems/averias.js';
 
+import { generarChecklist } from '../src/systems/checklist.js';
+import { valorPorObjetivo } from '../src/systems/recursos.js';
+
+test('checklist: el CubeSat bien diseñado cumple todos los requisitos estimados', () => {
+  const { mision, destino, orbita, diseno, ambiente } = prepararCubesat();
+  const operativo = balanceOperativo(diseno, ambiente);
+  const a = {
+    diseno, operativo, orbita, destino,
+    vidaEsperada: vidaEsperada(diseno, ambiente),
+    costoTotal: diseno.costoComponentes + 1,
+    valorObjetivos: valorPorObjetivo(diseno, ambiente, mision.objetivos, operativo.fraccionOperacion).porObjetivo,
+    soporte: null
+  };
+  const items = generarChecklist(a, mision, mision.presupuesto);
+  assert.deepEqual(items.filter((i) => !i.ok).map((i) => i.texto), []);
+});
+
 const AVERIAS = JSON.parse(readFileSync(new URL('../src/data/eventos.json', import.meta.url), 'utf8')).averiasViaje;
 
 test('soporte vital: ida + estadía + vuelta por tripulante', () => {

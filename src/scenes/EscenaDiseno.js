@@ -1,9 +1,10 @@
 // =============================================================
 // FASE 3 — ESTUDIO DE COMPENSACIONES (diseño de la nave)
-// Izquierda: categorías por disciplina. Centro: componentes.
-// Derecha: panel de recursos (barras verde/amarillo/rojo) y metas de cada rol.
+// Izquierda: categorías. Centro: piezas y DIBUJO de la nave que se arma.
+// Derecha: 4 recursos principales (el resto en "Ver más"), checklist de
+// requisitos y, en modo equipo, las metas de cada rol como ✓/✗.
+// Poco texto a la vista: los detalles están en tooltips y botones "?".
 // Abajo: guardar diseños A y B y compararlos lado a lado.
-// En modo equipo cada jugador solo cambia las categorías de su rol.
 // =============================================================
 import * as Phaser from 'phaser';
 import { CATEGORIAS, CONFIG, rolDeCategoria } from '../systems/datos.js';
@@ -12,12 +13,17 @@ import {
   puedeEditarCategoria, pasarTurno, textoTurno, anularAprobaciones, guardarComoAB, usarDisenoAB
 } from '../systems/estadoMision.js';
 import { compatibilidadInstrumento } from '../systems/recursos.js';
+import { generarChecklist } from '../systems/checklist.js';
 import { cargarDiseno } from '../systems/almacenamiento.js';
-import { ANCHO, ALTO, COLORES, texto, titulo, panel, boton, barra, barraFases } from '../ui/ui.js';
+import { crearPanelRecursos } from '../ui/panelRecursos.js';
+import { crearDibujoNave } from '../ui/dibujoNave.js';
+import { crearChecklist } from '../ui/checklistUI.js';
+import { botonAyuda, crearTooltip, conTooltip } from '../ui/ayuda.js';
+import { ANCHO, ALTO, COLORES, texto, titulo, panel, boton, ventana, barraFases } from '../ui/ui.js';
 
 const X_CARTA = [385, 705];
-const Y_CARTA = 228;
-const PASO_CARTA = 72;
+const Y_CARTA = 178;
+const PASO_CARTA = 51;
 
 export default class EscenaDiseno extends Phaser.Scene {
   constructor() {
@@ -27,9 +33,8 @@ export default class EscenaDiseno extends Phaser.Scene {
   create() {
     const mision = misionActual();
     barraFases(this, CONFIG.fases, 2);
-    titulo(this, 'Estudio de compensaciones: diseña la nave',
-      `${mision.nombre} · Presupuesto ${estado.presupuesto} M$ · Intento ${estado.intento} · Cada mejora empeora otra cosa: busca el equilibrio`);
-
+    titulo(this, 'Diseña tu nave', `${mision.nombre} · Intento ${estado.intento}`);
+    this.tooltip = crearTooltip(this);
     this.aplicarSeleccionPorDefecto();
 
     // ---- Categorías (izquierda) — soporte vital solo aparece si hay tripulación ----
@@ -38,54 +43,63 @@ export default class EscenaDiseno extends Phaser.Scene {
       boton(this, 110, 112 + i * 45, 180, 40, '', () => this.mostrarCategoria(cat), { tam: 13 })
     );
 
-    // ---- Centro: título de la categoría, cartas y descripción ----
-    this.textoCategoria = texto(this, 230, 96, '', { tam: 19, negrita: true, color: COLORES.acento });
-    this.textoAyudaCat = texto(this, 230, 124, '', { tam: 13, ancho: 630, color: COLORES.textoSuave });
+    // ---- Centro: categoría (una frase) + botón "?" con la explicación larga ----
+    this.textoCategoria = texto(this, 230, 94, '', { tam: 19, negrita: true, color: COLORES.acento });
+    this.textoAyudaCat = texto(this, 230, 122, '', { tam: 12, ancho: 600, color: COLORES.textoSuave });
+    botonAyuda(this, 850, 106, '¿Por qué importa esto?', () => this.textoPorQueImporta());
     this.cartas = [];
 
-    panel(this, 225, 415, 640, 98);
-    this.textoTooltip = texto(this, 238, 422, 'Pasa el mouse sobre un componente para ver qué hace.', {
-      tam: 13, ancho: 615, color: COLORES.textoSuave
-    });
-    this.textoConsejo = texto(this, 238, 482, '', { tam: 13, ancho: 615, color: COLORES.aviso });
-    this.textoTurno = texto(this, 230, 520, '', { tam: 14, ancho: 630, color: COLORES.aviso });
+    // ---- Centro: dibujo de la nave ----
+    panel(this, 225, 308, 640, 274, 0x0e1530);
+    texto(this, 237, 314, 'Tu nave', { tam: 12, color: COLORES.textoSuave });
+    this.nave = crearDibujoNave(this, 545, 452);
+    this.textoEstado = texto(this, 545, 590, '', { tam: 14, origen: [0.5, 0], color: COLORES.aviso, ancho: 630, align: 'center' });
 
     // ---- Estudio de compensaciones: A y B ----
-    this.botonA = boton(this, 320, 610, 175, 36, 'Guardar como A', () => { guardarComoAB('A'); this.actualizar(); }, { tam: 14 });
-    this.botonB = boton(this, 505, 610, 175, 36, 'Guardar como B', () => { guardarComoAB('B'); this.actualizar(); }, { tam: 14 });
-    this.botonComparar = boton(this, 705, 610, 205, 36, 'Comparar A y B', () => this.comparar(), { tam: 14 });
+    this.botonA = boton(this, 330, 632, 170, 32, 'Guardar como A', () => { guardarComoAB('A'); this.actualizar(); }, { tam: 13 });
+    this.botonB = boton(this, 510, 632, 170, 32, 'Guardar como B', () => { guardarComoAB('B'); this.actualizar(); }, { tam: 13 });
+    this.botonComparar = boton(this, 700, 632, 190, 32, 'Comparar A y B', () => this.comparar(), { tam: 13 });
 
-    // ---- Panel de recursos (derecha) ----
+    // ---- Derecha: recursos ----
     panel(this, 875, 88, 390, 622);
-    texto(this, 890, 92, 'Recursos', { tam: 18, negrita: true, color: COLORES.acento });
-    const a = analizarDiseno();
-    this.barras = a.barras.map((b, i) => {
-      const y = 118 + i * 35;
-      return { etiqueta: texto(this, 890, y, '', { tam: 12 }), barra: barra(this, 890, y + 16, 360, 8) };
-    });
-    texto(this, 890, 466, esEquipo() ? 'Metas de cada rol' : 'Metas de cada rol (consejos)', {
-      tam: 16, negrita: true, color: COLORES.acento
-    });
-    this.textosMeta = a.metas.map(() => texto(this, 890, 490, '', { tam: 11, ancho: 365 }));
+    texto(this, 890, 94, 'Recursos', { tam: 18, negrita: true, color: COLORES.acento });
+    if (nivel().ayudas) {
+      this.botonConsejo = boton(this, 1215, 106, 80, 26, '💡 Pista', () => this.mostrarConsejo(), { tam: 12 });
+    }
+    this.panelRecursos = crearPanelRecursos(this, 890, 130, 370, this.tooltip);
+
+    // Checklist de requisitos (se abre en una ventana)
+    this.botonChecklist = boton(this, 1070, 628, 360, 34, '', () => this.abrirChecklist(), { tam: 14 });
+
+    // Metas de los roles: solo en modo equipo, como ✓/✗ (detalle en tooltip)
+    this.chipsMeta = [];
+    if (esEquipo()) {
+      texto(this, 890, 655, 'Metas:', { tam: 12, color: COLORES.textoSuave });
+      const a = analizarDiseno();
+      this.chipsMeta = a.metas.map((m, i) => {
+        const x = 940 + i * 80;
+        const fondo = this.add.rectangle(x, 673, 74, 26, 0x24304f).setOrigin(0, 0.5).setStrokeStyle(1, 0x3a4a7a);
+        const t = texto(this, x + 37, 673, '', { tam: 13, negrita: true, origen: [0.5, 0.5] });
+        conTooltip(fondo, this.tooltip, () => {
+          const meta = analizarDiseno().metas[i];
+          return `${meta.nombre}\n${meta.texto}\n${meta.detalle}`;
+        });
+        return { fondo, t };
+      });
+    }
 
     // ---- Botones inferiores ----
-    boton(this, 110, 675, 170, 44, '◀ Requisitos', () => this.scene.start('Requisitos'), { tam: 15 });
+    boton(this, 110, 680, 170, 40, '◀ Requisitos', () => this.scene.start('Requisitos'), { tam: 15 });
     const guardado = cargarDiseno(estado.misionId);
-    const bCargar = boton(this, 300, 675, 190, 44, 'Cargar último lanzado', () => this.cargarGuardado(guardado), { tam: 14 });
+    const bCargar = boton(this, 300, 680, 190, 40, 'Cargar último lanzado', () => this.cargarGuardado(guardado), { tam: 13 });
     bCargar.setHabilitado(!!guardado);
     if (esEquipo()) {
-      boton(this, 510, 675, 190, 44, 'Pasar turno ▶', () => { pasarTurno(); this.mostrarCategoria(this.categoriaActual); }, { tam: 16 });
+      boton(this, 510, 680, 190, 40, 'Pasar turno ▶', () => { pasarTurno(); this.mostrarCategoria(this.categoriaActual); }, { tam: 15 });
     }
-    this.botonContinuar = boton(this, 735, 675, 240, 50, 'Diseño puntual ▶', () => this.scene.start('DisenoPuntual'), { tam: 18 });
+    this.botonContinuar = boton(this, 735, 680, 240, 46, 'Diseño puntual ▶', () => this.scene.start('DisenoPuntual'), { tam: 17 });
 
     this.categoriaActual = this.categorias[0];
     this.mostrarCategoria(this.categoriaActual);
-  }
-
-  /** Tarjeta "¿Por qué importa esto?" de la categoría (se ve hasta pasar el mouse por un componente). */
-  mostrarPorQueImporta(cat) {
-    this.textoTooltip.setColor(COLORES.acento);
-    this.textoTooltip.setText(`¿Por qué importa esto? ${cat.porQueImporta || ''}`);
   }
 
   /** La primera vez, elige la opción más simple de cada categoría obligatoria. */
@@ -115,25 +129,38 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.mostrarCategoria(this.categoriaActual);
   }
 
+  /** Texto del botón "?": por qué importa la categoría, quién la decide y la disciplina. */
+  textoPorQueImporta() {
+    const cat = this.categoriaActual;
+    const rol = rolDeCategoria(cat.id);
+    return `${cat.porQueImporta || cat.ayuda}\n\nDisciplina de ingeniería: ${cat.disciplina}.` +
+      (esEquipo() && rol ? `\nEn el equipo la decide: ${rol.nombre}.` : '') +
+      '\n\nPasa el mouse sobre cada pieza para ver todos sus datos.';
+  }
+
   mostrarCategoria(cat) {
     this.categoriaActual = cat;
     this.cartas.forEach((c) => c.destruir());
     this.cartas = [];
+    this.tooltip.ocultar();
 
     const editable = puedeEditarCategoria(cat);
     const rol = rolDeCategoria(cat.id);
     this.textoCategoria.setText(`${cat.nombre}${cat.multiple ? ' (puedes elegir varios)' : ''}`);
-    this.textoAyudaCat.setText(`Disciplina: ${cat.disciplina}. ${cat.ayuda}` +
-      (esEquipo() && rol ? `\nLa decide: ${rol.nombre}.${editable ? '' : ' (Ahora no es tu turno para esta categoría.)'}` : ''));
+    this.textoAyudaCat.setText(cat.ayuda + (esEquipo() && rol && !editable ? `  🔒 La decide: ${rol.nombre}.` : ''));
 
-    this.mostrarPorQueImporta(cat);
     const mision = misionActual();
     opcionesDisponibles(cat).forEach((op, i) => {
       const x = X_CARTA[i % 2];
       const y = Y_CARTA + Math.floor(i / 2) * PASO_CARTA;
       const comp = cat.id === 'instrumentos' ? compatibilidadInstrumento(mision, op.id) : { ok: true };
-      const carta = boton(this, x, y, 310, 64, this.etiquetaCarta(op, comp), () => this.elegir(cat, op.id), {
-        tam: 12, alPasar: () => this.mostrarTooltip(op, comp)
+      const carta = boton(this, x, y, 310, 46, this.etiquetaCarta(op, comp), () => this.elegir(cat, op.id), {
+        tam: 13,
+        alPasar: () => {
+          const p = this.input.activePointer;
+          this.tooltip.mostrar(p.x, p.y, this.textoTooltip(op, comp));
+        },
+        alSalir: () => this.tooltip.ocultar()
       });
       carta.setHabilitado(editable && comp.ok);
       carta.opcionId = op.id;
@@ -142,22 +169,18 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.actualizar();
   }
 
+  /** Etiqueta corta de cada pieza: nombre + costo y masa (el resto va en el tooltip). */
   etiquetaCarta(op, comp) {
-    const partes = [`${op.costo} M$`, `${op.masa} kg`];
-    if (op.energia) partes.push(`${op.energia > 0 ? '+' : ''}${op.energia} W`);
-    if (op.datos) partes.push(`${op.datos} GB/d`);
-    const conf = op.confiabilidad === 'nuevo' ? '⚠ nuevo' : '✓ probado en vuelo';
-    const extra = comp.ok ? conf : 'NO SIRVE PARA ESTA MISIÓN';
-    return `${op.nombre}${op.nivel === 'avanzado' ? ' [avanzado]' : ''}\n${partes.join(' · ')}\n${extra}`;
+    const marca = !comp.ok ? '🚫 ' : op.confiabilidad === 'nuevo' ? '⚠ ' : '';
+    return `${marca}${op.nombre}\n${op.costo} M$ · ${op.masa} kg`;
   }
 
-  mostrarTooltip(op, comp) {
-    if (!comp.ok) {
-      this.textoTooltip.setColor(COLORES.mal);
-      this.textoTooltip.setText(`${op.nombre}: no se puede usar en esta misión.\n${comp.razon}`);
-      return;
-    }
-    const extra = [];
+  /** Todo el detalle de una pieza, para el tooltip. */
+  textoTooltip(op, comp) {
+    if (!comp.ok) return `🚫 ${op.nombre}: no sirve en esta misión.\n${comp.razon}`;
+    const extra = [`${op.costo} M$`, `${op.masa} kg`];
+    if (op.energia) extra.push(op.energia > 0 ? `genera ${op.energia} W` : `consume ${-op.energia} W`);
+    if (op.datos) extra.push(`${op.datos} GB/día`);
     if (op.valorCientifico) extra.push(`valor científico ${op.valorCientifico}/mes`);
     if (op.capacidadMasa) extra.push(`aguanta ${op.capacidadMasa} kg`, `vida ${op.vidaMeses} meses`);
     if (op.capacidadWh) extra.push(`${op.capacidadWh} Wh`);
@@ -166,15 +189,16 @@ export default class EscenaDiseno extends Phaser.Scene {
     if (op.almacenamientoGB) extra.push(`memoria ${op.almacenamientoGB} GB`);
     if (op.combustible) extra.push(`${op.combustible} kg de combustible`, `${op.empuje} N`);
     if (op.precision) extra.push(`precisión ${Math.round(op.precision * 100)}%`);
+    if (op.diasPersona) extra.push(`${op.diasPersona} días-persona`);
     if (op.mesesDesarrollo) extra.push(`${op.mesesDesarrollo} meses de desarrollo`);
     if (op.efectos && op.efectos.length) extra.push(`protege: ${op.efectos.join(', ')}`);
-    extra.push(op.confiabilidad === 'nuevo' ? 'componente NUEVO: más riesgo de falla' : 'probado en vuelo: poco riesgo');
-    this.textoTooltip.setColor(COLORES.texto);
-    this.textoTooltip.setText(`${op.nombre}: ${op.tooltip}\n${extra.join(' · ')}${op.aproximado ? '  (valores aproximados)' : ''}`);
+    return `${op.nombre}${op.nivel === 'avanzado' ? ' [avanzado]' : ''}\n${op.tooltip}\n\n${extra.join(' · ')}\n` +
+      (op.confiabilidad === 'nuevo' ? '⚠ Componente NUEVO: más riesgo de falla.' : '✓ Probado en vuelo: poco riesgo.');
   }
 
   elegir(cat, id) {
     if (!puedeEditarCategoria(cat)) return;
+    const antes = analizarDiseno();
     if (cat.multiple) {
       const lista = estado.seleccion[cat.id];
       const pos = lista.indexOf(id);
@@ -184,10 +208,11 @@ export default class EscenaDiseno extends Phaser.Scene {
       estado.seleccion[cat.id] = id;
     }
     anularAprobaciones(); // cualquier cambio obliga a volver a aprobar
-    this.actualizar();
+    const ahora = this.actualizar();
+    this.panelRecursos.mostrarCambios(antes, ahora); // textos flotantes: "+0.5 kg", "−2 W"...
   }
 
-  /** Recalcula todo y refresca la pantalla. */
+  /** Recalcula todo y refresca la pantalla. Devuelve el análisis actual. */
   actualizar() {
     const a = analizarDiseno();
 
@@ -204,35 +229,31 @@ export default class EscenaDiseno extends Phaser.Scene {
     const sel = estado.seleccion[this.categoriaActual.id];
     this.cartas.forEach((c) => c.setSeleccionado(Array.isArray(sel) ? sel.includes(c.opcionId) : sel === c.opcionId));
 
-    // Barras de recursos
-    a.barras.forEach((b, i) => {
-      const color = { verde: COLORES.bien, amarillo: COLORES.aviso, rojo: COLORES.mal }[b.nivel];
-      this.barras[i].etiqueta.setText(`${b.nombre}: ${b.texto}`).setColor(color);
-      this.barras[i].barra.actualizar(b.ratio, b.nivel);
-    });
+    // Recursos, dibujo de la nave y checklist
+    this.panelRecursos.actualizar(a.barras);
+    this.nave.actualizar(a.diseno);
+    this.checklist = generarChecklist(a, misionActual(), estado.presupuesto);
+    const ok = this.checklist.filter((x) => x.ok).length;
+    this.botonChecklist.setTexto(`📋 Requisitos cumplidos: ${ok} de ${this.checklist.length}`);
 
-    // Metas de cada rol
-    // (cada texto se ubica debajo del anterior según su altura, para que no se encimen)
-    let yMeta = 490;
-    a.metas.forEach((m, i) => {
-      const t = this.textosMeta[i];
-      t.setText(`${m.ok ? '✔' : '✖'} ${m.abreviatura}: ${m.texto}\n   ${m.detalle}`);
-      t.setColor(m.ok ? COLORES.bien : COLORES.mal);
-      t.setY(yMeta);
-      yMeta += t.height + 3;
-    });
-
-    // Consejo (solo con ayudas)
-    if (nivel().ayudas) {
-      const problema = a.barras.find((b) => b.nivel === 'rojo') || a.barras.find((b) => b.nivel === 'amarillo');
-      this.textoConsejo.setText(problema ? `Consejo: ${problema.ayuda}` : 'Consejo: ¡todo en verde! Guarda este diseño como A y prueba una alternativa como B.');
+    // Pista: late si hay algún recurso en rojo
+    if (this.botonConsejo && a.barras.some((b) => b.nivel === 'rojo')) {
+      this.tweens.add({ targets: [this.botonConsejo.fondo, this.botonConsejo.txt], scale: 1.15, duration: 180, yoyo: true });
     }
 
-    // Turno y faltantes
+    // Metas de rol (modo equipo)
+    a.metas.forEach((m, i) => {
+      const chip = this.chipsMeta[i];
+      if (!chip) return;
+      chip.t.setText(`${m.abreviatura} ${m.ok ? '✓' : '✗'}`).setColor(m.ok ? COLORES.bien : COLORES.mal);
+      chip.fondo.setStrokeStyle(1, m.ok ? 0x3cc46e : 0xe5484d);
+    });
+
+    // Una sola línea de estado: turno o lo que falta
     const lineas = [];
-    if (esEquipo()) lineas.push(`${textoTurno()}. Puedes cambiar las categorías marcadas con ✎. El presupuesto es de todos: ¡negocien!`);
-    if (a.diseno.faltantes.length) lineas.push(`Falta elegir: ${a.diseno.faltantes.join(', ')}.`);
-    this.textoTurno.setText(lineas.join('\n'));
+    if (esEquipo()) lineas.push(`${textoTurno()} · El presupuesto es de todos: ¡negocien!`);
+    if (a.diseno.faltantes.length) lineas.push(`Falta elegir: ${a.diseno.faltantes.join(', ')}`);
+    this.textoEstado.setText(lineas.join('\n'));
 
     // A/B
     this.botonA.setTexto(estado.disenosAB.A ? 'Guardar como A ✔' : 'Guardar como A');
@@ -240,6 +261,38 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.botonComparar.setHabilitado(!!(estado.disenosAB.A && estado.disenosAB.B));
 
     this.botonContinuar.setHabilitado(a.diseno.faltantes.length === 0);
+    return a;
+  }
+
+  /** Pista: el consejo del recurso con más problemas. */
+  mostrarConsejo() {
+    const a = analizarDiseno();
+    const problema = a.barras.find((b) => b.nivel === 'rojo') || a.barras.find((b) => b.nivel === 'amarillo');
+    ventana(this, {
+      tituloTexto: '💡 Pista',
+      cuerpo: problema ? `${problema.nombre}: ${problema.ayuda}`
+        : '¡Todo en verde! Guarda este diseño como A, prueba una alternativa como B y compáralos.',
+      textoBoton: 'Entendido'
+    });
+  }
+
+  /** Ventana con el checklist de requisitos (se actualiza con el diseño actual). */
+  abrirChecklist() {
+    const capa = [];
+    capa.push(this.add.rectangle(0, 0, ANCHO, ALTO, 0x000000, 0.6).setOrigin(0, 0).setInteractive().setDepth(1000));
+    capa.push(panel(this, 170, 100, 940, 520).setDepth(1000));
+    capa.push(texto(this, 640, 112, '📋 Requisitos de la misión', { tam: 22, negrita: true, origen: [0.5, 0], color: COLORES.acento }).setDepth(1000));
+    capa.push(texto(this, 640, 146, 'Pasa el mouse sobre cada tarjeta para ver cuánto te falta.', { tam: 13, origen: [0.5, 0], color: COLORES.textoSuave }).setDepth(1000));
+    const lista = crearChecklist(this, { x: 195, y: 180, columnas: 2, anchoTarjeta: 440, altoTarjeta: 50, tooltip: this.tooltip, profundidad: 1001 });
+    lista.actualizar(this.checklist);
+    const b = boton(this, 640, 585, 200, 40, 'Cerrar', () => {
+      capa.forEach((o) => o.destroy());
+      lista.destruir();
+      b.destruir();
+      this.tooltip.ocultar();
+    }, { tam: 16 });
+    b.fondo.setDepth(1001);
+    b.txt.setDepth(1001);
   }
 
   /** Ventana con la comparación lado a lado de los diseños A y B. */
@@ -248,7 +301,7 @@ export default class EscenaDiseno extends Phaser.Scene {
     const B = analizarDiseno(estado.disenosAB.B);
     const pct = (x) => `${Math.round(x * 100)}%`;
     const r1 = (x) => Math.round(x * 10) / 10;
-    // [nombre, valorA, valorB, ¿mayor es mejor?, texto A, texto B]
+    // [nombre, valorA, valorB, ¿mayor es mejor?, formato]
     const filas = [
       ['Costo total (M$)', A.costoTotal, B.costoTotal, false],
       ['Masa (kg)', A.diseno.masaTotal, B.diseno.masaTotal, false],
@@ -279,6 +332,7 @@ export default class EscenaDiseno extends Phaser.Scene {
       elementos.push(texto(this, 640, y, String(fmt(va)), { tam: 15, origen: [0.5, 0], color: mejorA ? COLORES.bien : COLORES.texto }));
       elementos.push(texto(this, 880, y, String(fmt(vb)), { tam: 15, origen: [0.5, 0], color: mejorB ? COLORES.bien : COLORES.texto }));
     });
+    elementos.forEach((e) => e.setDepth(1000));
     const botones = [];
     const cerrar = () => {
       elementos.forEach((e) => e.destroy());
@@ -287,5 +341,6 @@ export default class EscenaDiseno extends Phaser.Scene {
     botones.push(boton(this, 450, 610, 200, 44, 'Usar diseño A', () => { usarDisenoAB('A'); cerrar(); this.mostrarCategoria(this.categoriaActual); }, { tam: 16 }));
     botones.push(boton(this, 680, 610, 200, 44, 'Usar diseño B', () => { usarDisenoAB('B'); cerrar(); this.mostrarCategoria(this.categoriaActual); }, { tam: 16 }));
     botones.push(boton(this, 900, 610, 160, 44, 'Cerrar', cerrar, { tam: 16 }));
+    botones.forEach((b) => { b.fondo.setDepth(1001); b.txt.setDepth(1001); });
   }
 }

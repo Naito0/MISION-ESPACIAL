@@ -115,7 +115,10 @@ export function boton(escena, x, y, ancho, alto, etiqueta, alClic, opciones = {}
     b.refrescar(true);
     if (opciones.alPasar) opciones.alPasar();
   });
-  fondo.on('pointerout', () => b.refrescar(false));
+  fondo.on('pointerout', () => {
+    b.refrescar(false);
+    if (opciones.alSalir) opciones.alSalir();
+  });
   fondo.on('pointerdown', () => {
     if (b.habilitado && alClic) alClic();
   });
