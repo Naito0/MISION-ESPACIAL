@@ -16,6 +16,8 @@ import {
 import { coheteMasBarato, costoRetraso } from './lanzamiento.js';
 import { asignarRoles, evaluarMetas } from './roles.js';
 import { calcularSoporte } from './soporteVital.js';
+import { obtenerProgreso } from './progreso.js';
+import { esModoExperto } from './preferencias.js';
 
 // Único objeto de estado: import { estado } from '../systems/estadoMision.js'
 export const estado = {};
@@ -87,6 +89,31 @@ export function opcionesDisponibles(categoria) {
   const m = misionActual();
   if (categoria.soloTripulada && !m.tripulada) return [];
   return categoria.opciones.filter((o) => o.escala === m.escala && nivel().nivelesComponentes.includes(o.nivel));
+}
+
+/**
+ * ¿El jugador ya puede tocar esta categoría? Depende de cuántas misiones
+ * completó (config.json → desbloqueo). El modo experto desbloquea todo.
+ */
+export function categoriaDesbloqueada(categoria) {
+  if (esModoExperto()) return true;
+  const completadas = obtenerProgreso().misionesCompletadas;
+  const paso = CONFIG.desbloqueo.pasos.find((p) => p.categorias.includes(categoria.id));
+  return !paso || completadas >= paso.tras;
+}
+
+/** Cuántas misiones hay que completar para desbloquear una categoría. */
+export function misionesParaDesbloquear(categoria) {
+  const paso = CONFIG.desbloqueo.pasos.find((p) => p.categorias.includes(categoria.id));
+  return paso ? paso.tras : 0;
+}
+
+/** Pieza que usa la misión en una categoría bloqueada (o la primera disponible). */
+export function piezaPorDefecto(categoria) {
+  const m = misionActual();
+  const opciones = opcionesDisponibles(categoria);
+  const id = m.piezasPorDefecto && m.piezasPorDefecto[categoria.id];
+  return (opciones.find((o) => o.id === id) || opciones[0] || null);
 }
 
 /** Categorías que se muestran en el diseño (soporte vital solo si hay tripulación). */

@@ -10,6 +10,7 @@ import * as Phaser from 'phaser';
 import { CATEGORIAS, CONFIG, rolDeCategoria } from '../systems/datos.js';
 import {
   estado, analizarDiseno, nivel, misionActual, esEquipo, opcionesDisponibles, categoriasVisibles,
+  categoriaDesbloqueada, misionesParaDesbloquear, piezaPorDefecto,
   puedeEditarCategoria, pasarTurno, textoTurno, anularAprobaciones, guardarComoAB, usarDisenoAB
 } from '../systems/estadoMision.js';
 import { compatibilidadInstrumento } from '../systems/recursos.js';
@@ -24,6 +25,7 @@ import { monedas, pesoSimple, etiquetasSimples } from '../ui/textosSimples.js';
 import { esModoExperto } from '../systems/preferencias.js';
 import { fraseRecurso } from '../ui/textosSimples.js';
 import { crearOrbi } from '../ui/orbi.js';
+import { hacerArrastrable } from '../ui/arrastrarPiezas.js';
 import { iniciarTutorial } from '../ui/tutorial.js';
 import { obtenerProgreso, marcar } from '../systems/progreso.js';
 
@@ -53,10 +55,22 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.aplicarSeleccionPorDefecto();
 
     // ---- Categorías (izquierda) — soporte vital solo aparece si hay tripulación ----
-    this.categorias = categoriasVisibles();
-    this.botonesCategoria = this.categorias.map((cat, i) =>
-      boton(this, 110, 112 + i * 45, 180, 40, '', () => this.mostrarCategoria(cat), { tam: 13 })
-    );
+    // Las categorías bloqueadas aparecen al final con un candado 🔒
+    const todas = categoriasVisibles();
+    this.categorias = [...todas.filter((c) => categoriaDesbloqueada(c)), ...todas.filter((c) => !categoriaDesbloqueada(c))];
+    this.botonesCategoria = this.categorias.map((cat, i) => {
+      const b = boton(this, 110, 112 + i * 45, 180, 40, '', () => this.mostrarCategoria(cat), {
+        tam: 13,
+        alPasar: () => {
+          if (categoriaDesbloqueada(cat)) return;
+          const p = this.input.activePointer;
+          const n = misionesParaDesbloquear(cat);
+          this.tooltip.mostrar(p.x, p.y, `🔒 ${cat.nombre}: se desbloquea al completar ${n} misión(es).\nPor ahora Orbi eligió una pieza que funciona.`);
+        },
+        alSalir: () => this.tooltip.ocultar()
+      });
+      return b;
+    });
 
     // ---- Centro: categoría (una frase) + botón "?" con la explicación larga ----
     this.textoCategoria = texto(this, 230, 94, '', { tam: 19, negrita: true, color: COLORES.acento });
@@ -65,9 +79,13 @@ export default class EscenaDiseno extends Phaser.Scene {
     this.cartas = [];
 
     // ---- Centro: dibujo de la nave ----
-    panel(this, 225, 308, 640, 274, 0x0e1530);
+    this.zonaNave = { x: 225, y: 308, ancho: 640, alto: 274 }; // donde se sueltan las piezas
+    this.panelNave = panel(this, 225, 308, 640, 274, 0x0e1530);
     texto(this, 237, 314, 'Tu nave', { tam: 12, color: COLORES.textoSuave });
+    this.textoSoltar = texto(this, 545, 330, '⬇ Suelta la pieza aquí ⬇', { tam: 16, negrita: true, origen: [0.5, 0], color: COLORES.acento }).setVisible(false);
     this.nave = crearDibujoNave(this, 545, 452);
+    // La nave flota suavemente
+    this.tweens.add({ targets: this.nave.contenedor, y: 446, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     this.textoEstado = texto(this, 545, 590, '', { tam: 14, origen: [0.5, 0], color: COLORES.aviso, ancho: 630, align: 'center' });
 
     // ---- Estudio de compensaciones: A y B ----
@@ -153,8 +171,16 @@ export default class EscenaDiseno extends Phaser.Scene {
       const opciones = opcionesDisponibles(cat);
       if (cat.multiple) {
         if (!Array.isArray(estado.seleccion[cat.id])) estado.seleccion[cat.id] = [];
-      } else if (!opciones.some((o) => o.id === estado.seleccion[cat.id]) && cat.obligatoria && opciones.length) {
-        estado.seleccion[cat.id] = opciones[0].id;
+        continue;
+      }
+      const valida = opciones.some((o) => o.id === estado.seleccion[cat.id]);
+      // Categorías bloqueadas: siempre la pieza por defecto de la misión (una que funciona)
+      if (!categoriaDesbloqueada(cat) && opciones.length) {
+        const def = piezaPorDefecto(cat);
+        if (def) estado.seleccion[cat.id] = def.id;
+      } else if (!valida && (cat.obligatoria || (cat.soloTripulada && opciones.length)) && opciones.length) {
+        const def = piezaPorDefecto(cat);
+        estado.seleccion[cat.id] = def ? def.id : opciones[0].id;
       }
     }
   }
@@ -199,7 +225,9 @@ export default class EscenaDiseno extends Phaser.Scene {
       const x = X_CARTA[i % 2];
       const y = Y_CARTA + Math.floor(i / 2) * PASO_CARTA;
       const comp = cat.id === 'instrumentos' ? compatibilidadInstrumento(mision, op.id) : { ok: true };
-      const carta = boton(this, x, y, 310, 46, this.etiquetaCarta(op, comp), () => this.elegir(cat, op.id), {
+      // Se puede usar si: es tu turno, sirve para la misión y la categoría está desbloqueada
+      const usable = editable && comp.ok && categoriaDesbloqueada(cat);
+      const carta = boton(this, x, y, 310, 46, this.etiquetaCarta(op, comp), undefined, {
         tam: 13,
         alPasar: () => {
           const p = this.input.activePointer;
@@ -207,9 +235,23 @@ export default class EscenaDiseno extends Phaser.Scene {
         },
         alSalir: () => this.tooltip.ocultar()
       });
-      carta.setHabilitado(editable && comp.ok);
+      carta.setHabilitado(usable);
       carta.opcionId = op.id;
       this.cartas.push(carta);
+      // Armar arrastrando: soltar la pieza sobre la nave (o hacer clic) la coloca
+      if (usable) {
+        hacerArrastrable(this, carta, this.zonaNave, {
+          alEmpezar: () => { this.textoSoltar.setVisible(true); this.panelNave.setStrokeStyle(3, 0x7cf3ff); this.tooltip.ocultar(); },
+          alTerminar: () => { this.textoSoltar.setVisible(false); this.panelNave.setStrokeStyle(2, 0x3a4a7a); },
+          alSoltar: () => {
+            this.elegir(cat, op.id);
+            // La nave "rebota" al encajar la pieza
+            const s = this.nave.contenedor.scale;
+            this.tweens.add({ targets: this.nave.contenedor, scale: s * 1.12, duration: 120, yoyo: true, ease: 'Back.easeOut' });
+            this.mostrarCategoria(cat);
+          }
+        });
+      }
     });
     this.actualizar();
   }

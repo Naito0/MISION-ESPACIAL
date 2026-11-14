@@ -63,6 +63,15 @@
     "velocidadRotacionGrados": 90,
     "escalaTiempo": 1
   },
+  "desbloqueo": {
+    "_nota": "Qué categorías de piezas puede tocar el jugador según cuántas misiones completó ('tras'). Las bloqueadas usan las piezasPorDefecto de la misión. El modo experto desbloquea todo.",
+    "pasos": [
+      { "tras": 0, "categorias": ["paneles", "antena", "instrumentos"] },
+      { "tras": 1, "categorias": ["baterias", "estaciones", "estructura"] },
+      { "tras": 2, "categorias": ["propulsion", "termica", "soporte"] },
+      { "tras": 3, "categorias": ["avionica", "actitud"] }
+    ]
+  },
   "viaje": {
     "_nota": "msPorTramo: cuánto tarda (en ms) cada tramo del viaje entre averías. segundosReaccion: tiempo para hacer clic en la pieza dañada antes de que la avería cause daño.",
     "msPorTramo": 2200,

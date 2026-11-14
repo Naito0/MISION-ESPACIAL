@@ -17,6 +17,7 @@
       "requisitos": { "datosMinimosGB": 10, "vidaMinMeses": 9 },
       "orbitaSugerida": "tierra_leo",
       "destinosPrueba": ["tierra_leo", "tierra_sso", "luna_alta", "marte_alta"],
+      "piezasPorDefecto": { "estructura": "cs_chasis3u", "baterias": "cs_bat20", "propulsion": "cs_sin_prop", "termica": "cs_calefactor", "avionica": "cs_obc", "actitud": "cs_magnet", "estaciones": "cs_est_red" },
       "orbitasPermitidas": ["tierra_leo", "tierra_sso"],
       "objetivos": [
         { "id": "fotos", "nombre": "Fotografiar la Tierra",
@@ -44,6 +45,7 @@
       "requisitos": { "datosMinimosGB": 600, "vidaMinMeses": 24 },
       "orbitaSugerida": "tierra_sso",
       "destinosPrueba": ["tierra_sso", "tierra_geo", "luna_alta", "marte_alta"],
+      "piezasPorDefecto": { "estructura": "estr_ligera", "baterias": "bat_chica", "propulsion": "prop_chica", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_regional" },
       "objetivos": [
         { "id": "incendios", "nombre": "Detectar incendios",
           "descripcion": "Encontrar focos de calor en los bosques y avisar a los bomberos.",
@@ -73,6 +75,7 @@
       "requisitos": { "datosMinimosGB": 20, "vidaMinMeses": 3 },
       "orbitaSugerida": "luna_alta",
       "destinosPrueba": ["luna_alta", "marte_alta"],
+      "piezasPorDefecto": { "estructura": "estr_ligera", "baterias": "bat_grande", "propulsion": "prop_media", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_regional" },
       "superficie": {
         "factorSolar": 0.5, "eclipse": 0.3, "horasSombra": 4, "contacto": 0.5, "factorDatos": 1.0, "factorVida": 1.0,
         "_nota": "En el polo sur el Sol está muy bajo: los paneles rinden la mitad y hay sombras largas."
@@ -109,6 +112,7 @@
       "requisitos": { "datosMinimosGB": 5, "vidaMinMeses": 1 },
       "orbitaSugerida": "luna_alta",
       "destinosPrueba": ["luna_alta", "marte_alta"],
+      "piezasPorDefecto": { "estructura": "estr_reforzada", "baterias": "bat_grande", "propulsion": "prop_media", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_regional", "soporte": "sv_reserva" },
       "superficie": {
         "factorSolar": 1.0, "eclipse": 0.1, "horasSombra": 2, "contacto": 0.8, "factorDatos": 1.0, "factorVida": 1.0,
         "_nota": "Se aterriza de día en una zona ecuatorial: mucho sol y buena vista de la Tierra."
@@ -139,6 +143,7 @@
       "requisitos": { "datosMinimosGB": 150, "vidaMinMeses": 24 },
       "orbitaSugerida": "marte_alta",
       "destinosPrueba": ["marte_alta", "luna_alta", "tierra_sso"],
+      "piezasPorDefecto": { "estructura": "estr_reforzada", "baterias": "bat_grande", "propulsion": "prop_media", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_global" },
       "objetivos": [
         { "id": "mapa", "nombre": "Mapear la superficie",
           "descripcion": "Fotografiar el terreno con detalle para encontrar lugares seguros de aterrizaje.",
@@ -168,6 +173,7 @@
       "requisitos": { "datosMinimosGB": 900, "vidaMinMeses": 30 },
       "orbitaSugerida": "tierra_sso",
       "destinosPrueba": ["tierra_sso", "luna_alta", "marte_alta"],
+      "piezasPorDefecto": { "estructura": "estr_ligera", "baterias": "bat_chica", "propulsion": "prop_chica", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_regional" },
       "objetivos": [
         { "id": "incendios", "nombre": "Detectar incendios",
           "descripcion": "Encontrar focos de calor en los bosques.",
@@ -197,6 +203,7 @@
       "requisitos": { "datosMinimosGB": 200, "vidaMinMeses": 24 },
       "orbitaSugerida": "marte_alta",
       "destinosPrueba": ["marte_alta", "luna_alta", "tierra_sso"],
+      "piezasPorDefecto": { "estructura": "estr_reforzada", "baterias": "bat_grande", "propulsion": "prop_media", "termica": "term_manta", "avionica": "comp_estandar", "actitud": "act_ruedas", "estaciones": "est_global" },
       "objetivos": [
         { "id": "mapa", "nombre": "Mapear la superficie",
           "descripcion": "Fotografiar el terreno con detalle.",
