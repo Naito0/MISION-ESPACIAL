@@ -1,88 +1,93 @@
 // =============================================================
-// puntaje.js — Cálculo del puntaje y récords en localStorage.
-// Todos los pesos del puntaje están en src/data/config.json → "puntaje".
+// puntaje.js — FUNCIONES PURAS: requisitos de la misión y puntaje
+// por categorías (éxito, valor científico, eficiencia y colaboración).
+// Los pesos están en src/data/config.json → "puntaje".
 // =============================================================
-import { CONFIG } from './datos.js';
-import { estado, misionActual, destinoActual } from './estadoMision.js';
 
-/** ¿Se cumplió el objetivo científico de la misión? */
-export function objetivoCumplido() {
-  const op = estado.operacion;
-  if (!op) return false;
-  const m = misionActual();
-  return (op.datosTransmitidos[m.instrumentoRequerido] || 0) >= m.datosObjetivo;
+const limitar = (x, min, max) => Math.max(min, Math.min(max, x));
+
+/**
+ * Lista de requisitos con ok/no ok.
+ * p = { mision, lanzamiento, aterrizaje, resumen, presupuesto }
+ */
+export function evaluarRequisitos(p) {
+  const { mision, lanzamiento, aterrizaje, resumen, presupuesto } = p;
+  const req = mision.requisitos;
+  const enviados = resumen ? resumen.datosEnviados : 0;
+  const meses = resumen ? resumen.mesesOperativos : 0;
+  const lista = [
+    { id: 'presupuesto', ok: lanzamiento.costoTotal <= presupuesto,
+      texto: `Costo dentro del presupuesto (${lanzamiento.costoTotal} de ${presupuesto} M$)` },
+    { id: 'insercion', ok: lanzamiento.insercion.ok,
+      texto: mision.aterriza ? 'Llegar a la órbita de descenso con combustible' : 'Entrar en la órbita elegida' }
+  ];
+  if (mision.aterriza) {
+    lista.push({ id: 'aterrizaje', ok: !!(aterrizaje && aterrizaje.exito), texto: 'Aterrizar sin estrellarse' });
+  }
+  lista.push(
+    { id: 'datos', ok: enviados >= req.datosMinimosGB,
+      texto: `Enviar al menos ${req.datosMinimosGB} GB a la Tierra (llegaron ${Math.round(enviados * 10) / 10} GB)` },
+    { id: 'vida', ok: meses >= req.vidaMinMeses,
+      texto: `Funcionar al menos ${req.vidaMinMeses} meses (funcionó ${meses})` }
+  );
+  // Un requisito por cada objetivo científico
+  for (const obj of mision.objetivos) {
+    const valor = resumen ? resumen.valorObjetivos[obj.id] || 0 : 0;
+    lista.push({ id: `objetivo_${obj.id}`, ok: valor >= obj.valorMinimo,
+      texto: `Objetivo "${obj.nombre}": valor ${Math.round(valor)} de ${obj.valorMinimo}` });
+  }
+  return lista;
 }
 
-/** Calcula el puntaje con su desglose (para mostrarlo en Resultados). */
-export function calcularPuntaje() {
-  const p = CONFIG.puntaje;
-  const m = misionActual();
-  const desglose = [];
-  const sumar = (concepto, puntos) => {
-    if (puntos !== 0) desglose.push({ concepto, puntos: Math.round(puntos) });
+/**
+ * Puntaje por categorías.
+ * p = { requisitos, resumen, mision, lanzamiento, presupuesto, modoEquipo, metasRoles, config }
+ */
+export function calcularPuntaje(p) {
+  const cfg = p.config.puntaje;
+  const r = p.resumen;
+
+  // 1) Éxito: proporción de requisitos cumplidos
+  const cumplidos = p.requisitos.filter((x) => x.ok).length;
+  const exito = Math.round(cfg.maxExito * cumplidos / p.requisitos.length);
+
+  // 2) Valor científico: comparado con el valor de referencia de la misión
+  const valor = r ? r.valorCientifico : 0;
+  const ciencia = Math.round(cfg.maxCiencia * limitar(valor / p.mision.valorReferencia, 0, cfg.topeCiencia));
+
+  // 3) Eficiencia: promedio de 4 factores entre 0 y 1
+  //    (el ahorro solo cuenta si la misión llegó a operar)
+  const ahorroRelativo = (p.presupuesto - p.lanzamiento.costoTotal) / p.presupuesto;
+  const factores = {
+    ahorro: r && r.mesesOperativos > 0 ? limitar(ahorroRelativo / cfg.ahorroIdeal, 0, 1) : 0,
+    datosAprovechados: r && r.datosGenerados > 0 ? limitar(r.datosEnviados / r.datosGenerados, 0, 1) : 0,
+    margenMasa: limitar(p.lanzamiento.margenes.masa / 0.1, 0, 1),
+    margenEnergia: limitar(p.lanzamiento.margenes.energia / 0.1, 0, 1)
   };
+  const promedio = Object.values(factores).reduce((s, x) => s + x, 0) / 4;
+  const eficiencia = Math.round(cfg.maxEficiencia * promedio);
 
-  const at = estado.aterrizaje;
-  if (at && at.exito) {
-    sumar('Aterrizaje exitoso', p.bonusAterrizaje);
-    // Cuanto más suave el toque, más puntos de precisión.
-    const suavidad = 1 - at.vVertical / CONFIG.aterrizaje.velocidadMaxVertical;
-    sumar('Precisión del aterrizaje', p.bonusPrecisionAterrizaje * Math.max(0, suavidad));
-    sumar('Combustible sobrante', at.combustibleFinal * p.porKgCombustibleRestante);
+  const categorias = [
+    { id: 'exito', nombre: 'Éxito de la misión', puntos: exito, max: cfg.maxExito },
+    { id: 'ciencia', nombre: 'Valor científico', puntos: ciencia, max: cfg.maxCiencia },
+    { id: 'eficiencia', nombre: 'Uso eficiente de recursos', puntos: eficiencia, max: cfg.maxEficiencia }
+  ];
+
+  // 4) Colaboración (solo modo equipo): metas de rol cumplidas al lanzar
+  if (p.modoEquipo) {
+    const metas = p.metasRoles || [];
+    const ok = metas.filter((m) => m.ok).length;
+    categorias.push({
+      id: 'colaboracion', nombre: 'Colaboración (metas de segmento)',
+      puntos: metas.length ? Math.round(cfg.maxColaboracion * ok / metas.length) : 0,
+      max: cfg.maxColaboracion
+    });
   }
 
-  const op = estado.operacion;
-  if (op) {
-    for (const [id, cantidad] of Object.entries(op.datosTransmitidos)) {
-      const mult = id === m.instrumentoRequerido ? p.multiplicadorInstrumentoObjetivo : 1;
-      const nombre = estado.nave.instrumentos.find((i) => i.id === id)?.nombre || id;
-      sumar(`Datos de ${nombre} en la Tierra (${cantidad})`, cantidad * p.porDato * mult);
-    }
-    if (objetivoCumplido()) sumar('Objetivo científico cumplido', p.bonusObjetivoCumplido);
-    sumar('Turnos sin energía', -op.turnosSinEnergia * p.penalizacionTurnoSinEnergia);
-  }
-
-  // El ahorro solo premia si la misión llegó a la superficie
-  // (si no, estrellar una nave barata daría puntos).
-  if (at && at.exito) {
-    const sobrante = estado.presupuesto - estado.nave.costo - estado.lanzamiento.costoCohete;
-    sumar(`Presupuesto sin gastar (${sobrante} M$)`, Math.max(0, sobrante) * p.porMillonSobrante);
-  }
-
-  const total = Math.max(0, desglose.reduce((s, d) => s + d.puntos, 0));
-  return { total, desglose };
-}
-
-// ---------------- Récords (localStorage) ----------------
-
-/** Lee los récords guardados. Si localStorage no está disponible, devuelve []. */
-export function cargarRecords() {
-  try {
-    const texto = localStorage.getItem(CONFIG.records.claveLocalStorage);
-    const lista = texto ? JSON.parse(texto) : [];
-    return Array.isArray(lista) ? lista : [];
-  } catch {
-    return [];
-  }
-}
-
-/** Guarda el puntaje si entra en el top. Devuelve { records, esRecord }. */
-export function guardarRecord(puntaje) {
-  const anteriores = cargarRecords();
-  const mejorAnterior = anteriores.length ? anteriores[0].puntaje : 0;
-  const nuevo = {
-    puntaje,
-    mision: misionActual().nombre,
-    destino: destinoActual().nombre,
-    fecha: new Date().toLocaleDateString('es')
+  return {
+    categorias,
+    total: categorias.reduce((s, c) => s + c.puntos, 0),
+    maximo: categorias.reduce((s, c) => s + c.max, 0),
+    factoresEficiencia: factores
   };
-  const records = [...anteriores, nuevo]
-    .sort((a, b) => b.puntaje - a.puntaje)
-    .slice(0, CONFIG.records.cantidadGuardada);
-  try {
-    localStorage.setItem(CONFIG.records.claveLocalStorage, JSON.stringify(records));
-  } catch {
-    // Sin localStorage (modo privado): el juego sigue funcionando sin récords.
-  }
-  return { records, esRecord: puntaje > mejorAnterior };
 }

@@ -1,5 +1,6 @@
 // =============================================================
-// ESCENA 5 — ATERRIZAJE (tipo Lunar Lander) con gravedad real del destino.
+// FASE 6 — OPERACIÓN (parte 1): ATERRIZAJE tipo Lunar Lander, solo en las
+// misiones que aterrizan. Gravedad real del destino.
 //
 // Física (unidades reales: metros, segundos, kg, newtons):
 //   aceleración del motor = empuje / masa total   (en la dirección de la nave)
@@ -10,7 +11,7 @@
 // =============================================================
 import * as Phaser from 'phaser';
 import { CONFIG } from '../systems/datos.js';
-import { estado, destinoActual, registrar } from '../systems/estadoMision.js';
+import { estado, destinoActual, orbitaActual, analizarDiseno, nivel } from '../systems/estadoMision.js';
 import { ANCHO, ALTO, COLORES, texto, panel, boton, estrellas } from '../ui/ui.js';
 
 const SUELO_Y = 650;      // altura en pantalla de la superficie
@@ -25,21 +26,22 @@ export default class EscenaAterrizaje extends Phaser.Scene {
   create() {
     estrellas(this, 80);
     const destino = destinoActual();
-    const params = destino.juego.aterrizaje;
+    const params = orbitaActual().aterrizaje; // la órbita de llegada define cómo empieza el descenso
+    const diseno = analizarDiseno().diseno;
     this.cfg = CONFIG.aterrizaje;
 
     // ---- Variables físicas ----
     this.g = destino.gravedad;
-    this.k = params.frenadoAtmosferico;
+    this.k = destino.juego.frenadoAtmosferico;   // 0 en la Luna; leve en Marte
     this.altitudInicial = params.altitudInicial;
     this.altitud = params.altitudInicial;            // m
     this.vy = -params.velocidadVerticalInicial;      // m/s (negativo = cae)
     this.vx = Phaser.Math.FloatBetween(-params.velocidadHorizontalMax, params.velocidadHorizontalMax);
     this.angulo = 0;                                 // grados (0 = vertical, + = inclinada a la derecha)
-    this.masaSeca = estado.nave.masaSeca;
-    this.combustible = estado.recursos.combustible;  // kg (lo que quedó del viaje)
-    this.empuje = estado.nave.empuje;                // N
-    this.consumo = estado.nave.consumoMotor;         // kg/s
+    this.masaSeca = diseno.masaSeca;
+    this.combustible = estado.lanzamiento.insercion.quedan; // kg (lo que quedó tras entrar en órbita)
+    this.empuje = diseno.empuje;                     // N
+    this.consumo = diseno.consumoMotor;              // kg/s
     this.tiempo = 0;
     this.tiempoMotor = 0;
     this.sinCombustibleEnVuelo = false;
@@ -71,7 +73,7 @@ export default class EscenaAterrizaje extends Phaser.Scene {
 
   dibujarEscenario(destino) {
     const color = parseInt(destino.color.replace('#', ''), 16);
-    if (destino.juego.aterrizaje.frenadoAtmosferico > 0) {
+    if (destino.juego.frenadoAtmosferico > 0) {
       // Cielo rojizo tenue para Marte
       this.add.rectangle(0, 0, ANCHO, SUELO_Y, 0x3a1d14, 0.5).setOrigin(0, 0);
     }
@@ -229,11 +231,6 @@ export default class EscenaAterrizaje extends Phaser.Scene {
       empujePeso: this.empujePeso,
       sinCombustibleEnVuelo: this.sinCombustibleEnVuelo
     };
-    estado.recursos.combustible = Math.round(this.combustible);
-    registrar('aterrizaje', exito
-      ? `Aterrizaje exitoso a ${vVertical.toFixed(1)} m/s.`
-      : `Choque a ${vVertical.toFixed(1)} m/s (motivo: ${motivo}).`);
-
     if (!exito) {
       // "Explosión" simple con círculos
       for (let i = 0; i < 14; i++) {
@@ -257,8 +254,14 @@ export default class EscenaAterrizaje extends Phaser.Scene {
       `Velocidad vertical: ${vVertical.toFixed(1)} m/s · horizontal: ${vHorizontal.toFixed(1)} m/s\n` +
       `Inclinación: ${angulo.toFixed(0)}° · Combustible restante: ${this.combustible.toFixed(0)} kg`,
       { tam: 16, origen: [0.5, 0], align: 'center' });
-    boton(this, 640, 400, 300, 46,
-      exito ? 'Comenzar operación ▶' : 'Ver resultados ▶',
-      () => this.scene.start(exito ? 'Operacion' : 'Resultados'), { tam: 20 });
+    // Éxito → simulación de la operación en la superficie. Choque → informe.
+    // En el nivel 1 (tutorial) se puede reintentar el descenso.
+    const puedeReintentar = !exito && nivel().reintentarAterrizaje;
+    boton(this, puedeReintentar ? 540 : 640, 400, 260, 46,
+      exito ? 'Operar en la superficie ▶' : 'Ver informe ▶',
+      () => this.scene.start(exito ? 'Simulacion' : 'Informe'), { tam: 18 });
+    if (puedeReintentar) {
+      boton(this, 770, 400, 180, 46, 'Reintentar ↺', () => this.scene.restart(), { tam: 18 });
+    }
   }
 }

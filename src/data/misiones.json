@@ -1,47 +1,176 @@
 {
-  "_comentario": "Misiones disponibles. presupuesto en M$ (incluye piezas + cohete). datosObjetivo: datos del instrumento requerido que deben llegar a la Tierra. factorSolar (opcional) reemplaza al del destino.",
+  "_comentario": "Escenarios por nivel (1 = tutorial CubeSat, 2 = una misión con un objetivo, 3 = varios objetivos a la vez). escala: qué componentes se usan ('cubesat' o 'normal'). presupuesto en M$ (nave + cohete). plazoMeses = tiempo máximo de desarrollo. duracionMeses = cuánto se simula. objetivos: cada uno lista los instrumentos útiles con su multiplicador de valor y el valor mínimo para cumplirlo. incompatibles: instrumentos que no sirven y por qué. valorReferencia = valor que da el puntaje completo de ciencia. metaValorMensual = meta del segmento Usuario. 'superficie' reemplaza a la órbita durante la operación si la misión aterriza. misionesReales: ids de misiones_reales.json.",
   "misiones": [
     {
+      "id": "cubesat_tierra",
+      "nivel": 1,
+      "nombre": "Mi primer CubeSat",
+      "tipoNave": "CubeSat",
+      "escala": "cubesat",
+      "destino": "tierra",
+      "aterriza": false,
+      "resumen": "Un satélite del tamaño de una caja de zapatos que fotografía la Tierra. Barato, pequeño y con poca energía: ideal para aprender.",
+      "presupuesto": 12,
+      "plazoMeses": 12,
+      "costoPorMesRetraso": 1,
+      "duracionMeses": 12,
+      "requisitos": { "datosMinimosGB": 10, "vidaMinMeses": 9 },
+      "orbitaSugerida": "tierra_leo",
+      "orbitasPermitidas": ["tierra_leo", "tierra_sso"],
+      "objetivos": [
+        { "id": "fotos", "nombre": "Fotografiar la Tierra",
+          "descripcion": "Tomar fotos de tu región para ver ríos, bosques y ciudades desde el espacio.",
+          "instrumentos": { "cs_camara": 1.5, "cs_multi": 2 }, "valorMinimo": 30 }
+      ],
+      "incompatibles": { "cs_radiacion": "Mide partículas, no toma fotos: no ayuda a fotografiar la Tierra." },
+      "valorReferencia": 60,
+      "metaValorMensual": 5,
+      "misionesReales": ["elana", "landsat9"],
+      "inspiradoEn": "CubeSats educativos lanzados como carga secundaria (aproximado)."
+    },
+    {
+      "id": "tierra_incendios",
+      "nivel": 2,
+      "nombre": "Vigía de incendios",
+      "tipoNave": "Satélite",
+      "escala": "normal",
+      "destino": "tierra",
+      "aterriza": false,
+      "resumen": "Un satélite que vigila los bosques con luz visible e infrarroja para detectar incendios a tiempo.",
+      "presupuesto": 200,
+      "plazoMeses": 18,
+      "duracionMeses": 36,
+      "requisitos": { "datosMinimosGB": 600, "vidaMinMeses": 24 },
+      "orbitaSugerida": "tierra_sso",
+      "objetivos": [
+        { "id": "incendios", "nombre": "Detectar incendios",
+          "descripcion": "Encontrar focos de calor en los bosques y avisar a los bomberos.",
+          "instrumentos": { "termometro": 2, "cam_simple": 1.5, "cam_alta": 1.5, "radar": 1.2 }, "valorMinimo": 400 }
+      ],
+      "incompatibles": {
+        "detector_neutrones": "Busca hidrógeno bajo el suelo: no sirve para ver incendios.",
+        "espectrometro": "Analiza la composición de las rocas; para incendios se necesita ver el calor."
+      },
+      "valorReferencia": 900,
+      "metaValorMensual": 25,
+      "misionesReales": ["terra", "landsat9"],
+      "inspiradoEn": "Satélites reales de observación de la Tierra que detectan incendios (aproximado)."
+    },
+    {
       "id": "luna_hielo",
+      "nivel": 2,
+      "nombre": "Cazador de hielo lunar",
+      "tipoNave": "Módulo de aterrizaje",
+      "escala": "normal",
       "destino": "luna",
-      "nombre": "Hielo en el polo sur lunar",
-      "objetivo": "Buscar hielo de agua dentro de los cráteres en sombra del polo sur.",
-      "instrumentoRequerido": "espectrometro",
-      "datosObjetivo": 60,
-      "presupuesto": 300,
-      "factorSolar": 0.5,
-      "notaSolar": "En el polo sur el Sol está muy bajo en el horizonte: los paneles rinden la mitad.",
+      "aterriza": true,
+      "resumen": "Un módulo que aterriza cerca del polo sur de la Luna y busca hielo de agua escondido en el suelo.",
+      "presupuesto": 320,
+      "plazoMeses": 20,
+      "duracionMeses": 6,
+      "requisitos": { "datosMinimosGB": 20, "vidaMinMeses": 3 },
+      "orbitaSugerida": "luna_alta",
+      "superficie": {
+        "factorSolar": 0.5, "eclipse": 0.3, "horasSombra": 4, "contacto": 0.5, "factorDatos": 1.0, "factorVida": 1.0,
+        "_nota": "En el polo sur el Sol está muy bajo: los paneles rinden la mitad y hay sombras largas."
+      },
+      "objetivos": [
+        { "id": "hielo", "nombre": "Encontrar hielo de agua",
+          "descripcion": "Detectar hidrógeno y minerales con agua en el suelo del polo sur.",
+          "instrumentos": { "detector_neutrones": 2.5, "espectrometro": 2, "radar": 1.5, "cam_simple": 0.5 }, "valorMinimo": 120 }
+      ],
+      "incompatibles": {
+        "termometro": "Buscar calor no ayuda a encontrar hielo enterrado en cráteres oscuros.",
+        "cam_alta": "Desde la superficie, una cámara de alta resolución orbital no aporta: el hielo está bajo el suelo."
+      },
+      "valorReferencia": 250,
+      "metaValorMensual": 30,
+      "misionesReales": ["lcross", "lunar_prospector"],
       "inspiradoEn": "Misiones reales de búsqueda de agua en el polo sur lunar (aproximado)."
     },
     {
-      "id": "luna_sismos",
-      "destino": "luna",
-      "nombre": "Sismos lunares",
-      "objetivo": "Registrar temblores para entender el interior de la Luna.",
-      "instrumentoRequerido": "sismometro",
-      "datosObjetivo": 40,
-      "presupuesto": 270,
-      "inspiradoEn": "Sismómetros dejados por las misiones Apolo (aproximado)."
+      "id": "marte_mapa",
+      "nivel": 2,
+      "nombre": "Cartógrafo de Marte",
+      "tipoNave": "Orbitador",
+      "escala": "normal",
+      "destino": "marte",
+      "aterriza": false,
+      "resumen": "Un orbitador que hace un mapa detallado de Marte para elegir dónde aterrizarán las próximas misiones.",
+      "presupuesto": 420,
+      "plazoMeses": 26,
+      "duracionMeses": 36,
+      "requisitos": { "datosMinimosGB": 150, "vidaMinMeses": 24 },
+      "orbitaSugerida": "marte_alta",
+      "objetivos": [
+        { "id": "mapa", "nombre": "Mapear la superficie",
+          "descripcion": "Fotografiar el terreno con detalle para encontrar lugares seguros de aterrizaje.",
+          "instrumentos": { "cam_alta": 1.5, "cam_simple": 1, "radar": 1.5, "espectrometro": 1 }, "valorMinimo": 500 }
+      ],
+      "incompatibles": {
+        "detector_neutrones": "Sirve para buscar agua, no para hacer mapas del terreno.",
+        "termometro": "La cámara infrarroja no tiene el detalle necesario para un mapa de aterrizaje."
+      },
+      "valorReferencia": 1200,
+      "metaValorMensual": 30,
+      "misionesReales": ["mro", "mars_odyssey"],
+      "inspiradoEn": "Orbitadores reales que cartografían Marte (aproximado)."
     },
     {
-      "id": "marte_agua",
+      "id": "tierra_guardianes",
+      "nivel": 3,
+      "nombre": "Guardianes de la Tierra",
+      "tipoNave": "Satélite",
+      "escala": "normal",
+      "destino": "tierra",
+      "aterriza": false,
+      "resumen": "Dos objetivos a la vez: detectar incendios y vigilar la salud de los cultivos. Un instrumento puede servir para ambos.",
+      "presupuesto": 240,
+      "plazoMeses": 20,
+      "duracionMeses": 36,
+      "requisitos": { "datosMinimosGB": 900, "vidaMinMeses": 30 },
+      "orbitaSugerida": "tierra_sso",
+      "objetivos": [
+        { "id": "incendios", "nombre": "Detectar incendios",
+          "descripcion": "Encontrar focos de calor en los bosques.",
+          "instrumentos": { "termometro": 2, "cam_simple": 1, "cam_alta": 1.2, "radar": 1.2 }, "valorMinimo": 350 },
+        { "id": "cultivos", "nombre": "Vigilar cultivos",
+          "descripcion": "Medir cómo de sanas están las plantas en los campos.",
+          "instrumentos": { "espectrometro": 2, "cam_alta": 1.2, "cam_simple": 0.8 }, "valorMinimo": 350 }
+      ],
+      "incompatibles": { "detector_neutrones": "Busca hidrógeno bajo el suelo: no sirve ni para incendios ni para cultivos." },
+      "valorReferencia": 1400,
+      "metaValorMensual": 40,
+      "misionesReales": ["landsat9", "terra"],
+      "inspiradoEn": "Satélites reales de observación de la Tierra con varios instrumentos (aproximado)."
+    },
+    {
+      "id": "marte_agua_mapa",
+      "nivel": 3,
+      "nombre": "Marte: mapa y agua",
+      "tipoNave": "Orbitador",
+      "escala": "normal",
       "destino": "marte",
-      "nombre": "Rastros de agua antigua",
-      "objetivo": "Perforar el suelo de un antiguo lago marciano en busca de minerales formados con agua.",
-      "instrumentoRequerido": "taladro",
-      "datosObjetivo": 50,
+      "aterriza": false,
+      "resumen": "Dos objetivos a la vez: hacer el mapa de Marte y buscar agua congelada bajo la superficie.",
       "presupuesto": 460,
-      "inspiradoEn": "Rovers de exploración de cráteres marcianos (aproximado)."
-    },
-    {
-      "id": "marte_clima",
-      "destino": "marte",
-      "nombre": "Clima marciano",
-      "objetivo": "Medir temperatura, presión y viento durante varios días marcianos.",
-      "instrumentoRequerido": "meteo",
-      "datosObjetivo": 40,
-      "presupuesto": 400,
-      "inspiradoEn": "Estaciones meteorológicas de los módulos de aterrizaje en Marte (aproximado)."
+      "plazoMeses": 26,
+      "duracionMeses": 36,
+      "requisitos": { "datosMinimosGB": 200, "vidaMinMeses": 24 },
+      "orbitaSugerida": "marte_alta",
+      "objetivos": [
+        { "id": "mapa", "nombre": "Mapear la superficie",
+          "descripcion": "Fotografiar el terreno con detalle.",
+          "instrumentos": { "cam_alta": 1.5, "cam_simple": 1 }, "valorMinimo": 300 },
+        { "id": "agua", "nombre": "Buscar agua subterránea",
+          "descripcion": "Detectar hielo de agua bajo el suelo marciano.",
+          "instrumentos": { "radar": 2, "detector_neutrones": 2, "espectrometro": 1.5 }, "valorMinimo": 300 }
+      ],
+      "incompatibles": { "termometro": "La cámara infrarroja no ve el agua enterrada ni da el detalle de un mapa." },
+      "valorReferencia": 1500,
+      "metaValorMensual": 45,
+      "misionesReales": ["mars_odyssey", "phoenix"],
+      "inspiradoEn": "Orbitadores y módulos reales que buscaron agua en Marte (aproximado)."
     }
   ]
 }

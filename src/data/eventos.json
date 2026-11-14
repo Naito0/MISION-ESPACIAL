@@ -1,73 +1,59 @@
 {
-  "_comentario": "Eventos del viaje. 'mitigadoPor' es el efecto de pieza que evita el daño (ver 'efectos' de los escudos en piezas.json); null = no se puede evitar. Tipos de daño: combustible, paneles, bateria, antena (porcentaje que se pierde) e instrumento (uno deja de funcionar).",
+  "_comentario": "Eventos durante la simulación. Los eventos del ambiente (esFalla: false) se sortean según el nivel. Las fallas internas (esFalla: true) ocurren con una probabilidad que depende del RIESGO del diseño (componentes nuevos = más riesgo). mitigadoPor = efecto de un componente que evita el daño (null = inevitable). Tipos de daño: paneles, bateria, antena, vida (porcentaje que se pierde), datos (porcentaje de la memoria que se borra) e instrumento (uno deja de funcionar).",
   "eventos": [
     {
-      "id": "tormenta_solar",
-      "nombre": "Tormenta solar",
-      "probabilidad": 1,
+      "id": "tormenta_solar", "nombre": "Tormenta solar", "probabilidad": 1, "esFalla": false,
       "descripcion": "Una eyección de masa coronal lanza partículas de alta energía contra la nave.",
       "mitigadoPor": "radiacion",
-      "textoMitigado": "El blindaje integral protegió las celdas solares y la electrónica.",
-      "textoDanio": "La radiación degradó las celdas de los paneles solares (-35% de energía).",
-      "danio": [{ "tipo": "paneles", "porcentaje": 35 }],
-      "explicacion": "Las partículas solares dañan celdas y circuitos. Un blindaje contra radiación agrega masa, pero protege el sistema de energía."
+      "textoMitigado": "La protección contra radiación salvó las celdas solares.",
+      "textoDanio": "La radiación degradó los paneles solares: generan 25% menos.",
+      "danio": [{ "tipo": "paneles", "porcentaje": 25 }],
+      "explicacion": "Las partículas solares dañan celdas y circuitos. Una estructura blindada o una computadora resistente a radiación lo evitan."
     },
     {
-      "id": "micrometeorito",
-      "nombre": "Lluvia de micrometeoritos",
-      "probabilidad": 1,
-      "descripcion": "Partículas del tamaño de un grano de arena viajan a decenas de km/s.",
+      "id": "micrometeorito", "nombre": "Impacto de micrometeorito", "probabilidad": 1, "esFalla": false,
+      "descripcion": "Una partícula del tamaño de un grano de arena golpea la nave a decenas de km/s.",
       "mitigadoPor": "impactos",
-      "textoMitigado": "El escudo de impactos desintegró las partículas.",
-      "textoDanio": "Un micrometeorito perforó el tanque: se perdió el 30% del combustible.",
-      "danio": [{ "tipo": "combustible", "porcentaje": 30 }],
-      "explicacion": "A esas velocidades, un grano de arena tiene la energía de una bala. Los escudos Whipple usan capas separadas para frenarlos."
+      "textoMitigado": "La estructura blindada absorbió el impacto.",
+      "textoDanio": "El impacto dañó la estructura: la vida útil restante baja 30%.",
+      "danio": [{ "tipo": "vida", "porcentaje": 30 }],
+      "explicacion": "A esas velocidades un grano de arena tiene la energía de una bala. Las estructuras blindadas usan capas para frenarlos."
     },
     {
-      "id": "frio_extremo",
-      "nombre": "Frío extremo",
-      "probabilidad": 1,
-      "descripcion": "La nave queda a la sombra durante horas y la temperatura cae por debajo de -150 °C.",
+      "id": "frio_extremo", "nombre": "Frío extremo", "probabilidad": 1, "esFalla": false,
+      "descripcion": "La nave queda a la sombra más tiempo de lo previsto y la temperatura cae por debajo de -150 °C.",
       "mitigadoPor": "aislamiento",
-      "textoMitigado": "El aislamiento térmico mantuvo calientes los instrumentos.",
+      "textoMitigado": "El control térmico mantuvo calientes los instrumentos.",
       "textoDanio": "Un instrumento se congeló y quedó fuera de servicio.",
       "danio": [{ "tipo": "instrumento" }],
-      "explicacion": "La electrónica deja de funcionar si se enfría demasiado. Las mantas térmicas multicapa reducen la pérdida de calor."
+      "explicacion": "La electrónica deja de funcionar si se enfría demasiado. Una manta térmica, un calefactor o un control térmico activo la protegen."
     },
     {
-      "id": "correccion_trayectoria",
-      "nombre": "Corrección de trayectoria",
-      "probabilidad": 0.7,
-      "descripcion": "La navegación detecta un pequeño desvío y hay que encender el motor.",
+      "id": "falla_bateria", "nombre": "Falla de batería", "probabilidad": 1, "esFalla": true,
+      "descripcion": "Una celda de la batería se recalienta y deja de funcionar.",
+      "mitigadoPor": "redundancia",
+      "textoMitigado": "El segundo banco de baterías tomó el control: no se perdió capacidad.",
+      "textoDanio": "La batería perdió la mitad de su capacidad.",
+      "danio": [{ "tipo": "bateria", "porcentaje": 50 }],
+      "explicacion": "Las fallas internas son más probables con componentes nuevos (sin vuelos previos). Tener un repuesto (redundancia) evita que una falla sea grave."
+    },
+    {
+      "id": "reinicio_computadora", "nombre": "Reinicio de la computadora", "probabilidad": 0.8, "esFalla": true,
+      "descripcion": "Un error de software reinicia la computadora de a bordo.",
       "mitigadoPor": null,
       "textoMitigado": "",
-      "textoDanio": "La maniobra de corrección gastó el 10% del combustible.",
-      "danio": [{ "tipo": "combustible", "porcentaje": 10 }],
-      "explicacion": "Las correcciones de rumbo son normales en todo viaje espacial; por eso las misiones llevan combustible de reserva."
+      "textoDanio": "Se borraron los datos que esperaban en la memoria.",
+      "danio": [{ "tipo": "datos", "porcentaje": 100 }],
+      "explicacion": "El software nuevo tiene más errores que el probado en vuelo. Enviar los datos a tiempo (buena antena y estaciones) reduce lo que se pierde."
     },
     {
-      "id": "falla_comunicaciones",
-      "nombre": "Descarga electrostática",
-      "probabilidad": 0.6,
-      "descripcion": "Se acumula carga eléctrica en el casco y se produce una descarga cerca de la antena.",
-      "mitigadoPor": "radiacion",
-      "textoMitigado": "El blindaje integral desvió la descarga.",
-      "textoDanio": "El amplificador de la antena se dañó: transmitirá un 40% menos de datos.",
+      "id": "falla_antena", "nombre": "Falla del amplificador de la antena", "probabilidad": 0.6, "esFalla": true,
+      "descripcion": "El amplificador de la radio se degrada antes de lo previsto.",
+      "mitigadoPor": null,
+      "textoMitigado": "",
+      "textoDanio": "La antena envía 40% menos datos.",
       "danio": [{ "tipo": "antena", "porcentaje": 40 }],
-      "explicacion": "El entorno espacial carga eléctricamente la nave. El blindaje y una buena conexión a tierra eléctrica protegen las comunicaciones."
-    }
-  ],
-  "eventosFijos": [
-    {
-      "id": "entrada_atmosferica",
-      "nombre": "Entrada en la atmósfera de Marte",
-      "soloEn": ["marte"],
-      "descripcion": "La nave entra a unos 20 000 km/h y el roce con la atmósfera la calienta a más de 1000 °C.",
-      "mitigadoPor": "entradaAtmosferica",
-      "textoMitigado": "El escudo térmico absorbió el calor y la nave llegó intacta al paracaídas.",
-      "textoDanio": "Sin escudo térmico, el calor quemó la mitad de los paneles y dañó el tanque (-25% de combustible).",
-      "danio": [{ "tipo": "paneles", "porcentaje": 50 }, { "tipo": "combustible", "porcentaje": 25 }],
-      "explicacion": "Toda nave que aterriza en Marte necesita un escudo térmico: aunque la atmósfera es delgada, la velocidad de entrada es enorme."
+      "explicacion": "Los componentes nuevos fallan más. Elegir equipos probados en vuelo reduce el riesgo, aunque a veces rindan menos."
     }
   ]
 }

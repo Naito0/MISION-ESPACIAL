@@ -1,18 +1,27 @@
 // =============================================================
 // main.js — Punto de entrada: configura Phaser y registra las escenas.
-// El orden del recorrido es: Mision → Taller → Lanzamiento → Viaje
-//                            → Aterrizaje → Operacion → Resultados
+//
+// Recorrido (fases de maduración de una misión, como en la NASA):
+//   Inicio
+//   1. Concepto ............ EscenaMision
+//   2. Requisitos .......... EscenaRequisitos
+//   3. Compensaciones ...... EscenaDiseno
+//   4. Diseño puntual ...... EscenaDisenoPuntual
+//   5. Lanzamiento ......... EscenaLanzamiento
+//   6. Operación ........... EscenaAterrizaje (si aterriza) → EscenaSimulacion → EscenaInforme
 // =============================================================
 import * as Phaser from 'phaser';
 import { ANCHO, ALTO, COLORES } from './ui/ui.js';
 
+import EscenaInicio from './scenes/EscenaInicio.js';
 import EscenaMision from './scenes/EscenaMision.js';
-import EscenaTaller from './scenes/EscenaTaller.js';
+import EscenaRequisitos from './scenes/EscenaRequisitos.js';
+import EscenaDiseno from './scenes/EscenaDiseno.js';
+import EscenaDisenoPuntual from './scenes/EscenaDisenoPuntual.js';
 import EscenaLanzamiento from './scenes/EscenaLanzamiento.js';
-import EscenaViaje from './scenes/EscenaViaje.js';
 import EscenaAterrizaje from './scenes/EscenaAterrizaje.js';
-import EscenaOperacion from './scenes/EscenaOperacion.js';
-import EscenaResultados from './scenes/EscenaResultados.js';
+import EscenaSimulacion from './scenes/EscenaSimulacion.js';
+import EscenaInforme from './scenes/EscenaInforme.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -26,13 +35,15 @@ const config = {
   },
   // La primera escena de la lista es la que arranca
   scene: [
+    EscenaInicio,
     EscenaMision,
-    EscenaTaller,
+    EscenaRequisitos,
+    EscenaDiseno,
+    EscenaDisenoPuntual,
     EscenaLanzamiento,
-    EscenaViaje,
     EscenaAterrizaje,
-    EscenaOperacion,
-    EscenaResultados
+    EscenaSimulacion,
+    EscenaInforme
   ]
 };
 

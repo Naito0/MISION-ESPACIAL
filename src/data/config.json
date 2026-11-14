@@ -1,5 +1,58 @@
 {
-  "_comentario": "Balance general del juego: umbrales de aterrizaje, reglas de la operación y puntaje. Se puede cambiar sin tocar el código.",
+  "_comentario": "Balance general: fases, niveles, barras, riesgo, presupuesto, aterrizaje, simulación y puntaje. Se puede cambiar sin tocar el código.",
+  "fases": [
+    { "nombre": "Concepto", "explicacion": "Elegir el objetivo científico" },
+    { "nombre": "Requisitos", "explicacion": "Qué debe lograr la misión" },
+    { "nombre": "Compensaciones", "explicacion": "Probar y comparar diseños A y B" },
+    { "nombre": "Diseño puntual", "explicacion": "Órbita, cohete y diseño final" },
+    { "nombre": "Lanzamiento", "explicacion": "¡Despegue!" },
+    { "nombre": "Operación", "explicacion": "Simular y evaluar resultados" }
+  ],
+  "niveles": {
+    "1": {
+      "nombre": "Nivel 1 · Tutorial",
+      "descripcion": "Un CubeSat en órbita baja de la Tierra. Solo componentes simples, 1 evento y consejos en pantalla. Puedes reintentar el aterrizaje.",
+      "nivelesComponentes": ["simple"],
+      "factorPresupuesto": 1.0,
+      "eventos": 1,
+      "ayudas": true,
+      "reintentarAterrizaje": true
+    },
+    "2": {
+      "nombre": "Nivel 2 · Misión",
+      "descripcion": "Una misión con un objetivo (Tierra, Luna o Marte). Componentes simples y avanzados, 2 eventos y consejos en pantalla.",
+      "nivelesComponentes": ["simple", "avanzado"],
+      "factorPresupuesto": 1.0,
+      "eventos": 2,
+      "ayudas": true,
+      "reintentarAterrizaje": false
+    },
+    "3": {
+      "nombre": "Nivel 3 · Varios objetivos",
+      "descripcion": "Misiones con dos objetivos a la vez, 10% menos de presupuesto, 3 eventos y sin consejos.",
+      "nivelesComponentes": ["simple", "avanzado"],
+      "factorPresupuesto": 0.9,
+      "eventos": 3,
+      "ayudas": false,
+      "reintentarAterrizaje": false
+    }
+  },
+  "barras": {
+    "_nota": "Las barras muestran uso/límite: verde hasta 'amarillo', amarillo hasta 1 (100%), rojo si se pasa.",
+    "amarillo": 0.9
+  },
+  "riesgo": {
+    "_nota": "Probabilidad de falla de cada componente según su confiabilidad. El riesgo total aumenta la probabilidad de las fallas internas en la simulación.",
+    "probado": 0.02,
+    "nuevo": 0.08,
+    "maximoAceptable": 0.35,
+    "multiplicadorFallas": 1.5
+  },
+  "presupuesto": {
+    "sobrecostoMaximo": 0.15,
+    "costoPorMesRetraso": 3,
+    "_nota": "Se puede lanzar pasándose hasta un 15% (con penalización). Cada mes de desarrollo por encima del plazo cuesta 3 M$ (en CubeSat, se escala con el presupuesto)."
+  },
   "aterrizaje": {
     "velocidadMaxVertical": 4,
     "velocidadMaxHorizontal": 3,
@@ -7,23 +60,21 @@
     "velocidadRotacionGrados": 90,
     "escalaTiempo": 1
   },
-  "operacion": {
-    "turnos": 8,
-    "reduccionCalefaccionConAislamiento": 0.5,
-    "transmisionesPorTurno": 1
+  "simulacion": {
+    "msPorMes": 350,
+    "diasPorMes": 30
   },
   "puntaje": {
-    "porDato": 5,
-    "multiplicadorInstrumentoObjetivo": 2,
-    "bonusObjetivoCumplido": 500,
-    "bonusAterrizaje": 300,
-    "bonusPrecisionAterrizaje": 200,
-    "porMillonSobrante": 3,
-    "porKgCombustibleRestante": 1,
-    "penalizacionTurnoSinEnergia": 40
+    "maxExito": 400,
+    "maxCiencia": 300,
+    "topeCiencia": 1.5,
+    "maxEficiencia": 200,
+    "ahorroIdeal": 0.25,
+    "maxColaboracion": 200
   },
-  "records": {
-    "claveLocalStorage": "misionEspacial.records",
-    "cantidadGuardada": 5
+  "almacenamiento": {
+    "claveRecords": "misionEspacial.records",
+    "claveDisenos": "misionEspacial.disenos",
+    "cantidadRecords": 8
   }
 }

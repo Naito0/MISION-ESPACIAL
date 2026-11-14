@@ -1,0 +1,29 @@
+{
+  "_comentario": "Roles del modo equipo = los 4 segmentos de una misión. 'categorias' = categorías de componentes que ese segmento puede modificar. 'controlaOrbita' = elige órbita y cohete. El presupuesto es compartido: nadie lo controla, hay que negociar. meta.tipo se interpreta en src/systems/roles.js (cohete, energia, datos, ciencia).",
+  "roles": [
+    {
+      "id": "lanzamiento", "nombre": "Segmento de lanzamiento", "abreviatura": "LAN", "color": "#ffd166",
+      "descripcion": "Elige el cohete y la órbita.",
+      "categorias": [], "controlaOrbita": true,
+      "meta": { "tipo": "cohete", "minimo": 0.10, "texto": "Dejar al menos 10% de margen en la capacidad del cohete." }
+    },
+    {
+      "id": "espacial", "nombre": "Segmento espacial", "abreviatura": "ESP", "color": "#7cc4ff",
+      "descripcion": "Diseña la nave: estructura, energía, propulsión, térmica, aviónica y control de actitud.",
+      "categorias": ["estructura", "paneles", "baterias", "propulsion", "termica", "avionica", "actitud"], "controlaOrbita": false,
+      "meta": { "tipo": "energia", "minimo": 0.10, "texto": "Tener al menos 10% de margen de energía." }
+    },
+    {
+      "id": "terrestre", "nombre": "Segmento terrestre", "abreviatura": "TER", "color": "#ff9fdc",
+      "descripcion": "Elige la antena y la red de estaciones en tierra.",
+      "categorias": ["antena", "estaciones"], "controlaOrbita": false,
+      "meta": { "tipo": "datos", "texto": "Que todos los datos generados lleguen a la Tierra." }
+    },
+    {
+      "id": "usuario", "nombre": "Segmento usuario (ciencia)", "abreviatura": "USU", "color": "#5be08a",
+      "descripcion": "Define qué ciencia se hace: elige los instrumentos.",
+      "categorias": ["instrumentos"], "controlaOrbita": false,
+      "meta": { "tipo": "ciencia", "texto": "Alcanzar la meta de valor científico por mes." }
+    }
+  ]
+}

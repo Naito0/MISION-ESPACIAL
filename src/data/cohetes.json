@@ -1,11 +1,29 @@
 {
-  "_comentario": "Cohetes ficticios. La capacidad es la masa máxima (kg) que pueden enviar hacia cada destino. Valores aproximados y reducidos para el balance del juego.",
+  "_comentario": "Cohetes ficticios. 'capacidad' = kg máximos que llevan a cada órbita. Si una órbita no aparece, ese cohete no puede llegar. Valores aproximados y reducidos para el balance del juego.",
   "cohetes": [
-    { "id": "ligero", "nombre": "Cohete ligero", "costo": 60, "capacidad": { "luna": 700, "marte": 400 }, "aproximado": true,
-      "descripcion": "Barato, pero solo lleva naves pequeñas." },
-    { "id": "medio", "nombre": "Cohete mediano", "costo": 110, "capacidad": { "luna": 1300, "marte": 800 }, "aproximado": true,
-      "descripcion": "La opción más común para sondas medianas." },
-    { "id": "pesado", "nombre": "Cohete pesado", "costo": 180, "capacidad": { "luna": 2500, "marte": 1600 }, "aproximado": true,
-      "descripcion": "Lleva naves grandes a Marte, pero consume buena parte del presupuesto." }
+    {
+      "id": "compartido", "nombre": "Viaje compartido", "costo": 1, "aproximado": true,
+      "descripcion": "Tu CubeSat viaja como pasajero junto a un satélite más grande. Muy barato, pero solo para naves de pocos kilos.",
+      "capacidad": { "tierra_leo": 12, "tierra_sso": 12 }
+    },
+    {
+      "id": "ligero", "nombre": "Cohete ligero", "costo": 40, "aproximado": true,
+      "descripcion": "Barato. Solo llega a órbitas bajas alrededor de la Tierra.",
+      "capacidad": { "tierra_leo": 700, "tierra_sso": 550 }
+    },
+    {
+      "id": "medio", "nombre": "Cohete mediano", "costo": 75, "aproximado": true,
+      "descripcion": "El más usado: llega a órbita geoestacionaria y a una órbita lunar alta con naves livianas.",
+      "capacidad": { "tierra_leo": 1800, "tierra_sso": 1500, "tierra_geo": 500, "luna_alta": 650 }
+    },
+    {
+      "id": "pesado", "nombre": "Cohete pesado", "costo": 130, "aproximado": true,
+      "descripcion": "Llega a todas partes, incluso a Marte, pero se lleva buena parte del presupuesto.",
+      "capacidad": {
+        "tierra_leo": 4000, "tierra_sso": 3500, "tierra_geo": 1800,
+        "luna_alta": 1600, "luna_baja": 1300,
+        "marte_alta": 1000, "marte_baja": 900
+      }
+    }
   ]
 }

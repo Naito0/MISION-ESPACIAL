@@ -1,0 +1,59 @@
+{
+  "_comentario": "Misiones reales de la NASA que se muestran en el informe como 'Misiones reales parecidas a la tuya'. El campo 'verificar' lista los datos que el equipo debe comprobar antes de la demo (por ejemplo, que la URL siga funcionando). Textos resumidos y simplificados.",
+  "misiones": [
+    {
+      "id": "landsat9", "nombre": "Landsat 9", "lanzamiento": 2021, "destino": "tierra", "tipo": "Satélite de observación de la Tierra",
+      "descripcion": "Fotografía toda la superficie terrestre en forma repetida para seguir bosques, cultivos, agua y ciudades. Es parte de la serie Landsat (NASA y USGS), que observa la Tierra desde 1972.",
+      "fuente": "https://landsat.gsfc.nasa.gov/satellites/landsat-9/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "terra", "nombre": "Terra (instrumento MODIS)", "lanzamiento": 1999, "destino": "tierra", "tipo": "Satélite de observación de la Tierra",
+      "descripcion": "Su instrumento MODIS observa todo el planeta cada uno o dos días y se usa para detectar incendios activos desde el espacio.",
+      "fuente": "https://terra.nasa.gov/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "lcross", "nombre": "LCROSS", "lanzamiento": 2009, "destino": "luna", "tipo": "Impactador",
+      "descripcion": "Hizo chocar la etapa superior de su cohete contra el cráter Cabeus, cerca del polo sur lunar, y detectó agua en la nube de material que se levantó.",
+      "fuente": "https://science.nasa.gov/mission/lcross/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "lunar_prospector", "nombre": "Lunar Prospector", "lanzamiento": 1998, "destino": "luna", "tipo": "Orbitador",
+      "descripcion": "Su espectrómetro de neutrones encontró señales de hidrógeno en los polos de la Luna, una pista de hielo de agua.",
+      "fuente": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1998-001A",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "mro", "nombre": "Mars Reconnaissance Orbiter (MRO)", "lanzamiento": 2005, "destino": "marte", "tipo": "Orbitador",
+      "descripcion": "Su cámara HiRISE fotografía Marte con muchísimo detalle y ayuda a elegir lugares de aterrizaje; su radar SHARAD busca hielo bajo la superficie.",
+      "fuente": "https://science.nasa.gov/mission/mars-reconnaissance-orbiter/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "mars_odyssey", "nombre": "2001 Mars Odyssey", "lanzamiento": 2001, "destino": "marte", "tipo": "Orbitador",
+      "descripcion": "Detectó hidrógeno bajo la superficie de Marte, señal de hielo de agua, y sigue sirviendo como enlace de comunicaciones para los rovers.",
+      "fuente": "https://science.nasa.gov/mission/mars-odyssey/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "phoenix", "nombre": "Phoenix", "lanzamiento": 2007, "destino": "marte", "tipo": "Módulo de aterrizaje",
+      "descripcion": "Aterrizó cerca del polo norte de Marte en 2008, excavó el suelo y confirmó la presencia de hielo de agua bajo la superficie.",
+      "fuente": "https://science.nasa.gov/mission/phoenix/",
+      "verificar": ["fuente"]
+    },
+    {
+      "id": "elana", "nombre": "ELaNa (CubeSat Launch Initiative)", "lanzamiento": 2011, "destino": "tierra", "tipo": "Programa de CubeSats",
+      "descripcion": "Programa de la NASA que lanza CubeSats hechos por universidades y escuelas como carga secundaria en otros cohetes.",
+      "fuente": "https://www.nasa.gov/kennedy/launch-services-program/cubesat-launch-initiative/",
+      "verificar": ["fuente", "lanzamiento"]
+    },
+    {
+      "id": "marco", "nombre": "MarCO", "lanzamiento": 2018, "destino": "marte", "tipo": "CubeSats de espacio profundo",
+      "descripcion": "Dos CubeSats que viajaron hasta Marte y retransmitieron a la Tierra los datos del aterrizaje de la sonda InSight.",
+      "fuente": "https://www.jpl.nasa.gov/missions/mars-cube-one-marco/",
+      "verificar": ["fuente"]
+    }
+  ]
+}

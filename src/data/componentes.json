@@ -1,0 +1,182 @@
+{
+  "_comentario": "Componentes por disciplina de ingeniería (como en el Mission Design Lab). costo en M$, masa en kg, energia en W (+ genera, − consume), datos en GB/día, valorCientifico en puntos por mes. nivel: 'simple' o 'avanzado'. escala: 'cubesat' o 'normal' (cada misión usa una). confiabilidad: 'probado' (probado en vuelo) o 'nuevo' (más riesgo de falla). efectos: protecciones contra eventos. segmento: segmento de la misión que decide esa categoría en el modo equipo.",
+  "categorias": [
+    {
+      "id": "estructura", "nombre": "Estructura", "disciplina": "Estructura", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "El esqueleto de la nave: define cuánto peso aguanta y cuánto dura.",
+      "opciones": [
+        { "id": "cs_chasis3u", "escala": "cubesat", "nombre": "Chasis CubeSat 3U", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 1.0, "energia": 0,
+          "mesesDesarrollo": 4, "capacidadMasa": 4, "vidaMeses": 18, "aproximado": true,
+          "tooltip": "Tres cubos de 10 cm. Aguanta hasta 4 kg en total." },
+        { "id": "cs_chasis6u", "escala": "cubesat", "nombre": "Chasis CubeSat 6U", "nivel": "simple", "confiabilidad": "probado", "costo": 2, "masa": 1.8, "energia": 0,
+          "mesesDesarrollo": 5, "capacidadMasa": 10, "vidaMeses": 24, "aproximado": true,
+          "tooltip": "El doble de grande: aguanta 10 kg y dura más, pero cuesta más." },
+        { "id": "estr_ligera", "escala": "normal", "nombre": "Estructura ligera", "nivel": "simple", "confiabilidad": "probado", "costo": 15, "masa": 80, "energia": 0,
+          "mesesDesarrollo": 10, "capacidadMasa": 650, "vidaMeses": 40, "aproximado": true,
+          "tooltip": "Liviana y barata. Aguanta hasta 650 kg y dura unos 3 años." },
+        { "id": "estr_reforzada", "escala": "normal", "nombre": "Estructura reforzada", "nivel": "simple", "confiabilidad": "probado", "costo": 25, "masa": 140, "energia": 0,
+          "mesesDesarrollo": 12, "capacidadMasa": 1000, "vidaMeses": 60, "aproximado": true,
+          "tooltip": "Más pesada, pero aguanta 1000 kg y dura unos 5 años." },
+        { "id": "estr_blindada", "escala": "normal", "nombre": "Estructura blindada", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 45, "masa": 200, "energia": 0,
+          "mesesDesarrollo": 18, "capacidadMasa": 1300, "vidaMeses": 84, "efectos": ["impactos", "radiacion"], "aproximado": true,
+          "tooltip": "Protege de micrometeoritos y radiación. Muy pesada, diseño nuevo y lento de construir." }
+      ]
+    },
+    {
+      "id": "paneles", "nombre": "Paneles solares", "disciplina": "Energía", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "Convierten la luz del Sol en electricidad. Lejos del Sol o a la sombra rinden menos.",
+      "opciones": [
+        { "id": "cs_pan_cuerpo", "escala": "cubesat", "nombre": "Paneles en el cuerpo", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": 7, "mesesDesarrollo": 3, "aproximado": true,
+          "tooltip": "Celdas pegadas a los lados del cubo: 7 W. Seguros, pero dan poca energía." },
+        { "id": "cs_pan_despl", "escala": "cubesat", "nombre": "Paneles desplegables", "nivel": "simple", "confiabilidad": "nuevo", "costo": 2, "masa": 0.5, "energia": 20, "mesesDesarrollo": 5, "aproximado": true,
+          "tooltip": "Se abren como alas: 20 W. Mucha más energía, pero el mecanismo puede fallar." },
+        { "id": "pan_chicos", "escala": "normal", "nombre": "Paneles chicos", "nivel": "simple", "confiabilidad": "probado", "costo": 10, "masa": 15, "energia": 150, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Generan 150 W con sol pleno. Alcanzan para pocos instrumentos." },
+        { "id": "pan_medianos", "escala": "normal", "nombre": "Paneles medianos", "nivel": "simple", "confiabilidad": "probado", "costo": 20, "masa": 30, "energia": 300, "mesesDesarrollo": 8, "aproximado": true,
+          "tooltip": "Generan 300 W con sol pleno. La opción equilibrada." },
+        { "id": "pan_grandes", "escala": "normal", "nombre": "Paneles grandes", "nivel": "simple", "confiabilidad": "probado", "costo": 30, "masa": 60, "energia": 450, "mesesDesarrollo": 10, "aproximado": true,
+          "tooltip": "Generan 450 W con sol pleno. Baratos para lo que dan, pero pesados." },
+        { "id": "pan_desplegables", "escala": "normal", "nombre": "Paneles ultralivianos", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 40, "masa": 35, "energia": 600, "mesesDesarrollo": 14, "aproximado": true,
+          "tooltip": "Generan 600 W y pesan poco, pero son caros, nuevos y tardan en desarrollarse." }
+      ]
+    },
+    {
+      "id": "baterias", "nombre": "Baterías", "disciplina": "Energía", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "Guardan energía para cuando la nave pasa por la sombra.",
+      "opciones": [
+        { "id": "cs_bat20", "escala": "cubesat", "nombre": "Batería 20 Wh", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": 0, "capacidadWh": 20, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Como la de un celular grande: 20 Wh." },
+        { "id": "cs_bat40", "escala": "cubesat", "nombre": "Batería 40 Wh", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.6, "energia": 0, "capacidadWh": 40, "mesesDesarrollo": 3, "aproximado": true,
+          "tooltip": "El doble de capacidad, el doble de peso." },
+        { "id": "bat_chica", "escala": "normal", "nombre": "Batería chica", "nivel": "simple", "confiabilidad": "probado", "costo": 5, "masa": 10, "energia": 0, "capacidadWh": 200, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Guarda 200 Wh. Suficiente para sombras cortas." },
+        { "id": "bat_grande", "escala": "normal", "nombre": "Batería grande", "nivel": "simple", "confiabilidad": "probado", "costo": 12, "masa": 30, "energia": 0, "capacidadWh": 600, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Guarda 600 Wh. Aguanta sombras largas o muchos instrumentos." },
+        { "id": "bat_redundante", "escala": "normal", "nombre": "Baterías redundantes", "nivel": "avanzado", "confiabilidad": "probado", "costo": 25, "masa": 35, "energia": 0, "capacidadWh": 800, "mesesDesarrollo": 10,
+          "efectos": ["redundancia"], "aproximado": true,
+          "tooltip": "800 Wh en dos bancos: si uno falla, el otro sigue funcionando." }
+      ]
+    },
+    {
+      "id": "propulsion", "nombre": "Propulsión", "disciplina": "Propulsión", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "Motor + combustible para entrar en órbita, mantenerse en ella y (si hace falta) aterrizar.",
+      "opciones": [
+        { "id": "cs_sin_prop", "escala": "cubesat", "nombre": "Sin propulsión", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0, "energia": 0, "combustible": 0, "empuje": 0, "consumo": 0, "bonusVidaMeses": 0, "mesesDesarrollo": 0, "aproximado": true,
+          "tooltip": "El cohete lo deja en órbita y ahí se queda hasta que el roce con el aire lo hace caer." },
+        { "id": "cs_gas_frio", "escala": "cubesat", "nombre": "Propulsor de gas frío", "nivel": "simple", "confiabilidad": "nuevo", "costo": 1, "masa": 0.5, "energia": 0, "combustible": 0.2, "empuje": 1, "consumo": 0.001, "bonusVidaMeses": 6, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Pequeños impulsos para corregir la órbita: +6 meses de vida, pero es un sistema nuevo." },
+        { "id": "prop_chica", "escala": "normal", "nombre": "Motor pequeño + 100 kg", "nivel": "simple", "confiabilidad": "probado", "costo": 15, "masa": 40, "energia": 0, "combustible": 100, "empuje": 2000, "consumo": 0.8, "bonusVidaMeses": 0, "mesesDesarrollo": 8, "aproximado": true,
+          "tooltip": "100 kg de combustible y 2000 N de empuje. Liviano, pero con poca reserva." },
+        { "id": "prop_media", "escala": "normal", "nombre": "Motor mediano + 250 kg", "nivel": "simple", "confiabilidad": "probado", "costo": 25, "masa": 70, "energia": 0, "combustible": 250, "empuje": 4000, "consumo": 1.5, "bonusVidaMeses": 0, "mesesDesarrollo": 10, "aproximado": true,
+          "tooltip": "250 kg de combustible y 4000 N. Suficiente para la mayoría de las misiones." },
+        { "id": "prop_grande", "escala": "normal", "nombre": "Motor grande + 450 kg", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 45, "masa": 110, "energia": 0, "combustible": 450, "empuje": 8000, "consumo": 2.8, "bonusVidaMeses": 0, "mesesDesarrollo": 16, "aproximado": true,
+          "tooltip": "450 kg de combustible y 8000 N. Mucha reserva, pero la nave pesa mucho más." }
+      ]
+    },
+    {
+      "id": "termica", "nombre": "Control térmico", "disciplina": "Térmica", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "Mantiene la temperatura: en el espacio hace muchísimo frío a la sombra y calor al sol.",
+      "opciones": [
+        { "id": "cs_cinta", "escala": "cubesat", "nombre": "Pintura y cinta térmica", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0.05, "energia": 0, "factorVida": 0.9, "mesesDesarrollo": 1, "aproximado": true,
+          "tooltip": "Lo mínimo. Los cambios de temperatura desgastan el CubeSat (-10% de vida)." },
+        { "id": "cs_calefactor", "escala": "cubesat", "nombre": "Calefactor pequeño", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -1, "factorVida": 1.0, "efectos": ["aislamiento"], "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Mantiene tibia la batería y la electrónica. Protege del frío extremo." },
+        { "id": "term_pintura", "escala": "normal", "nombre": "Pintura y radiadores", "nivel": "simple", "confiabilidad": "probado", "costo": 2, "masa": 3, "energia": 0, "factorVida": 0.85, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Lo mínimo. Los cambios de temperatura desgastan la nave (-15% de vida)." },
+        { "id": "term_manta", "escala": "normal", "nombre": "Manta térmica", "nivel": "simple", "confiabilidad": "probado", "costo": 6, "masa": 12, "energia": 0, "factorVida": 1.0, "efectos": ["aislamiento"], "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Aislamiento multicapa: protege del frío extremo." },
+        { "id": "term_activa", "escala": "normal", "nombre": "Control térmico activo", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 15, "masa": 20, "energia": -25, "factorVida": 1.15, "efectos": ["aislamiento"], "mesesDesarrollo": 10, "aproximado": true,
+          "tooltip": "Calefactores y bombas: protege del frío y alarga la vida (+15%), pero gasta energía." }
+      ]
+    },
+    {
+      "id": "avionica", "nombre": "Aviónica", "disciplina": "Aviónica (computadora y software)", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "La computadora y el software de vuelo: controlan la nave y guardan los datos hasta enviarlos.",
+      "opciones": [
+        { "id": "cs_obc", "escala": "cubesat", "nombre": "Computadora CubeSat", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -1.5, "almacenamientoGB": 8, "mesesDesarrollo": 3, "aproximado": true,
+          "tooltip": "Computadora pequeña con software probado. Memoria de 8 GB." },
+        { "id": "cs_obc_plus", "escala": "cubesat", "nombre": "Computadora CubeSat avanzada", "nivel": "simple", "confiabilidad": "nuevo", "costo": 2, "masa": 0.15, "energia": -2, "almacenamientoGB": 32, "mesesDesarrollo": 5, "aproximado": true,
+          "tooltip": "Memoria de 32 GB, pero el software es nuevo (más riesgo)." },
+        { "id": "comp_basica", "escala": "normal", "nombre": "Computadora básica", "nivel": "simple", "confiabilidad": "probado", "costo": 5, "masa": 5, "energia": -15, "almacenamientoGB": 32, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Memoria de 32 GB. Si la antena no da abasto, los datos se pierden rápido." },
+        { "id": "comp_estandar", "escala": "normal", "nombre": "Computadora estándar", "nivel": "simple", "confiabilidad": "probado", "costo": 12, "masa": 8, "energia": -25, "almacenamientoGB": 128, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Memoria de 128 GB y software probado en vuelo." },
+        { "id": "comp_resistente", "escala": "normal", "nombre": "Computadora resistente a radiación", "nivel": "avanzado", "confiabilidad": "probado", "costo": 25, "masa": 10, "energia": -30, "almacenamientoGB": 256,
+          "efectos": ["radiacion"], "mesesDesarrollo": 12, "aproximado": true,
+          "tooltip": "256 GB y protegida contra tormentas solares." }
+      ]
+    },
+    {
+      "id": "actitud", "nombre": "Control de actitud", "disciplina": "Control de actitud", "segmento": "espacial", "obligatoria": true, "multiple": false,
+      "ayuda": "Mantiene la nave apuntando hacia donde debe. Mejor puntería = mejores datos.",
+      "opciones": [
+        { "id": "cs_magnet", "escala": "cubesat", "nombre": "Imanes (magnetorquers)", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.2, "energia": -1, "precision": 0.7, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Se orienta con el campo magnético de la Tierra. Barato, puntería regular (70%)." },
+        { "id": "cs_ruedas", "escala": "cubesat", "nombre": "Mini ruedas de reacción", "nivel": "simple", "confiabilidad": "probado", "costo": 2, "masa": 0.4, "energia": -2, "precision": 1.0, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Ruedas diminutas que giran para orientar el CubeSat. Buena puntería (100%)." },
+        { "id": "act_giro", "escala": "normal", "nombre": "Estabilización por giro", "nivel": "simple", "confiabilidad": "probado", "costo": 2, "masa": 5, "energia": 0, "precision": 0.6, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "La nave gira como un trompo. Barato, pero apunta mal (60% de calidad)." },
+        { "id": "act_ruedas", "escala": "normal", "nombre": "Ruedas de reacción", "nivel": "simple", "confiabilidad": "probado", "costo": 8, "masa": 15, "energia": -20, "precision": 1.0, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Ruedas que giran para orientar la nave. Buena puntería (100%)." },
+        { "id": "act_estelar", "escala": "normal", "nombre": "Rastreador de estrellas", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 20, "masa": 20, "energia": -30, "precision": 1.3, "mesesDesarrollo": 12, "aproximado": true,
+          "tooltip": "Se guía con las estrellas: puntería excelente (130%)." }
+      ]
+    },
+    {
+      "id": "antena", "nombre": "Antena", "disciplina": "Comunicaciones", "segmento": "terrestre", "obligatoria": true, "multiple": false,
+      "ayuda": "Envía los datos a la Tierra. Más lejos = señal más débil.",
+      "opciones": [
+        { "id": "cs_uhf", "escala": "cubesat", "nombre": "Antena UHF", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -2, "tasa": 0.1, "alcance": 1, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Como una radio de aficionados: 0,1 GB/día con contacto pleno. Muy simple." },
+        { "id": "cs_banda_s", "escala": "cubesat", "nombre": "Antena banda S", "nivel": "simple", "confiabilidad": "probado", "costo": 2, "masa": 0.2, "energia": -5, "tasa": 1, "alcance": 1, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "10 veces más rápida: 1 GB/día con contacto pleno, pero gasta más energía." },
+        { "id": "ant_baja", "escala": "normal", "nombre": "Antena de baja ganancia", "nivel": "simple", "confiabilidad": "probado", "costo": 4, "masa": 5, "energia": -10, "tasa": 5, "alcance": 2, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Envía 5 GB/día con contacto pleno. Llega hasta la Luna, no a Marte." },
+        { "id": "ant_media", "escala": "normal", "nombre": "Antena de media ganancia", "nivel": "simple", "confiabilidad": "probado", "costo": 12, "masa": 15, "energia": -30, "tasa": 20, "alcance": 3, "mesesDesarrollo": 8, "aproximado": true,
+          "tooltip": "Envía 20 GB/día con contacto pleno. Llega hasta Marte." },
+        { "id": "ant_alta", "escala": "normal", "nombre": "Antena de alta ganancia", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 30, "masa": 30, "energia": -60, "tasa": 60, "alcance": 3, "mesesDesarrollo": 14, "aproximado": true,
+          "tooltip": "Envía 60 GB/día con contacto pleno. Pesada y gasta mucha energía." }
+      ]
+    },
+    {
+      "id": "estaciones", "nombre": "Estaciones terrenas", "disciplina": "Comunicaciones", "segmento": "terrestre", "obligatoria": true, "multiple": false,
+      "ayuda": "Las antenas en tierra que reciben los datos. Más estaciones repartidas por el mundo = más tiempo de contacto.",
+      "opciones": [
+        { "id": "cs_est_uni", "escala": "cubesat", "nombre": "Estación universitaria", "nivel": "simple", "confiabilidad": "probado", "costo": 0, "masa": 0, "energia": 0, "factorContacto": 0.5, "mesesDesarrollo": 2, "aproximado": true,
+          "tooltip": "Una antena en el techo de la escuela: gratis, pero solo ve al CubeSat unos minutos al día (×0,5)." },
+        { "id": "cs_est_red", "escala": "cubesat", "nombre": "Red de estaciones comerciales", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0, "energia": 0, "factorContacto": 1.5, "mesesDesarrollo": 1, "aproximado": true,
+          "tooltip": "Alquilas tiempo en antenas de todo el mundo: más contacto (×1,5)." },
+        { "id": "est_una", "escala": "normal", "nombre": "Una estación propia", "nivel": "simple", "confiabilidad": "probado", "costo": 5, "masa": 0, "energia": 0, "factorContacto": 0.6, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Barata, pero la nave solo la ve una parte del día (×0,6)." },
+        { "id": "est_regional", "escala": "normal", "nombre": "Red regional (3 estaciones)", "nivel": "simple", "confiabilidad": "probado", "costo": 12, "masa": 0, "energia": 0, "factorContacto": 1.0, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Tres estaciones en distintos países (×1,0)." },
+        { "id": "est_global", "escala": "normal", "nombre": "Red global", "nivel": "simple", "confiabilidad": "probado", "costo": 25, "masa": 0, "energia": 0, "factorContacto": 1.6, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Antenas gigantes repartidas por el planeta, como la Red de Espacio Profundo: casi contacto permanente (×1,6), pero cara." }
+      ]
+    },
+    {
+      "id": "instrumentos", "nombre": "Instrumentos científicos", "disciplina": "Instrumentos", "segmento": "usuario", "obligatoria": false, "multiple": true,
+      "ayuda": "Hacen la ciencia. Más instrumentos = más valor, pero también más masa, energía, datos y costo. Los que no sirven para el objetivo aparecen desactivados.",
+      "opciones": [
+        { "id": "cs_camara", "escala": "cubesat", "nombre": "Cámara CubeSat", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.3, "energia": -2, "datos": 0.3, "valorCientifico": 4, "mesesDesarrollo": 3, "aproximado": true,
+          "tooltip": "Una cámara pequeña como la de un celular. 0,3 GB/día." },
+        { "id": "cs_multi", "escala": "cubesat", "nombre": "Cámara multiespectral mini", "nivel": "simple", "confiabilidad": "nuevo", "costo": 3, "masa": 0.6, "energia": -4, "datos": 0.8, "valorCientifico": 8, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Ve colores invisibles para el ojo (sirve para ver plantas y agua). 0,8 GB/día." },
+        { "id": "cs_radiacion", "escala": "cubesat", "nombre": "Sensor de radiación mini", "nivel": "simple", "confiabilidad": "probado", "costo": 1, "masa": 0.1, "energia": -0.5, "datos": 0.02, "valorCientifico": 3, "mesesDesarrollo": 3, "aproximado": true,
+          "tooltip": "Mide partículas energéticas alrededor de la Tierra." },
+        { "id": "cam_simple", "escala": "normal", "nombre": "Cámara simple", "nivel": "simple", "confiabilidad": "probado", "costo": 8, "masa": 5, "energia": -10, "datos": 1, "valorCientifico": 5, "mesesDesarrollo": 4, "aproximado": true,
+          "tooltip": "Fotos en color. Poca energía y pocos datos (1 GB/día)." },
+        { "id": "cam_alta", "escala": "normal", "nombre": "Cámara de alta resolución", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 25, "masa": 20, "energia": -40, "datos": 6, "valorCientifico": 15, "mesesDesarrollo": 14, "aproximado": true,
+          "tooltip": "Fotos muy detalladas, pero genera muchísimos datos (6 GB/día)." },
+        { "id": "termometro", "escala": "normal", "nombre": "Cámara infrarroja", "nivel": "simple", "confiabilidad": "probado", "costo": 12, "masa": 8, "energia": -15, "datos": 1, "valorCientifico": 8, "mesesDesarrollo": 6, "aproximado": true,
+          "tooltip": "Ve el calor: detecta incendios y temperaturas del suelo (1 GB/día)." },
+        { "id": "espectrometro", "escala": "normal", "nombre": "Espectrómetro", "nivel": "simple", "confiabilidad": "probado", "costo": 20, "masa": 15, "energia": -25, "datos": 2, "valorCientifico": 12, "mesesDesarrollo": 8, "aproximado": true,
+          "tooltip": "Descompone la luz para saber de qué están hechas las rocas y las plantas (2 GB/día)." },
+        { "id": "detector_neutrones", "escala": "normal", "nombre": "Detector de neutrones", "nivel": "simple", "confiabilidad": "probado", "costo": 15, "masa": 10, "energia": -10, "datos": 0.2, "valorCientifico": 10, "mesesDesarrollo": 8, "aproximado": true,
+          "tooltip": "Detecta hidrógeno bajo el suelo, una pista de hielo de agua. Casi no genera datos." },
+        { "id": "radar", "escala": "normal", "nombre": "Radar", "nivel": "avanzado", "confiabilidad": "nuevo", "costo": 35, "masa": 40, "energia": -80, "datos": 5, "valorCientifico": 20, "mesesDesarrollo": 16, "aproximado": true,
+          "tooltip": "Ve a través de nubes, humo, polvo y bajo la superficie. Pesado y muy gastador de energía." }
+      ]
+    }
+  ]
+}

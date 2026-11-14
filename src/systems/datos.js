@@ -1,49 +1,44 @@
 // =============================================================
-// datos.js — Carga los JSON de src/data y ofrece funciones de búsqueda.
-// Todas las escenas leen los datos desde aquí (nunca valores fijos en el código).
+// datos.js — Carga los JSON de src/data y ofrece búsquedas por id.
+// Las escenas leen los datos desde aquí. Las funciones puras
+// (recursos, simulación, puntaje...) NO importan este archivo:
+// reciben los datos por parámetro.
 // =============================================================
 import destinosJson from '../data/destinos.json';
-import piezasJson from '../data/piezas.json';
+import componentesJson from '../data/componentes.json';
 import cohetesJson from '../data/cohetes.json';
+import orbitasJson from '../data/orbitas.json';
 import misionesJson from '../data/misiones.json';
+import misionesRealesJson from '../data/misiones_reales.json';
 import eventosJson from '../data/eventos.json';
+import rolesJson from '../data/roles.json';
 import configJson from '../data/config.json';
 
-export const TIERRA = destinosJson.tierra;
 export const DESTINOS = destinosJson.destinos;
-export const NAVE_BASE = piezasJson.naveBase;
-export const CATEGORIAS = piezasJson.categorias;
+export const CATEGORIAS = componentesJson.categorias;
 export const COHETES = cohetesJson.cohetes;
+export const ORBITAS = orbitasJson.orbitas;
 export const MISIONES = misionesJson.misiones;
+export const MISIONES_REALES = misionesRealesJson.misiones;
 export const EVENTOS = eventosJson.eventos;
-export const EVENTOS_FIJOS = eventosJson.eventosFijos;
+export const ROLES = rolesJson.roles;
 export const CONFIG = configJson;
 
-/** Devuelve el destino por id ('luna' o 'marte'). */
-export function buscarDestino(id) {
-  return DESTINOS.find((d) => d.id === id);
+const porId = (lista) => (id) => lista.find((x) => x.id === id) || null;
+export const buscarDestino = porId(DESTINOS);
+export const buscarCohete = porId(COHETES);
+export const buscarOrbita = porId(ORBITAS);
+export const buscarMision = porId(MISIONES);
+export const buscarRol = porId(ROLES);
+export const buscarCategoria = porId(CATEGORIAS);
+
+/** Órbitas disponibles para una misión (las de su destino, o las permitidas). */
+export function orbitasDe(mision) {
+  return ORBITAS.filter((o) => o.destino === mision.destino &&
+    (!mision.orbitasPermitidas || mision.orbitasPermitidas.includes(o.id)));
 }
 
-/** Devuelve la misión por id. */
-export function buscarMision(id) {
-  return MISIONES.find((m) => m.id === id);
-}
-
-/** Devuelve la categoría de piezas por id ('motor', 'tanque', ...). */
-export function buscarCategoria(id) {
-  return CATEGORIAS.find((c) => c.id === id);
-}
-
-/** Devuelve una pieza (opción) buscándola en todas las categorías. */
-export function buscarPieza(idPieza) {
-  for (const cat of CATEGORIAS) {
-    const p = cat.opciones.find((o) => o.id === idPieza);
-    if (p) return p;
-  }
-  return null;
-}
-
-/** Devuelve el cohete por id. */
-export function buscarCohete(id) {
-  return COHETES.find((c) => c.id === id);
+/** Rol (segmento) que decide una categoría de componentes. */
+export function rolDeCategoria(categoriaId) {
+  return ROLES.find((r) => r.categorias.includes(categoriaId)) || null;
 }

@@ -1,0 +1,63 @@
+{
+  "_comentario": "Órbitas por destino. altitudKm se usa para el diagrama 2D. Referencias para órbitas: GMAT y Mission Viz de la NASA. factorDatos: multiplica datos y valor científico (más cerca = más detalle). contacto: fracción del tiempo con enlace a la Tierra. factorVida: multiplica la vida útil. eclipse: fracción del tiempo a la sombra. horasSombra: horas seguidas a la sombra (la batería debe cubrirlas). factorCombustible: kg de combustible por kg de nave para entrar en la órbita. Valores aproximados.",
+  "orbitas": [
+    {
+      "id": "tierra_leo", "altitudKm": 500,
+      "destino": "tierra",
+      "nombre": "Órbita baja (500 km)",
+      "explicacion": "Muy cerca: fotos más detalladas y más datos. Pero los restos de atmósfera la frenan (dura menos) y solo ve una antena en tierra unos minutos por vuelta.",
+      "factorDatos": 1.3, "contacto": 0.25, "factorVida": 0.7, "eclipse": 0.38, "horasSombra": 0.6, "factorCombustible": 0.01,
+      "aproximado": true
+    },
+    {
+      "id": "tierra_sso", "altitudKm": 700,
+      "destino": "tierra",
+      "nombre": "Órbita heliosíncrona (700 km)",
+      "explicacion": "Pasa sobre cada lugar siempre a la misma hora solar: la luz es pareja y se pueden comparar fotos. Buen equilibrio entre detalle y duración.",
+      "factorDatos": 1.15, "contacto": 0.3, "factorVida": 1.0, "eclipse": 0.3, "horasSombra": 0.55, "factorCombustible": 0.015,
+      "aproximado": true
+    },
+    {
+      "id": "tierra_geo", "altitudKm": 35786,
+      "destino": "tierra",
+      "nombre": "Órbita geoestacionaria (35 786 km)",
+      "explicacion": "Queda fija sobre un punto: contacto permanente con la Tierra y vida larga. Pero está tan lejos que las fotos tienen poco detalle, y llegar cuesta mucho.",
+      "factorDatos": 0.5, "contacto": 1.0, "factorVida": 1.3, "eclipse": 0.02, "horasSombra": 1.2, "factorCombustible": 0.15,
+      "aproximado": true
+    },
+    {
+      "id": "marte_baja", "altitudKm": 300,
+      "destino": "marte",
+      "nombre": "Órbita baja de Marte (300 km)",
+      "explicacion": "Mapas muy detallados, pero pasa mucho tiempo a la sombra, ve poco a la Tierra y frenar para quedarse ahí gasta mucho combustible.",
+      "factorDatos": 1.3, "contacto": 0.4, "factorVida": 0.8, "eclipse": 0.38, "horasSombra": 0.7, "factorCombustible": 0.35,
+      "aproximado": true
+    },
+    {
+      "id": "marte_alta", "altitudKm": 1000,
+      "destino": "marte",
+      "nombre": "Órbita alta de Marte (1000 km)",
+      "explicacion": "Menos detalle, pero más tiempo de contacto con la Tierra, menos sombra y más vida útil. Entrar gasta algo menos de combustible.",
+      "factorDatos": 0.9, "contacto": 0.6, "factorVida": 1.1, "eclipse": 0.25, "horasSombra": 0.6, "factorCombustible": 0.28,
+      "aproximado": true
+    },
+    {
+      "id": "luna_baja", "altitudKm": 50,
+      "destino": "luna",
+      "nombre": "Órbita lunar baja (50 km)",
+      "explicacion": "El descenso empieza bajo y lento: aterrizar es más fácil. Pero frenar para entrar en esta órbita gasta más combustible y solo el cohete pesado llega.",
+      "factorDatos": 1.0, "contacto": 0.5, "factorVida": 1.0, "eclipse": 0.4, "horasSombra": 1.0, "factorCombustible": 0.25,
+      "aterrizaje": { "altitudInicial": 500, "velocidadVerticalInicial": 12, "velocidadHorizontalMax": 4 },
+      "aproximado": true
+    },
+    {
+      "id": "luna_alta", "altitudKm": 500,
+      "destino": "luna",
+      "nombre": "Órbita lunar alta (500 km)",
+      "explicacion": "Entrar es más barato en combustible y la alcanza un cohete mediano, pero el descenso empieza más alto y más rápido: aterrizar es más difícil.",
+      "factorDatos": 1.0, "contacto": 0.5, "factorVida": 1.0, "eclipse": 0.4, "horasSombra": 1.0, "factorCombustible": 0.15,
+      "aterrizaje": { "altitudInicial": 800, "velocidadVerticalInicial": 30, "velocidadHorizontalMax": 8 },
+      "aproximado": true
+    }
+  ]
+}

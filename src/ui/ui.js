@@ -42,12 +42,32 @@ export function texto(escena, x, y, contenido, opciones = {}) {
   return t;
 }
 
-/** Título grande centrado en la parte superior. */
+/** Título centrado debajo de la barra de fases. */
 export function titulo(escena, contenido, subtitulo) {
-  texto(escena, ANCHO / 2, 22, contenido, { tam: 32, negrita: true, origen: [0.5, 0], color: COLORES.acento });
+  texto(escena, ANCHO / 2, 42, contenido, { tam: 24, negrita: true, origen: [0.5, 0], color: COLORES.acento });
   if (subtitulo) {
-    texto(escena, ANCHO / 2, 64, subtitulo, { tam: 16, origen: [0.5, 0], color: COLORES.textoSuave });
+    texto(escena, ANCHO / 2, 71, subtitulo, { tam: 13, origen: [0.5, 0], color: COLORES.textoSuave });
   }
+}
+
+/**
+ * Barra de progreso con las fases de maduración de una misión (arriba de la pantalla).
+ * @param fases  lista { nombre, explicacion } (config.json → fases)
+ * @param actual índice de la fase actual (0 a 5)
+ */
+export function barraFases(escena, fases, actual) {
+  const ancho = ANCHO / fases.length;
+  fases.forEach((f, i) => {
+    const color = i < actual ? 0x1f5a3a : i === actual ? COLORES.boton : 0x1a2038;
+    escena.add.rectangle(i * ancho + 2, 2, ancho - 4, 34, color).setOrigin(0, 0)
+      .setStrokeStyle(1, i === actual ? 0x9dd0ff : COLORES.borde);
+    texto(escena, i * ancho + ancho / 2, 4, `${i < actual ? '✔ ' : ''}${i + 1}. ${f.nombre}`, {
+      tam: 12, negrita: true, origen: [0.5, 0], color: i <= actual ? '#ffffff' : COLORES.textoSuave
+    });
+    texto(escena, i * ancho + ancho / 2, 20, f.explicacion, {
+      tam: 10, origen: [0.5, 0], color: i === actual ? '#dbe9ff' : COLORES.textoSuave
+    });
+  });
 }
 
 /** Rectángulo de fondo para agrupar información (origen arriba a la izquierda). */
@@ -76,7 +96,7 @@ export function boton(escena, x, y, ancho, alto, etiqueta, alClic, opciones = {}
     seleccionado: false,
     refrescar(hover = false) {
       let color = COLORES.boton;
-      if (!b.habilitado) color = COLORES.botonDeshabilitado;
+      if (!b.habilitado) color = b.seleccionado ? 0x24553a : COLORES.botonDeshabilitado;
       else if (b.seleccionado) color = hover ? COLORES.seleccionadoHover : COLORES.seleccionado;
       else if (hover) color = COLORES.botonHover;
       fondo.setFillStyle(color);
@@ -101,6 +121,48 @@ export function boton(escena, x, y, ancho, alto, etiqueta, alClic, opciones = {}
   });
   b.refrescar();
   return b;
+}
+
+/** Colores de las barras de recursos según su nivel. */
+export const COLOR_NIVEL = { verde: 0x3cc46e, amarillo: 0xf2c14e, rojo: 0xe5484d };
+
+/**
+ * Barra de progreso horizontal (x, y = esquina superior izquierda).
+ * Devuelve { actualizar(fraccion 0-1+, nivel 'verde'|'amarillo'|'rojo') }.
+ */
+export function barra(escena, x, y, ancho, alto = 12) {
+  escena.add.rectangle(x, y, ancho, alto, 0x2a3150).setOrigin(0, 0);
+  const relleno = escena.add.rectangle(x, y, ancho, alto, COLOR_NIVEL.verde).setOrigin(0, 0);
+  return {
+    relleno,
+    actualizar(fraccion, nivel = 'verde') {
+      relleno.scaleX = Math.max(0, Math.min(1, fraccion));
+      relleno.setFillStyle(COLOR_NIVEL[nivel] ?? nivel);
+    }
+  };
+}
+
+/**
+ * Ventana emergente centrada con título, texto y un botón.
+ * Devuelve una función para cerrarla.
+ */
+export function ventana(escena, { tituloTexto, cuerpo, colorFondo = COLORES.panel, colorTitulo = COLORES.acento, textoBoton = 'Continuar', alCerrar }) {
+  const elementos = [];
+  elementos.push(escena.add.rectangle(0, 0, ANCHO, ALTO, 0x000000, 0.55).setOrigin(0, 0).setInteractive());
+  elementos.push(panel(escena, 240, 170, 800, 380, colorFondo));
+  elementos.push(texto(escena, 640, 190, tituloTexto, { tam: 26, negrita: true, origen: [0.5, 0], color: colorTitulo, ancho: 760, align: 'center' }));
+  elementos.push(texto(escena, 270, 250, cuerpo, { tam: 17, ancho: 740 }));
+  const cerrar = () => {
+    elementos.forEach((e) => e.destroy());
+    b.destruir();
+  };
+  const b = boton(escena, 640, 510, 240, 46, textoBoton, () => {
+    cerrar();
+    if (alCerrar) alCerrar();
+  }, { tam: 18 });
+  // La ventana siempre queda por encima de todo lo demás
+  [...elementos, b.fondo, b.txt].forEach((e) => e.setDepth(1000));
+  return cerrar;
 }
 
 /** Fondo de estrellas simple (círculos al azar). */

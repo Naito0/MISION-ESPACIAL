@@ -1,162 +1,189 @@
 // =============================================================
-// estadoMision.js — EL objeto de estado compartido entre todas las escenas.
+// estadoMision.js — EL objeto de estado compartido entre escenas
+// + funciones "pegamento" que juntan el estado con los datos JSON
+// y las funciones puras (recursos, lanzamiento, roles...).
 //
-// Cada escena lee y escribe aquí sus decisiones y lo que pasó.
-// La pantalla de Resultados usa toda esta información para explicar
-// causa y efecto. Si agregas algo nuevo a una escena, guárdalo aquí.
+// Regla del equipo: si tu escena produce algo importante, guárdalo en `estado`.
 // =============================================================
 import {
-  NAVE_BASE, CATEGORIAS, CONFIG,
-  buscarDestino, buscarMision, buscarPieza
+  CATEGORIAS, COHETES, ROLES, CONFIG,
+  buscarMision, buscarDestino, buscarOrbita, buscarCohete, buscarRol
 } from './datos.js';
+import {
+  calcularDiseno, ambienteDe, balanceOperativo, valorPorObjetivo, vidaEsperada,
+  calcularMargenes, construirBarras
+} from './recursos.js';
+import { coheteMasBarato, costoRetraso } from './lanzamiento.js';
+import { asignarRoles, evaluarMetas } from './roles.js';
 
-// Único objeto de estado (se importa con: import { estado } from '../systems/estadoMision.js')
+// Único objeto de estado: import { estado } from '../systems/estadoMision.js'
 export const estado = {};
 
-/** Deja el estado limpio para empezar una misión nueva. */
-export function reiniciarEstado() {
-  // Borramos todo lo que hubiera y volvemos a crear la estructura.
-  for (const clave of Object.keys(estado)) delete estado[clave];
-
+/** Empieza una partida nueva desde la pantalla de Inicio. */
+export function nuevaPartida({ modo, numJugadores, nivelId }) {
+  for (const k of Object.keys(estado)) delete estado[k];
   Object.assign(estado, {
-    // 1. Misión
-    destinoId: null,
+    modo,                       // 'individual' | 'equipo'
+    numJugadores,
+    nivelId,                    // '1' | '2' | '3'
+    asignacion: modo === 'equipo' ? asignarRoles(ROLES, numJugadores) : [],
+    jugadorActual: 0,           // índice en asignacion (modo equipo)
     misionId: null,
     presupuesto: 0,
-
-    // 2. Taller: id de la pieza elegida por categoría (instrumentos es una lista)
-    seleccion: {
-      motor: null, tanque: null, escudo: null, paneles: null,
-      bateria: null, antena: null, instrumentos: []
-    },
-    nave: null, // resumen calculado con calcularNave()
-
-    // 3. Lanzamiento
-    lanzamiento: { coheteId: null, rutaId: null, costoCohete: 0, coheteMasBarato: null },
-
-    // Recursos que cambian durante el viaje (los eventos los dañan)
-    recursos: {
-      combustible: 0,
-      factorPaneles: 1,
-      factorAntena: 1,
-      bateriaMax: 0,
-      instrumentosDanados: []
-    },
-
-    // 4. Viaje
-    viaje: {
-      combustibleAntes: 0,
-      combustibleRuta: 0,
-      faltoCombustibleRuta: false,
-      eventos: [] // { id, nombre, mitigado, texto, explicacion, perdidas }
-    },
-
-    // 5. Aterrizaje
-    aterrizaje: null, // { exito, motivo, vVertical, vHorizontal, angulo, combustibleInicial, combustibleFinal, ... }
-
-    // 6. Operación
-    operacion: null, // { datosGenerados, datosTransmitidos, datosPerdidosMemoria, ... }
-
-    // 7. Resultados (se calcula al final)
-    resultado: null,
-
-    // Bitácora general: lista de textos con lo que fue pasando
-    bitacora: []
+    seleccion: {},              // { categoriaId: idComponente | [ids] }
+    orbitaId: null,
+    coheteId: null,
+    disenosAB: { A: null, B: null }, // estudio de compensaciones
+    aprobaciones: {},           // { rolId: true } (modo equipo)
+    intento: 1,
+    historial: [],              // resultados de intentos anteriores (para comparar)
+    ...resultadosVacios()
   });
 }
 
-/** Agrega una línea a la bitácora de la misión. */
-export function registrar(fase, texto) {
-  estado.bitacora.push({ fase, texto });
-}
-
-/** Atajos para obtener el destino y la misión actuales. */
-export function destinoActual() {
-  return buscarDestino(estado.destinoId);
-}
-export function misionActual() {
-  return buscarMision(estado.misionId);
-}
-
-/** Lista de piezas elegidas (objetos completos), sin contar la nave base. */
-export function piezasElegidas(seleccion = estado.seleccion) {
-  const lista = [];
-  for (const cat of CATEGORIAS) {
-    const valor = seleccion[cat.id];
-    if (Array.isArray(valor)) {
-      valor.forEach((id) => lista.push(buscarPieza(id)));
-    } else if (valor) {
-      lista.push(buscarPieza(valor));
-    }
-  }
-  return lista.filter(Boolean);
-}
-
-/**
- * Calcula el resumen de la nave a partir de la selección del taller.
- * Se usa en vivo en el Taller y se guarda en estado.nave al continuar.
- */
-export function calcularNave(seleccion = estado.seleccion) {
-  const piezas = piezasElegidas(seleccion);
-  const pieza = (cat) => (seleccion[cat] ? buscarPieza(seleccion[cat]) : null);
-
-  const motor = pieza('motor');
-  const tanque = pieza('tanque');
-  const escudo = pieza('escudo');
-  const paneles = pieza('paneles');
-  const bateria = pieza('bateria');
-  const antena = pieza('antena');
-  const instrumentos = seleccion.instrumentos.map(buscarPieza).filter(Boolean);
-
-  const costo = NAVE_BASE.costo + piezas.reduce((s, p) => s + p.costo, 0);
-  const masaSeca = NAVE_BASE.masa + piezas.reduce((s, p) => s + p.masa, 0);
-  const capacidadCombustible = tanque ? tanque.capacidad : 0;
-
+function resultadosVacios() {
   return {
-    costo,
-    masaSeca,
-    capacidadCombustible,
-    masaTotal: masaSeca + capacidadCombustible, // con el tanque lleno
-    empuje: motor ? motor.empuje : 0,
-    consumoMotor: motor ? motor.consumo : 0,
-    efectos: escudo ? [...escudo.efectos] : [],
-    generacion: paneles ? paneles.energia : 0, // E por turno con sol pleno
-    bateriaMax: NAVE_BASE.bateriaInterna + (bateria ? bateria.capacidad : 0),
-    tasaAntena: antena ? antena.tasa : 0,
-    energiaAntena: antena ? Math.abs(antena.energia) : 0,
-    instrumentos: instrumentos.map((i) => ({
-      id: i.id, nombre: i.nombre, datos: i.datos, energia: Math.abs(i.energia)
-    })),
-    consumoInstrumentos: instrumentos.reduce((s, i) => s + Math.abs(i.energia), 0)
+    lanzamiento: null,  // lo que se decidió al lanzar (masa, costos, inserción, metas...)
+    aterrizaje: null,   // resultado del minijuego
+    simulacion: null,   // { pasos, resumen } de simularMision()
+    resultado: null     // puntaje y explicaciones del informe
   };
 }
 
-/** ¿La nave tiene un efecto de protección? ('aislamiento', 'impactos', ...) */
-export function tieneEfecto(efecto) {
-  return !!estado.nave && estado.nave.efectos.includes(efecto);
+/** Elige la misión: ajusta el presupuesto según el nivel y limpia el diseño. */
+export function elegirMision(id) {
+  const m = buscarMision(id);
+  estado.misionId = id;
+  estado.presupuesto = Math.round(m.presupuesto * nivel().factorPresupuesto);
+  estado.seleccion = {};
+  estado.orbitaId = m.orbitaSugerida;
+  estado.coheteId = null;
+  estado.disenosAB = { A: null, B: null };
+  estado.aprobaciones = {};
+  estado.intento = 1;
+  estado.historial = [];
+  Object.assign(estado, resultadosVacios());
 }
 
-/** Factor solar de la misión (si la misión lo define) o del destino. */
-export function factorSolarActual() {
+/** "Rediseñar": conserva la nave, la órbita y el cohete, y borra los resultados. */
+export function nuevoIntento() {
+  estado.intento += 1;
+  estado.aprobaciones = {};
+  Object.assign(estado, resultadosVacios());
+}
+
+// ---------- Atajos ----------
+export const nivel = () => CONFIG.niveles[estado.nivelId];
+export const misionActual = () => buscarMision(estado.misionId);
+export const destinoActual = () => buscarDestino(misionActual().destino);
+export const orbitaActual = () => buscarOrbita(estado.orbitaId);
+export const coheteActual = () => (estado.coheteId ? buscarCohete(estado.coheteId) : null);
+export const esEquipo = () => estado.modo === 'equipo';
+
+/** Opciones de una categoría que se pueden usar en esta misión y este nivel. */
+export function opcionesDisponibles(categoria) {
   const m = misionActual();
-  if (m && typeof m.factorSolar === 'number') return m.factorSolar;
-  return destinoActual().juego.factorSolar;
+  return categoria.opciones.filter((o) => o.escala === m.escala && nivel().nivelesComponentes.includes(o.nivel));
 }
 
 /**
- * Balance de energía por turno en la superficie.
- * Lo usan el Taller (vista previa) y la Operación (valores reales tras los daños).
+ * Análisis completo de un diseño (por defecto, el actual): lo usan el panel
+ * de recursos, las metas de rol, la comparación A/B, el lanzamiento y el informe.
+ * @param config { seleccion, orbitaId, coheteId } opcional
  */
-export function balanceEnergia(nave, efectos, factorPaneles = 1) {
+export function analizarDiseno(config = {}) {
+  const seleccion = config.seleccion || estado.seleccion;
+  const mision = misionActual();
   const destino = destinoActual();
-  const generacion = Math.round(nave.generacion * factorSolarActual() * factorPaneles);
-  let calefaccion = destino.juego.consumoCalefaccion;
-  if (efectos.includes('aislamiento')) {
-    calefaccion = Math.round(calefaccion * CONFIG.operacion.reduccionCalefaccionConAislamiento);
-  }
-  const consumoFijo = NAVE_BASE.consumoPorTurno + calefaccion;
-  return { generacion, calefaccion, consumoFijo, neto: generacion - consumoFijo };
+  const orbita = buscarOrbita(config.orbitaId || estado.orbitaId);
+  const coheteElegido = buscarCohete(config.coheteId === undefined ? estado.coheteId : config.coheteId);
+
+  const diseno = calcularDiseno(seleccion, CATEGORIAS, CONFIG.riesgo);
+  const ambiente = ambienteDe(mision, destino, orbita);
+  const operativo = balanceOperativo(diseno, ambiente);
+  const valor = valorPorObjetivo(diseno, ambiente, mision.objetivos, operativo.fraccionOperacion);
+
+  // Si todavía no se eligió cohete, estimamos con el más barato posible
+  const barato = coheteMasBarato(COHETES, orbita, diseno.masaTotal);
+  const cohete = coheteElegido || barato;
+  const capacidadCohete = cohete ? cohete.capacidad[orbita.id] || 0 : 0;
+  const costoCohete = cohete ? cohete.costo : 0;
+  const porMes = mision.costoPorMesRetraso ?? CONFIG.presupuesto.costoPorMesRetraso;
+  const retraso = costoRetraso(diseno.mesesDesarrollo, mision.plazoMeses, porMes);
+  const costoTotal = Math.round((diseno.costoComponentes + costoCohete + retraso) * 10) / 10;
+  const vida = vidaEsperada(diseno, ambiente);
+  const margenes = calcularMargenes(diseno, operativo, capacidadCohete);
+
+  const barras = construirBarras({
+    diseno, operativo, costoTotal, presupuesto: estado.presupuesto,
+    plazoMeses: mision.plazoMeses, vidaEsperada: vida, vidaMinMeses: mision.requisitos.vidaMinMeses,
+    alcanceRequerido: ambiente.alcanceRequerido, riesgoMaximo: CONFIG.riesgo.maximoAceptable,
+    umbralAmarillo: CONFIG.barras.amarillo
+  });
+
+  const metas = evaluarMetas(ROLES, {
+    margenes, valorMes: valor.total, metaValorMensual: mision.metaValorMensual, operativo
+  });
+
+  return {
+    mision, destino, orbita, diseno, ambiente, operativo, valorMes: valor.total, valorObjetivos: valor.porObjetivo,
+    cohete, coheteBarato: barato, capacidadCohete, costoCohete, retraso, costoTotal,
+    vidaEsperada: vida, margenes, barras, metas
+  };
 }
 
-// Al cargar el módulo dejamos el estado listo.
-reiniciarEstado();
+// ---------- Estudio de compensaciones (diseños A y B) ----------
+
+/** Guarda una copia del diseño actual como 'A' o 'B'. */
+export function guardarComoAB(letra) {
+  estado.disenosAB[letra] = {
+    seleccion: JSON.parse(JSON.stringify(estado.seleccion)),
+    orbitaId: estado.orbitaId,
+    coheteId: estado.coheteId
+  };
+}
+
+/** Recupera el diseño 'A' o 'B' como diseño actual. */
+export function usarDisenoAB(letra) {
+  const d = estado.disenosAB[letra];
+  if (!d) return;
+  estado.seleccion = JSON.parse(JSON.stringify(d.seleccion));
+  estado.orbitaId = d.orbitaId;
+  estado.coheteId = d.coheteId;
+  anularAprobaciones();
+}
+
+// ---------- Modo equipo ----------
+
+/** Roles (objetos) del jugador que tiene el turno (individual: todos). */
+export function rolesDelJugadorActual() {
+  if (!esEquipo()) return ROLES;
+  return estado.asignacion[estado.jugadorActual].roles.map(buscarRol);
+}
+
+/** ¿El jugador actual puede modificar esta categoría? (individual: siempre) */
+export function puedeEditarCategoria(categoria) {
+  if (!esEquipo()) return true;
+  return rolesDelJugadorActual().some((r) => r.categorias.includes(categoria.id));
+}
+
+/** ¿El jugador actual puede elegir órbita y cohete? */
+export function puedeElegirOrbita() {
+  if (!esEquipo()) return true;
+  return rolesDelJugadorActual().some((r) => r.controlaOrbita);
+}
+
+export function pasarTurno() {
+  estado.jugadorActual = (estado.jugadorActual + 1) % estado.numJugadores;
+}
+
+/** Texto tipo "Turno del Jugador 2: Segmento espacial". */
+export function textoTurno() {
+  const a = estado.asignacion[estado.jugadorActual];
+  return `Turno del Jugador ${a.jugador}: ${a.roles.map((id) => buscarRol(id).nombre).join(', ')}`;
+}
+
+/** Cualquier cambio en el diseño anula las aprobaciones. */
+export function anularAprobaciones() {
+  estado.aprobaciones = {};
+}
