@@ -25,6 +25,9 @@ export class MundoFisico {
 const RADIO = 0.35;
 const ALTURA = 1.75;
 const PASOS = 4; // sub-pasos por cuadro: más estable a baja velocidad de cuadros
+// Para revisar: cuántas veces la velocidad vertical subió sin salto (debería ser 0)
+export const diagnostico = { subidasSinSalto: 0 };
+if (typeof window !== 'undefined') window.fisicaDiagnostico = diagnostico;
 
 export class CuerpoJugador {
   constructor(mundo, posicionPies) {
@@ -48,7 +51,7 @@ export class CuerpoJugador {
   /** Empujón: velocidad horizontal que se apaga en ~0,4 s (nunca atraviesa paredes). */
   empujar(vx, vz, saltito = 2) {
     this.impulso.set(vx, 0, vz);
-    if (this.apoyado) { this.velocidad.y = saltito; this.tiempoEnAire = 0.2; } // rebote pequeño
+    if (this.apoyado) { this.velocidad.y = saltito; this.tiempoEnAire = 0.2; this.saltoActivo = true; } // rebote pequeño
   }
 
   /** Posición de los pies (para dibujar al astronauta). */
@@ -80,7 +83,9 @@ export class CuerpoJugador {
     if (saltar && this.apoyado) {
       this.velocidad.y = this.fuerzaSalto;
       this.tiempoEnAire = 1; // ya no está apoyado
+      this.saltoActivo = true; // la velocidad vertical SOLO sube al saltar (o con el empujón)
     }
+    const estabaEnSuelo = this.enSuelo;
     const paso = dt / PASOS;
     let tocoPiso = false;
     for (let i = 0; i < PASOS; i++) {
@@ -100,6 +105,25 @@ export class CuerpoJugador {
         const r = this.resolverColisiones(deseo);
         if (r === null) break;
         if (r) tocoPiso = true;
+      }
+      // Sin salto ni empujón, nada puede lanzar al personaje hacia arriba (por ejemplo, el
+      // borde entre dos pisos). Si pasa, se anota en la consola para poder encontrarlo.
+      if (this.saltoActivo && this.velocidad.y <= 0) this.saltoActivo = false;
+      if (!this.saltoActivo && this.velocidad.y > 0.01) {
+        diagnostico.subidasSinSalto++;
+        if (diagnostico.subidasSinSalto <= 3) console.warn(`[física] la velocidad vertical subió sin salto: ${this.velocidad.y.toFixed(2)} m/s`);
+        this.velocidad.y = 0;
+      }
+    }
+    // PEGADO AL PISO: si venía caminando apoyado y el piso está a menos de 0,35 m abajo
+    // (bajando un borde o una unión entre pisos), baja hasta el piso en vez de "volar"
+    if (!tocoPiso && estabaEnSuelo && !this.saltoActivo) {
+      const pies = this.capsula.start;
+      const r = this.mundo.octree.rayIntersect(new THREE.Ray(new THREE.Vector3(pies.x, pies.y, pies.z), new THREE.Vector3(0, -1, 0)));
+      if (r && r.distance - RADIO < 0.35) {
+        this.capsula.translate(new THREE.Vector3(0, -(r.distance - RADIO), 0));
+        if (this.velocidad.y < 0) this.velocidad.y = 0;
+        tocoPiso = true;
       }
     }
     this.enSuelo = tocoPiso;
@@ -153,9 +177,18 @@ export class CuerpoJugador {
     return esPiso;
   }
 
-  /** Intenta subir un escalón de hasta 0,3 m: prueba la cápsula más arriba y un poco adelante. */
+  /**
+   * Sube un escalón SOLO si de verdad hay un borde de 0,05 a 0,3 m delante (se mide con un
+   * rayo hacia abajo). En el piso plano (o en la unión de dos pisos) nunca sube.
+   */
   subirEscalon(normal) {
-    const subir = new THREE.Vector3(-normal.x * 0.08, 0.3, -normal.z * 0.08);
+    const pies = this.capsula.start.clone(); pies.y -= RADIO;
+    const delante = new THREE.Vector3(pies.x - normal.x * (RADIO + 0.12), pies.y + 0.35, pies.z - normal.z * (RADIO + 0.12));
+    const r = this.mundo.octree.rayIntersect(new THREE.Ray(delante, new THREE.Vector3(0, -1, 0)));
+    if (!r) return false;
+    const altoBorde = 0.35 - r.distance;
+    if (altoBorde < 0.05 || altoBorde > 0.3) return false;
+    const subir = new THREE.Vector3(-normal.x * 0.08, altoBorde + 0.02, -normal.z * 0.08);
     const prueba = this.capsula.clone();
     prueba.translate(subir);
     if (this.mundo.octree.capsuleIntersect(prueba)) return false; // arriba también hay pared: no es un escalón
