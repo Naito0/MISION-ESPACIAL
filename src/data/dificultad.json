@@ -1,5 +1,5 @@
 {
-  "_comentario": "Valores de cada dificultad. Se pueden cambiar sin tocar código. 'maxSimultaneas' = emergencias a la vez. 'tiempoParaResolver' = segundos para cada emergencia. 'intervaloMin/Max' = segundos entre emergencias. 'factorDanio' = multiplica el daño de las emergencias (más bajo = la vida baja más lento). 'factorPresupuesto' = multiplica el presupuesto del hangar. 'minijuegos' = cuántos pasos tiene cada minijuego (menos = más fácil).",
+  "_comentario": "Valores de cada dificultad. Se pueden cambiar sin tocar código. 'maxSimultaneas' = emergencias a la vez. 'tiempoParaResolver' = segundos para cada emergencia. 'intervaloMin/Max' = segundos entre emergencias. 'factorDanio' ya no se usa en el modo misión (la dificultad cambia el tiempo para resolver, no el daño). 'factorPresupuesto' = multiplica el presupuesto del hangar. 'minijuegos' = cuántos pasos tiene cada minijuego (menos = más fácil).",
   "porDefecto": "facil",
   "niveles": {
     "facil": {

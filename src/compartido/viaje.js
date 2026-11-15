@@ -111,14 +111,18 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
     const e = elegirEmergencia(v, catalogo, rng);
     if (!e) { v.proxima = 5; return; }
     const agravada = estaAgravada(e, v.diseno);
+    // VIDA REPARTIDA: en modo misión, cada emergencia vale lo mismo (100 ÷ cantidad del viaje).
+    // Si falta la pieza protectora NO hace más daño: da un 30% menos de tiempo.
+    // La dificultad cambia el tiempo para resolver (tiempoParaResolver), no el daño.
+    const tiempo = config.tiempoParaResolver * (agravada ? 0.7 : 1);
+    const danio = v.total ? (config.vidaInicial ?? 100) / v.total : Math.max(1, Math.round(e.danio * (config.factorDanio ?? 1)));
     v.contador++;
     v.lanzadas++;
     v.rolesUsados.push(e.rol);
     v.emergencias.push({
       uid: v.contador, id: e.id, nombre: e.nombre, rol: e.rol, consola: e.consola, minijuego: e.minijuego,
-      efecto: e.efecto, descripcion: e.descripcion, limite: config.tiempoParaResolver, restante: config.tiempoParaResolver,
-      // factorDanio (dificultad): en Fácil la vida baja más lento
-      danio: Math.max(1, Math.round(e.danio * (agravada ? 1.5 : 1) * (config.factorDanio ?? 1))), agravada
+      efecto: e.efecto, descripcion: e.descripcion, limite: tiempo, restante: tiempo,
+      danio, agravada
     });
     v.ultimaPorRol[e.rol] = e.id;
     sucesos.push({ tipo: 'nueva', nombre: e.nombre, rol: e.rol });
@@ -128,11 +132,12 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
   for (const e of [...v.emergencias]) {
     e.restante -= dt;
     if (e.restante <= 0) {
-      v.vida = Math.max(0, v.vida - e.danio);
+      v.vida = v.vida - e.danio;
+      if (v.vida < 0.01) v.vida = 0; // con partes como 100/6 queda un resto mínimo: fallar todas = 0 exacto
       v.emergencias = v.emergencias.filter((x) => x.uid !== e.uid);
-      v.registro.push({ id: e.id, nombre: e.nombre, rol: e.rol, resultado: 'fallida', agravada: e.agravada, danio: e.danio, t: v.duracion - v.restante });
+      v.registro.push({ id: e.id, nombre: e.nombre, rol: e.rol, resultado: 'fallida', agravada: e.agravada, danio: Math.round(e.danio), t: v.duracion - v.restante });
       v.esperarCalma = true;
-      sucesos.push({ tipo: 'fallida', nombre: e.nombre, danio: e.danio });
+      sucesos.push({ tipo: 'fallida', nombre: e.nombre, danio: Math.round(e.danio) });
     }
   }
 

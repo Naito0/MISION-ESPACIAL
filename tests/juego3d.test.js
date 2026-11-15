@@ -566,6 +566,38 @@ test('cuadros de la pared: 2 o 3 por sala, cada dato coincide con su JSON, y la 
   assert.ok(!nuevosLogros({ cuadrosLeidos: C.length - 1, totalCuadros: C.length }, L).includes('curioso'));
 });
 
+test('vida repartida: fallar todas = 0 de vida; fallar 1 de 5 = 80; con 6, cada una ~17', () => {
+  const jugar = (total, fallar) => {
+    const config = { ...EMERG.config, emergenciasPorViaje: total, maxSimultaneas: 1, tiempoParaResolver: 30 };
+    const v = nuevoViaje(config, {});
+    let n = 0; let t = 0;
+    while (!v.terminado && t < 2000) {
+      avanzarViaje(v, 0.5, EMERG.emergencias, config, Math.random);
+      t += 0.5;
+      if (v.emergencias.length && !v.emergencias[0].vista) {
+        v.emergencias[0].vista = true;
+        n++;
+        if (n > fallar) resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true); // las demás se dejan vencer
+      }
+    }
+    return v;
+  };
+  const todas = jugar(5, 5);
+  assert.equal(todas.vida, 0); assert.equal(todas.terminado, 'fracaso');
+  const una = jugar(5, 1);
+  assert.equal(Math.round(una.vida), 80); assert.equal(una.terminado, 'llegada');
+  const marteTodas = jugar(6, 6);
+  assert.equal(marteTodas.vida, 0, 'con 6 partes de 100/6 también llega a 0 exacto');
+  const marteUna = jugar(6, 1);
+  assert.equal(Math.round(marteUna.vida), 83);
+  // Sin la pieza protectora: no hace más daño, da 30% menos de tiempo
+  const config = { ...EMERG.config, emergenciasPorViaje: 5, maxSimultaneas: 1, tiempoParaResolver: 30 };
+  const v = nuevoViaje(config, {}); // diseño vacío: falta todo
+  while (!v.emergencias.length) avanzarViaje(v, 0.5, EMERG.emergencias, config);
+  const e = v.emergencias[0];
+  if (e.agravada) { assert.equal(e.limite, 21); assert.equal(e.danio, 20); }
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

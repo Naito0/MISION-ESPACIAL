@@ -24,12 +24,13 @@ export function calcularInforme(r, datos) {
   const base = datos.emergencias.config.creditosBase[r.destinoId] || 0;
 
   // Créditos: la recompensa del destino según cómo llegó la nave, más las muestras
-  let creditos = exito ? Math.round(base * (0.5 + 0.5 * v.vida / 100)) : Math.round(base * 0.1);
+  const vida = Math.round(v.vida); // con partes como 100/6 la vida puede tener decimales
+  let creditos = exito ? Math.round(base * (0.5 + 0.5 * vida / 100)) : Math.round(base * 0.1);
   if (r.aterrizaje === 'choque') creditos = Math.round(creditos * 0.5);
   creditos += muestras * Math.round(base * 0.15);
   // Puntaje: vida, emergencias y ciencia
-  const puntaje = Math.max(0, v.vida * 10 + resueltas.length * 50 - fallidas.length * 25 + muestras * 100 + (r.aterrizaje === 'suave' ? 200 : 0));
-  const estrellas = !exito ? 0 : 1 + (v.vida >= 50 ? 1 : 0) + (muestras >= 2 && r.aterrizaje !== 'choque' ? 1 : 0);
+  const puntaje = Math.max(0, vida * 10 + resueltas.length * 50 - fallidas.length * 25 + muestras * 100 + (r.aterrizaje === 'suave' ? 200 : 0));
+  const estrellas = !exito ? 0 : 1 + (vida >= 50 ? 1 : 0) + (muestras >= 2 && r.aterrizaje !== 'choque' ? 1 : 0);
 
   // Causas y efectos
   const causas = [];
@@ -55,7 +56,7 @@ export function calcularInforme(r, datos) {
   if (r.aterrizaje === 'suave') causas.push({ tipo: 'bien', causa: 'Aterrizaje suave', efecto: 'El comandante frenó a tiempo contra la gravedad del destino.' });
   if (muestras) causas.push({ tipo: 'bien', causa: `Analizaron ${muestras} muestra${muestras > 1 ? 's' : ''}`, efecto: 'La ciencia es el objetivo de la misión: cada muestra suma créditos.' });
 
-  return { exito, creditos, puntaje, estrellas, resueltas: resueltas.length, fallidas: fallidas.length, vida: v.vida, causas, mision: misionParecida(r, datos.misionesReales || []) };
+  return { exito, creditos, puntaje, estrellas, resueltas: resueltas.length, fallidas: fallidas.length, vida, causas, mision: misionParecida(r, datos.misionesReales || []) };
 }
 
 /** Elige una misión real de la NASA parecida a la de la tripulación. */

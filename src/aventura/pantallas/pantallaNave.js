@@ -552,8 +552,13 @@ export function iniciarPantallaNave(ctx) {
       refrescoHud = 0.12;
       $('.sala-actual').innerHTML = `${yo.icono} ${yo.corto} · ${yo.sala}`;
       if (viaje) {
-        $('.hv-vida').style.width = `${viaje.vida}%`;
-        $('.hv-vida').style.background = viaje.vida > 50 ? '#3cc46e' : viaje.vida > 25 ? '#f2c14e' : '#e5484d';
+        // Barra de vida en SEGMENTOS: uno por emergencia del viaje; al fallar una, se apaga su parte
+        const partes = viaje.total || 5;
+        const barra = $('.hv-barra');
+        if (barra.dataset.partes !== String(partes)) { barra.dataset.partes = partes; barra.classList.add('segmentada'); barra.innerHTML = Array.from({ length: partes }, () => '<div class="hv-seg"></div>').join(''); }
+        const encendidas = Math.round(viaje.vida / (100 / partes));
+        const color = viaje.vida > 50 ? '#3cc46e' : viaje.vida > 25 ? '#f2c14e' : '#e5484d';
+        barra.querySelectorAll('.hv-seg').forEach((s, i) => { s.classList.toggle('apagado', i >= encendidas); s.style.background = i < encendidas ? color : ''; });
         $('.hv-num').textContent = viaje.vida;
         $('.hv-tiempo').textContent = `${Math.floor(viaje.restante / 60)}:${String(viaje.restante % 60).padStart(2, '0')}`;
         // Cuenta regresiva hasta la próxima emergencia (para no esperar sin saber)

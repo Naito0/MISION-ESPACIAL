@@ -429,3 +429,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .cuadro-numero { font-size: 34px; font-weight: bold; color: #ffd166; margin: 6px 0 8px; }
 #hud .cuadro-linea { font-size: var(--t); margin: 6px 0; }
 #hud .cuadro-fuente { display: block; color: #9fb0d0; margin: 8px 0; }
+
+/* Vida de la nave en segmentos (uno por emergencia del viaje) */
+#hud .hv-barra.segmentada { display: flex; gap: 3px; background: transparent; border-radius: 0; overflow: visible; }
+#hud .hv-seg { flex: 1; height: 100%; border-radius: 4px; background: #3cc46e; transition: background 0.4s, opacity 0.4s; }
+#hud .hv-seg.apagado { background: #1a2342; opacity: 0.6; }

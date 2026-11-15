@@ -506,7 +506,8 @@ export class Sala {
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
       viaje: this.viaje && {
-        duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
+        duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: Math.round(this.viaje.vida),
+        total: this.viaje.total || null, // emergencias del viaje (la barra de vida se divide en esa cantidad de partes)
         // Para la cuenta regresiva "Próxima emergencia en N s" y el viaje acelerado
         proxima: this.viaje.emergencias.length || this.viaje.lanzadas >= (this.viaje.total ?? Infinity) ? null : Math.max(0, Math.ceil(this.viaje.proxima)),
         pendientes: this.viaje.total ? this.viaje.total - this.viaje.lanzadas : null,
