@@ -446,6 +446,7 @@ test('TODAS las preguntas de opción múltiple: mostradas 30 veces, la correcta 
   ];
   const letras = 'ABCD';
   const total = { A: 0, B: 0, C: 0, D: 0 };
+  const esperado = { A: 0, B: 0, C: 0, D: 0 }; // lo que daría un reparto perfecto
   const filas = [];
   for (const q of todas) {
     const conteo = {};
@@ -456,12 +457,17 @@ test('TODAS las preguntas de opción múltiple: mostradas 30 veces, la correcta 
       const pos = letras[ops.findIndex((o) => o.correcta)];
       conteo[pos] = (conteo[pos] || 0) + 1; total[pos]++;
     }
+    for (const l of letras.slice(0, n)) esperado[l] += 30 / n;
     filas.push(`${q.nombre.padEnd(30)} ${[...letras.slice(0, n)].map((l) => `${l}:${String(conteo[l] || 0).padStart(2)}`).join('  ')}`);
-    // Con 30 repeticiones, la correcta tiene que aparecer en todas las posiciones posibles
-    for (const l of letras.slice(0, n)) assert.ok(conteo[l] > 0, `${q.nombre}: la correcta nunca quedó en ${l}`);
+    // Cada pregunta: la correcta NO puede quedar siempre en el mismo lugar.
+    // (No se exige que pase por todas las letras: con 30 sorteos y 4 opciones, a veces
+    //  una letra queda en 0 por puro azar; eso no es un error de la mezcla.)
     assert.ok(Math.max(...Object.values(conteo)) < 30, `${q.nombre}: siempre en el mismo lugar`);
   }
   filas.push(`TOTAL (${todas.length} preguntas × 30)   A:${total.A}  B:${total.B}  C:${total.C}  D:${total.D}`);
+  filas.push(`Reparto perfecto          A:${Math.round(esperado.A)}  B:${Math.round(esperado.B)}  C:${Math.round(esperado.C)}  D:${Math.round(esperado.D)}`);
+  // En total, cada letra queda cerca de lo esperado (±25%): A no gana más que B, C o D
+  for (const l of letras) assert.ok(Math.abs(total[l] - esperado[l]) <= esperado[l] * 0.25, `total en ${l}: ${total[l]} (esperado ${Math.round(esperado[l])})`);
   tc.diagnostic('\n' + filas.join('\n'));
   if (process.env.CONTEO) console.log(filas.join('\n'));
 });
