@@ -15,12 +15,25 @@ export function mezclarLista(lista, rng = Math.random) {
 }
 
 /**
- * Opciones listas para mostrar: cada una con id, texto y si es la correcta,
- * en un orden NUEVO al azar. lista = [{ id, texto, correcta, ... }]
+ * INTERCALADO: la posición de la respuesta correcta va rotando de una pregunta a la
+ * siguiente (B, C, A, B, C… en las de 3 opciones; B, A, B… en las de 2) y la
+ * PRIMERA pregunta nunca la tiene en la A. Así no hay "siempre es la A" ni rachas
+ * por azar. Las opciones incorrectas se mezclan (Fisher-Yates).
  */
-export function prepararOpciones(lista, rng = Math.random) {
+let ultima = 0; // posición de la correcta en la pregunta anterior (0 = A)
+export function posicionIntercalada(n) { ultima = (ultima + 1) % n; return ultima; } // siempre la letra siguiente
+export function reiniciarIntercalado() { ultima = 0; }
+
+/**
+ * Opciones listas para mostrar: cada una con id, texto y si es la correcta.
+ * lista = [{ id, texto, correcta, ... }]; posicion = dónde va la correcta (0 = A).
+ */
+export function prepararOpciones(lista, rng = Math.random, posicion = posicionIntercalada(lista.length)) {
   if (lista.filter((o) => o.correcta).length !== 1) throw new Error('Cada pregunta necesita exactamente 1 opción correcta');
-  return mezclarLista(lista.map((o) => ({ ...o })), rng);
+  const correcta = { ...lista.find((o) => o.correcta) };
+  const resto = mezclarLista(lista.filter((o) => !o.correcta).map((o) => ({ ...o })), rng);
+  resto.splice(Math.min(posicion, resto.length), 0, correcta);
+  return resto;
 }
 
 /** Diagnóstico (diagnosticos.json): opciones [{ texto, correcta, porque }] → con id y mezcladas. */

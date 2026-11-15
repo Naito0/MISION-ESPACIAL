@@ -12,7 +12,7 @@ const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 import { estrellasMision, nuevosLogros } from '../src/compartido/logros.js';
 import { parametrosRetraso, dondeFrena } from '../src/compartido/retrasoRover.js';
-import { elegirPreguntas, prepararPregunta, opcionesDiagnostico, opcionesPrediccion } from '../src/compartido/preguntas.js';
+import { elegirPreguntas, prepararPregunta, opcionesDiagnostico, opcionesPrediccion, reiniciarIntercalado } from '../src/compartido/preguntas.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -502,6 +502,18 @@ test('aterrizaje: solo aterriza el Piloto humano; si el Piloto es un bot, el anf
   const solo = new Sala('SOLO', { ...datosCompletos, personajes: PJ });
   solo.unir('x', 'Xavi'); solo.accion('x', 'puesto', { rol: 'ingeniero' });
   assert.equal(solo.aterrizadorId(), 'x');
+});
+
+test('respuestas INTERCALADAS: la primera no es la A y la correcta cambia de lugar en cada pregunta', () => {
+  reiniciarIntercalado();
+  const DIAG = leerJSON('diagnosticos.json').diagnosticos;
+  const APR = leerJSON('aprendizaje.json');
+  const pos = (ops) => 'ABCD'[ops.findIndex((o) => o.correcta)];
+  // Partida típica: primero la predicción del hangar (2 opciones), después diagnósticos (3)
+  // Se alternan preguntas de 2 y de 3 opciones (el caso que podía repetir letra)
+  const secuencia = [pos(opcionesPrediccion(APR.predicciones.luna)), ...Object.values(DIAG).slice(0, 6).flatMap((d, i) => [pos(opcionesDiagnostico(d)), pos(opcionesPrediccion(APR.predicciones[i % 2 ? 'luna' : 'marte']))])];
+  assert.notEqual(secuencia[0], 'A', 'la primera pregunta no tiene la correcta en A');
+  for (let i = 1; i < secuencia.length; i++) assert.notEqual(secuencia[i], secuencia[i - 1], `dos seguidas en ${secuencia[i]}: ${secuencia.join(' ')}`);
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {  
