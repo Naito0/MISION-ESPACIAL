@@ -74,8 +74,14 @@ const TECLAS_DE = {
  * alTerminar() se llama al acabar (por tiempo o porque el bot ganó).
  * Devuelve detener().
  */
+// Demos que necesitan más tiempo para verse completas (el rover y el satélite)
+const DURACION = { retraso: 15, tormenta: 11 };
+
 export function reproducirDemo(id, area, iniciar, opciones, alTerminar, segundos = 7) {
   const bot = BOTS[id];
+  segundos = DURACION[id] ?? segundos;
+  // El rover se muestra con el retraso de la Luna (corto) para que se vea entero
+  if (id === 'retraso') opciones = { ...opciones, destinoId: 'luna', rondas: 1 };
   area.innerHTML = '';
   area.classList.add('en-demo');
   const banda = document.createElement('div');

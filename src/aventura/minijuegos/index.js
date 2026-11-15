@@ -56,20 +56,20 @@ export const MINIJUEGOS = {
     gana: 'Todas las plantas llegan a ✅.' },
   secuencia: { fn: secuencia, rol: 'cientifico', nombre: 'Analizar una muestra',
     objetivo: 'Repetir la secuencia de colores del analizador.',
-    controles: 'Mira los colores y después haz clic en el mismo orden. Los destellos grises no cuentan.',
+    controles: 'Mira los colores (5 a 7) y después haz clic en el mismo orden. Los destellos grises no cuentan. 3 intentos.',
     gana: 'Repites toda la secuencia sin errores.' },
   unidades: { fn: unidades, rol: 'comunicaciones', nombre: 'Unidades mezcladas',
     objetivo: 'Enviar cada orden en el sistema MÉTRICO.',
     controles: 'Lee la unidad de la orden y haz clic en el valor correcto.',
     gana: 'Envías bien todas las órdenes.' },
   retraso: { fn: retraso, rol: 'comunicaciones', nombre: 'Orden con retraso',
-    objetivo: 'Que el rover frene en la zona verde, antes del cráter.',
-    controles: 'Espacio (o el botón) envía "¡Frena!". Envíala cuando el rover cruce la línea amarilla.',
+    objetivo: 'Desde la Tierra, haz que el rover frene en la zona segura (verde), antes del cráter.',
+    controles: 'Espacio (o el botón) envía "¡Frena!". La señal tarda en llegar: envíala cuando el rover cruce la línea amarilla. 3 intentos.',
     gana: 'El rover se detiene dentro de la zona verde.' },
   tormenta: { fn: tormenta, rol: 'comunicaciones', nombre: 'Contacto perdido',
-    objetivo: 'Recuperar una señal fuerte y mantenerla.',
-    controles: 'Paso 1: ← → giran la antena hasta que diga "alineada". Paso 2: ↑ ↓ mueven la frecuencia hasta el pico más alto.',
-    gana: 'La barra de señal se pone verde el tiempo pedido.' }
+    objetivo: 'Que la antena del satélite vuelva a hablar con la Tierra.',
+    controles: 'Paso 1: ← → giran la antena hasta que el rayo (verde) apunte a la Tierra. Paso 2: ↑ ↓ llevan la aguja a la zona verde. 3 intentos.',
+    gana: 'La barra 📶 Señal se llena.' }
 };
 
 // Minijuegos ya jugados en ESTA misión (para el tiempo extra del primer intento)

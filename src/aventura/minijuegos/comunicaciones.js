@@ -61,21 +61,40 @@ export function unidades(area, terminar, op = {}) {
   return () => {};
 }
 
+/** Dibujos simples que se reconocen sin leer: la Tierra, el rover, el satélite. */
+function dibujarTierra(g, x, y, r = 22) {
+  g.fillStyle = '#2d6fd6'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  g.fillStyle = '#3cc46e';
+  g.beginPath(); g.ellipse(x - r * 0.3, y - r * 0.2, r * 0.45, r * 0.3, 0.5, 0, 7); g.fill();
+  g.beginPath(); g.ellipse(x + r * 0.35, y + r * 0.35, r * 0.35, r * 0.22, -0.4, 0, 7); g.fill();
+  g.strokeStyle = '#bfe0ff'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke();
+}
+function dibujarRover(g, x, y, alfa = 1) {
+  g.globalAlpha = alfa;
+  g.fillStyle = '#dfe6f5'; g.fillRect(x - 18, y - 14, 36, 14);
+  g.fillStyle = '#9aa6c8'; g.fillRect(x - 6, y - 26, 3, 12); g.fillRect(x - 10, y - 30, 11, 5); // mástil con cámara
+  g.fillStyle = '#333'; for (const dx of [-12, 0, 12]) { g.beginPath(); g.arc(x + dx, y + 3, 5, 0, 7); g.fill(); }
+  g.globalAlpha = 1;
+}
+
 /**
- * RETRASO — controlas un rover desde la Tierra. Lo que ves en tu pantalla pasó hace
- * unos segundos, y tu orden tarda lo mismo en llegar. Pulsa ESPACIO (o el botón) para
- * enviar "¡Frena!" con anticipación: el rover debe frenar en la zona verde, antes del cráter.
+ * RETRASO — manejas un rover en Marte (o la Luna) DESDE LA TIERRA.
+ * Se ve todo: la Tierra con tu antena arriba a la izquierda, el rover que avanza,
+ * la zona verde (segura) y el cráter. Al pulsar ESPACIO, la señal "¡Frena!" viaja
+ * desde la Tierra hasta el rover: tarda unos segundos, por eso hay que enviarla
+ * ANTES, cuando el rover cruza la línea amarilla. 3 intentos.
  * Luna: ~1,3 s. Marte: entre 4 y 24 minutos (en el juego, 1 minuto = 1/4 de segundo).
  */
 export function retraso(area, terminar, op = {}) {
   const destinoId = op.destinoId || 'luna';
   const rondas = op.rondas ?? 1;
-  const { c, g } = lienzo(area, 420, 220);
+  const { c, g } = lienzo(area, 420, 240);
   const boton = document.createElement('button');
   boton.className = 'consola-grande';
   boton.textContent = '📡 Enviar "¡Frena!" (Espacio)';
   area.appendChild(boton);
-  let ronda = 0;
+  const marte = destinoId === 'marte';
+  let ronda = 0; let intento = 1; let aviso = 0; let textoAviso = '';
   let D; let v; let x0; let t; let enviada; let llegada; let paradoEn; let zona; let lineaEnvio;
   function nueva() {
     ({ D, v, x0, zona, lineaEnvio } = parametrosRetraso(destinoId));
@@ -83,97 +102,153 @@ export function retraso(area, terminar, op = {}) {
   }
   nueva();
   const posReal = (tt) => { const tope = paradoEn ?? Infinity; return x0 + v * Math.min(tt, tope); };
-  const enviar = () => { if (enviada === null) { enviada = t; llegada = t + D; } };
+  const enviar = () => { if (enviada === null && aviso <= 0) { enviada = t; llegada = t + D; } };
   boton.onclick = enviar;
   const tecla = (e) => { if (e.code === 'Space') { e.preventDefault(); enviar(); } };
   window.addEventListener('keydown', tecla);
+  function fallo(corto, motivo) {
+    if (intento >= 3) { terminar(false, motivo); return true; }
+    intento++; aviso = 2; textoAviso = `¡Casi! ${corto}. Intento ${intento} de 3`;
+    nueva();
+    return false;
+  }
   let anterior = performance.now();
   let fin = 0;
   let id = requestAnimationFrame(cuadro);
   function cuadro(ahora) {
     const dt = Math.min(0.05, (ahora - anterior) / 1000); anterior = ahora;
-    t += dt;
+    if (aviso > 0) aviso -= dt; else t += dt;
     if (llegada !== null && paradoEn === null && t >= llegada) paradoEn = llegada;
-    const visto = posReal(Math.max(0, t - D)); // lo que ves en la Tierra: el pasado
+    const visto = posReal(Math.max(0, t - D)); // lo que ves en la Tierra: lo que pasó hace D s
     if (op.pista) Object.assign(op.pista, { lienzo: c, visto, lineaEnvio, enviada: enviada !== null, boton });
-    // Dibujo
-    g.fillStyle = '#c47a4a'; g.fillRect(0, 0, c.width, c.height);
-    g.fillStyle = 'rgba(60,196,110,0.6)'; g.fillRect(zona.a, 120, zona.b - zona.a, 40);
-    g.fillStyle = '#3a1a0a'; g.fillRect(350, 115, 70, 60); texto(g, 'Cráter', 357, 190, '#fff', 13);
-    // Línea amarilla: cuando el rover QUE VES la cruza, es el momento de enviar la orden
+    // ---- Dibujo ----
+    g.fillStyle = '#060a18'; g.fillRect(0, 0, c.width, 110);                 // espacio
+    g.fillStyle = marte ? '#c47a4a' : '#9a9aa2'; g.fillRect(0, 110, c.width, 130); // suelo
+    dibujarTierra(g, 36, 40);
+    texto(g, 'Tierra (tú)', 6, 80, '#bfe0ff', 12);
+    // Zona segura y cráter
+    g.fillStyle = 'rgba(60,196,110,0.75)'; g.fillRect(zona.a, 150, zona.b - zona.a, 26);
+    texto(g, 'Zona segura', zona.a + 4, 196, '#0b3a1c', 13);
+    g.fillStyle = '#2a1408'; g.beginPath(); g.ellipse(395, 165, 30, 20, 0, 0, 7); g.fill();
+    texto(g, 'Cráter', 374, 200, '#fff', 13);
+    // Línea amarilla: cuando el rover cruza esta línea, envía la orden
     g.strokeStyle = '#ffd166'; g.lineWidth = 3; g.setLineDash([6, 5]);
-    g.beginPath(); g.moveTo(lineaEnvio, 95); g.lineTo(lineaEnvio, 170); g.stroke(); g.setLineDash([]);
-    texto(g, 'Enviar aquí', lineaEnvio - 30, 90, '#ffd166', 12);
-    g.fillStyle = '#dfe6f5'; g.fillRect(visto - 14, 128, 28, 18); g.fillStyle = '#333'; g.beginPath(); g.arc(visto - 8, 148, 5, 0, 7); g.arc(visto + 8, 148, 5, 0, 7); g.fill();
-    if (enviada !== null && t < llegada) { const f = (t - enviada) / D; texto(g, '📡', 30 + f * 340, 60, '#fff', 22); }
-    texto(g, `Lo que ves pasó hace ${D.toFixed(1)} s · tu orden tarda ${D.toFixed(1)} s en llegar`, 10, 22, '#fff', 14);
-    texto(g, `Ronda ${ronda + 1} de ${rondas}`, 10, 210, '#fff', 13);
+    g.beginPath(); g.moveTo(lineaEnvio, 118); g.lineTo(lineaEnvio, 185); g.stroke(); g.setLineDash([]);
+    texto(g, '¡Envía aquí!', lineaEnvio - 36, 128, '#ffd166', 13);
+    dibujarRover(g, visto, 165);
+    // La señal viaja desde la Tierra hasta el rover
+    if (enviada !== null && t < llegada) {
+      const f = (t - enviada) / D;
+      const sx = 36 + (posReal(t) - 36) * f; const sy = 40 + (150 - 40) * f;
+      g.strokeStyle = 'rgba(255,159,220,0.5)'; g.setLineDash([4, 6]); g.beginPath(); g.moveTo(36, 40); g.lineTo(sx, sy); g.stroke(); g.setLineDash([]);
+      texto(g, '📡', sx - 10, sy + 8, '#fff', 20);
+    }
+    texto(g, `La señal tarda ${D.toFixed(1)} s en llegar al rover`, 74, 24, '#fff', 15);
+    texto(g, `Intento ${intento} de 3${rondas > 1 ? ` · Ronda ${ronda + 1} de ${rondas}` : ''}`, 74, 46, '#c8d2ec', 13);
+    if (aviso > 0) {
+      g.fillStyle = 'rgba(0,0,0,0.7)'; g.fillRect(20, 90, 380, 44);
+      texto(g, textoAviso, 210, 118, '#ffd166', 14, 'center');
+      id = requestAnimationFrame(cuadro);
+      return;
+    }
     const real = posReal(t);
     if (paradoEn !== null && t - D >= paradoEn) {
       fin += dt;
       if (fin > 0.6) {
+        fin = 0;
         if (real >= zona.a - 14 && real <= zona.b + 14) {
-          ronda++; fin = 0;
+          ronda++;
           if (ronda >= rondas) { ganado('retraso'); return terminar(true); }
           nueva();
-        } else return terminar(false, `La orden llegó ${real < zona.a ? 'demasiado pronto' : 'tarde'}. Lo que ves ya pasó hace ${D.toFixed(1)} s y tu orden tarda otros ${D.toFixed(1)} s: hay que enviarla cuando el rover todavía está lejos de la zona verde.`);
+        } else if (fallo(real < zona.a ? 'Frenó antes' : 'Frenó tarde', 'Envía la orden justo cuando el rover cruce la línea amarilla: la señal tarda en llegar.')) return;
       }
     }
-    if (real > 360 && paradoEn === null) return terminar(false, `El rover cayó al cráter: la orden tarda ${D.toFixed(1)} s en llegar. Envíala ANTES de que el rover llegue a la zona verde.`);
+    if (real > 365 && paradoEn === null && fallo('Cayó al cráter', 'La orden tarda en llegar: envíala cuando el rover cruce la línea amarilla.')) return;
     id = requestAnimationFrame(cuadro);
   }
   return () => { cancelAnimationFrame(id); window.removeEventListener('keydown', tecla); };
 }
 
 /**
- * TORMENTA — se perdió el contacto. Hay que ALINEAR la antena (← →) y encontrar la
- * FRECUENCIA (↑ ↓) entre el ruido. Hay picos falsos: la señal verdadera solo es
- * fuerte cuando la antena está bien alineada. Mantén la señal fuerte unos segundos.
+ * CONTACTO PERDIDO — el satélite perdió la comunicación con la Tierra.
+ * Paso 1: gira la ANTENA del satélite (← →) hasta que su rayo apunte a la Tierra.
+ * Paso 2: mueve la AGUJA de la frecuencia (↑ ↓) a la zona verde y quédate ahí unos segundos.
+ * Movimiento lento, zona verde grande y 3 intentos (de 25 s cada uno).
  */
 export function tormenta(area, terminar, op = {}) {
   const meta = op.segundos ?? 2;
   const { c, g } = lienzo(area, 420, 240);
   const t = teclas();
-  const fReal = azar(15, 85); const angReal = azar(-60, 60);
-  const falsos = Array.from({ length: op.picosFalsos ?? 2 }, () => { let f; do { f = azar(8, 92); } while (Math.abs(f - fReal) < 12); return f; });
-  let f = azar(5, 95); let ang = angReal + (Math.random() < 0.5 ? -1 : 1) * azar(40, 70); let fuerte = 0; let tiempo = 0;
+  const SAT = { x: 80, y: 115 };
+  const estrellas = Array.from({ length: 40 }, () => [Math.random() * 420, Math.random() * 180]);
+  let intento = 1; let aviso = 0; let textoAviso = '';
+  let tierraY; let angReal; let fReal; let ang; let f; let fuerte; let tiempo;
+  function nueva() {
+    tierraY = azar(45, 165);
+    angReal = Math.atan2(tierraY - SAT.y, 360 - SAT.x) * 180 / Math.PI;
+    fReal = azar(20, 80);
+    ang = angReal + (Math.random() < 0.5 ? -1 : 1) * azar(35, 55);
+    f = fReal + (Math.random() < 0.5 ? -1 : 1) * azar(25, 40); f = Math.max(0, Math.min(100, f));
+    fuerte = 0; tiempo = 0;
+  }
+  nueva();
   let anterior = performance.now();
   let id = requestAnimationFrame(cuadro);
-  const espectro = (x) => {
-    const alin = Math.max(0, Math.cos((ang - angReal) * Math.PI / 180 * 1.5));
-    let s = Math.exp(-((x - fReal) ** 2) / 18) * (0.25 + 0.75 * alin ** 2);
-    for (const k of falsos) s = Math.max(s, Math.exp(-((x - k) ** 2) / 12) * 0.5);
-    return s;
-  };
   function cuadro(ahora) {
     const dt = Math.min(0.05, (ahora - anterior) / 1000); anterior = ahora;
-    tiempo += dt;
-    ang += ((t.s.has('ArrowRight') || t.s.has('KeyD') ? 1 : 0) - (t.s.has('ArrowLeft') || t.s.has('KeyA') ? 1 : 0)) * 40 * dt;
-    f = Math.max(0, Math.min(100, f + ((t.s.has('ArrowUp') || t.s.has('KeyW') ? 1 : 0) - (t.s.has('ArrowDown') || t.s.has('KeyS') ? 1 : 0)) * 18 * dt));
-    const senal = espectro(f) + azar(-0.04, 0.04);
+    if (aviso > 0) aviso -= dt;
+    else {
+      tiempo += dt;
+      ang += ((t.s.has('ArrowRight') || t.s.has('KeyD') ? 1 : 0) - (t.s.has('ArrowLeft') || t.s.has('KeyA') ? 1 : 0)) * 25 * dt;
+      ang = Math.max(-80, Math.min(80, ang));
+      f = Math.max(0, Math.min(100, f + ((t.s.has('ArrowUp') || t.s.has('KeyW') ? 1 : 0) - (t.s.has('ArrowDown') || t.s.has('KeyS') ? 1 : 0)) * 14 * dt));
+    }
     if (op.pista) Object.assign(op.pista, { lienzo: c, antena: ang, antenaBuena: angReal, frecuencia: f, frecuenciaBuena: fReal });
-    fuerte = senal > 0.85 ? fuerte + dt : Math.max(0, fuerte - dt);
-    // Dibujo: espectro con ruido
-    g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);
-    g.strokeStyle = '#7cc4ff'; g.lineWidth = 2; g.beginPath();
-    for (let x = 0; x <= 100; x += 1) g.lineTo(20 + x * 2.6, 170 - (espectro(x) + Math.random() * 0.12) * 120);
-    g.stroke();
-    g.strokeStyle = senal > 0.85 ? '#5be08a' : '#ffd166'; g.lineWidth = 3; g.beginPath(); g.moveTo(20 + f * 2.6, 40); g.lineTo(20 + f * 2.6, 175); g.stroke();
-    texto(g, 'Frecuencia (↑ ↓)', 20, 196, '#fff', 13);
-    // Antena: dial de orientación
-    g.save(); g.translate(370, 90); g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 32, Math.PI, 0); g.stroke();
-    g.rotate((ang - 90) * Math.PI / 180); g.strokeStyle = '#ff9fdc'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 0); g.lineTo(30, 0); g.stroke(); g.restore();
-    // Paso 1 visible: qué tan alineada está la antena (al 100% el pico verdadero es el más alto)
-    const alineacion = Math.max(0, Math.cos((ang - angReal) * Math.PI / 180 * 1.5));
-    const alineada = alineacion > 0.95;
-    texto(g, 'Antena (← →)', 325, 140, '#fff', 13);
-    texto(g, alineada ? '✅ alineada' : `${Math.round(alineacion * 100)}%`, 335, 160, alineada ? '#5be08a' : '#ffd166', 15);
-    g.fillStyle = '#1a2342'; g.fillRect(20, 210, 380, 14);
-    g.fillStyle = senal > 0.85 ? '#5be08a' : '#f2c14e'; g.fillRect(20, 210, 380 * Math.max(0, Math.min(1, senal)), 14);
-    texto(g, senal > 0.85 ? `¡Señal clara! ${Math.max(0, meta - fuerte).toFixed(1)} s`
-      : alineada ? 'Paso 2: ↑ ↓ hasta el pico más alto' : 'Paso 1: gira la antena con ← → hasta "alineada"', 20, 24, '#fff', 15);
+    const alineada = Math.abs(ang - angReal) < 7;
+    const enZona = alineada && Math.abs(f - fReal) < 8;
+    fuerte = enZona ? fuerte + dt : Math.max(0, fuerte - dt * 0.5);
+    // ---- Dibujo ----
+    g.fillStyle = '#04081a'; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#cfd8ff'; for (const [x, y] of estrellas) g.fillRect(x, y, 1.5, 1.5);
+    dibujarTierra(g, 370, tierraY, 26);
+    texto(g, 'Tierra', 352, tierraY + 42, '#bfe0ff', 12);
+    // Rayo de la antena
+    const rad = ang * Math.PI / 180;
+    g.strokeStyle = alineada ? '#5be08a' : 'rgba(255,209,102,0.8)'; g.lineWidth = alineada ? 4 : 2; g.setLineDash(alineada ? [] : [8, 6]);
+    g.beginPath(); g.moveTo(SAT.x, SAT.y); g.lineTo(SAT.x + Math.cos(rad) * 330, SAT.y + Math.sin(rad) * 330); g.stroke(); g.setLineDash([]);
+    // Satélite: cuerpo, paneles solares y antena de plato que gira
+    g.fillStyle = '#3d77d8'; g.fillRect(SAT.x - 52, SAT.y - 9, 30, 18);
+    g.fillStyle = '#dfe6f5'; g.fillRect(SAT.x - 22, SAT.y - 13, 24, 26);
+    g.save(); g.translate(SAT.x, SAT.y); g.rotate(rad);
+    g.strokeStyle = '#ffffff'; g.lineWidth = 4; g.beginPath(); g.arc(4, 0, 14, -1.1, 1.1); g.stroke();
+    g.fillStyle = '#ff9fdc'; g.beginPath(); g.arc(14, 0, 3, 0, 7); g.fill();
+    g.restore();
+    texto(g, 'Satélite', SAT.x - 40, SAT.y + 34, '#fff', 12);
+    // Frecuencia: aguja y zona verde (la zona aparece cuando la antena apunta a la Tierra)
+    const bx = 40; const bw = 340; const by = 205;
+    g.fillStyle = '#1a2342'; g.fillRect(bx, by, bw, 16);
+    if (alineada) { g.fillStyle = 'rgba(60,196,110,0.85)'; g.fillRect(bx + (fReal - 8) / 100 * bw, by, 16 / 100 * bw, 16); }
+    const ax = bx + f / 100 * bw;
+    g.fillStyle = enZona ? '#5be08a' : '#ffd166'; g.beginPath(); g.moveTo(ax, by - 2); g.lineTo(ax - 7, by - 14); g.lineTo(ax + 7, by - 14); g.fill();
+    g.fillRect(ax - 1.5, by, 3, 16);
+    texto(g, 'Frecuencia', bx, by - 18, '#c8d2ec', 12);
+    // Barra de "señal recibida"
+    g.fillStyle = '#1a2342'; g.fillRect(170, 32, 120, 10);
+    g.fillStyle = '#5be08a'; g.fillRect(170, 32, 120 * Math.min(1, fuerte / meta), 10);
+    texto(g, '📶 Señal', 110, 42, '#fff', 12);
+    texto(g, enZona ? `¡Conectado! Mantén… ${Math.max(0, meta - fuerte).toFixed(1)} s`
+      : alineada ? 'Paso 2: ↑ ↓ lleva la aguja a la zona verde' : 'Paso 1: ← → apunta la antena a la Tierra', 10, 22, '#fff', 15);
+    texto(g, `Intento ${intento} de 3`, 10, 40, '#c8d2ec', 12);
+    if (aviso > 0) {
+      g.fillStyle = 'rgba(0,0,0,0.7)'; g.fillRect(20, 95, 380, 44);
+      texto(g, textoAviso, 210, 123, '#ffd166', 14, 'center');
+    }
     if (fuerte >= meta) { ganado('tormenta'); return terminar(true); }
-    if (tiempo > 45) return terminar(false, 'Los picos falsos nunca pasan de la mitad. El verdadero crece cuando ALINEAS la antena: primero gira la antena hasta que un pico suba, después ajusta la frecuencia.');
+    if (aviso <= 0 && tiempo > 25) {
+      if (intento >= 3) return terminar(false, 'Primero apunta la antena a la Tierra (el rayo se pone verde); después lleva la aguja a la zona verde y quédate quieto ahí.');
+      intento++; aviso = 2; textoAviso = `Se acabó el intento. Intento ${intento} de 3`;
+      nueva();
+    }
     id = requestAnimationFrame(cuadro);
   }
   return () => { cancelAnimationFrame(id); t.quitar(); };

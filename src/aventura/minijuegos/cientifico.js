@@ -175,11 +175,11 @@ export function huerto(area, terminar, op = {}) {
 
 /**
  * SECUENCIA — analizar una muestra: mira la secuencia de colores y repítela.
- * Es larga (7 a 9), los botones cambian de lugar en cada ronda y hay destellos
- * grises que NO son parte de la secuencia (distractores).
+ * Luna: 5 o 6 colores; Marte: 6 o 7. Se muestra despacio (un color cada 0,85 s)
+ * y hay pocos destellos grises que NO son parte de la secuencia. 3 intentos.
  */
 export function secuencia(area, terminar, op = {}) {
-  const largo = op.largo ?? 7;
+  const largo = Math.round((op.largoMin ?? op.largo ?? 5) + Math.random() * ((op.largoMax ?? op.largoMin ?? op.largo ?? 5) - (op.largoMin ?? op.largo ?? 5)));
   const colores = mezclar(['#e5484d', '#3d77d8', '#f2c14e', '#3cc46e']);
   const caja = document.createElement('div');
   caja.className = 'secuencia';
@@ -193,11 +193,11 @@ export function secuencia(area, terminar, op = {}) {
   function nuevaRonda() {
     orden = Array.from({ length: largo }, () => Math.floor(Math.random() * 4));
     paso = 0; mostrando = true; msg.textContent = `Mira la secuencia de ${largo} colores… (los grises no cuentan)`;
-    let tt = 500;
+    let tt = 700;
     orden.forEach((i) => {
-      timers.push(setTimeout(() => iluminar(i, 380), tt));
-      tt += 600;
-      if (Math.random() < 0.3) { const k = Math.floor(Math.random() * 4); timers.push(setTimeout(() => iluminar(k, 200, true), tt - 150)); }
+      timers.push(setTimeout(() => iluminar(i, 600), tt));
+      tt += 850;
+      if (Math.random() < 0.15) { const k = Math.floor(Math.random() * 4); timers.push(setTimeout(() => iluminar(k, 200, true), tt - 150)); }
     });
     timers.push(setTimeout(() => { mostrando = false; msg.textContent = '¡Tu turno! Repite la secuencia (solo los colores).'; }, tt));
   }
@@ -209,8 +209,8 @@ export function secuencia(area, terminar, op = {}) {
       if (i === orden[paso]) { if (++paso === orden.length) { ganado('secuencia'); terminar(true); } }
       else {
         fallos++;
-        if (fallos >= 2) return terminar(false, 'Ve diciendo los colores en voz baja mientras aparecen ("rojo, azul, azul…") e ignora los destellos grises: son ruido del analizador.');
-        msg.textContent = `¡Ups! Ese era el paso ${paso + 1}. Mira otra vez…`; mostrando = true; timers.push(setTimeout(nuevaRonda, 900));
+        if (fallos >= 3) return terminar(false, 'Ve diciendo los colores en voz baja mientras aparecen ("rojo, azul, azul…") e ignora los destellos grises: son ruido del analizador.');
+        msg.textContent = `¡Ups! Ese era el paso ${paso + 1}. Intento ${fallos + 1} de 3: mira otra vez…`; mostrando = true; timers.push(setTimeout(nuevaRonda, 900));
       }
     };
   });

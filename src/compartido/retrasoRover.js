@@ -3,16 +3,16 @@
 // D = retraso de la señal en segundos del juego. Luna: 1,3 s. Marte: 4 a 24 minutos
 //     reales (dato de la NASA) → 1 minuto = 1/4 de segundo en el juego (1 a 6 s).
 // La velocidad se elige para que el rover tarde en llegar a la zona verde
-// 2 × D (lo que ves es de hace D y tu orden tarda D) + 3 a 5 s para reaccionar:
+// 2 × D (lo que ves es de hace D y tu orden tarda D) + 5 a 7 s para reaccionar:
 // así SIEMPRE se puede ganar.
 // lineaEnvio = posición (de lo que VES) en la que conviene enviar la orden.
 // =============================================================
 export function parametrosRetraso(destinoId = 'luna', rng = Math.random) {
   const D = destinoId === 'marte' ? (4 + rng() * 20) / 4 : 1.3;
-  const x0 = 20;
-  const zona = { a: 300, b: 340 };
+  const x0 = 40;
+  const zona = { a: 270, b: 350 }; // zona segura grande (80 px)
   const centro = (zona.a + zona.b) / 2;
-  const v = (zona.a - x0) / (2 * D + 3 + rng() * 2);
+  const v = (zona.a - x0) / (2 * D + 5 + rng() * 2); // lento: 5 a 7 s para reaccionar
   // El rover que ves cruza esta línea 2·D segundos antes de que el real llegue al centro de la zona
   const lineaEnvio = centro - v * 2 * D;
   return { D, v, x0, zona, lineaEnvio };

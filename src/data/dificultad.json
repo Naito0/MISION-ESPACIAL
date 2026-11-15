@@ -62,7 +62,7 @@
       "filtro": { "distractores": 3, "subidaCO2": 2.4 },
       "equilibrio": { "segundos": 12, "cambios": 2, "retardo": 0.6 },
       "huerto": { "plantas": 2, "segundos": 8 },
-      "secuencia": { "largo": 7 },
+      "secuencia": { "largoMin": 5, "largoMax": 6 },
       "unidades": { "rondas": 2 },
       "retraso": { "rondas": 1 },
       "tormenta": { "picosFalsos": 2, "segundos": 2 }
@@ -78,9 +78,9 @@
       "filtro": { "distractores": 5, "subidaCO2": 3.6 },
       "equilibrio": { "segundos": 16, "cambios": 4, "retardo": 1.3 },
       "huerto": { "plantas": 3, "segundos": 10 },
-      "secuencia": { "largo": 7 },
+      "secuencia": { "largoMin": 6, "largoMax": 7 },
       "unidades": { "rondas": 3 },
-      "retraso": { "rondas": 2 },
+      "retraso": { "rondas": 1 },
       "tormenta": { "picosFalsos": 4, "segundos": 3 }
     }
   }

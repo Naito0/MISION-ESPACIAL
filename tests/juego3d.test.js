@@ -364,6 +364,11 @@ test('minijuego "Orden con retraso": siempre se puede ganar, en la Luna y en Mar
       const frena = dondeFrena(p, p.lineaEnvio);
       assert.ok(frena >= p.zona.a && frena <= p.zona.b, `${destino}: enviando en la línea amarilla, el rover frena en la zona verde`);
       if (destino === 'marte') assert.ok(p.D >= 1 && p.D <= 6, 'Marte: 4 a 24 min → 1 a 6 s');
+      // Margen: aunque se envíe medio segundo antes o después de la línea, igual se gana
+      for (const error of [-0.5, 0.5]) {
+        const f2 = dondeFrena(p, p.lineaEnvio + error * p.v);
+        assert.ok(f2 >= p.zona.a && f2 <= p.zona.b, `: con ${error} s de error frena en ${f2.toFixed(0)}`);
+      }
     }
   }
 });
