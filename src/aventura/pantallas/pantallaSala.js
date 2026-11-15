@@ -8,6 +8,7 @@
 // De fondo: los astronautas sobre la plataforma, con el nombre de quien los usa.
 // =============================================================
 import * as THREE from 'three';
+import { camaraPlataforma } from './camaraPlataforma.js';
 import { crearLuces } from '../engine/luces.js';
 import { cielo } from '../engine/decoracion.js';
 import { nuevoEscenario, cilindro, material } from '../engine/construccion.js';
@@ -136,9 +137,7 @@ export function iniciarPantallaSala(ctx) {
 
   return {
     actualizar(dt, t) {
-      const ang = Math.sin(t * 0.15) * 0.5;
-      motor.camara.position.set(Math.sin(ang) * 9, 2.6, Math.cos(ang) * 9);
-      motor.camara.lookAt(0, 1.1, 0);
+      camaraPlataforma(motor.camara, t); // personajes a la izquierda, sin que el panel los tape
       figuras.forEach((f) => f.a && f.a.actualizar(dt, { velocidad: 0, apoyado: true, velocidadVertical: 0, giro: 0 }));
     },
     salir() { panel.remove(); quitarEstado(); quitarRed(); }
