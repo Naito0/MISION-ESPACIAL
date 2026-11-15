@@ -116,7 +116,9 @@ export function equilibrio(area, terminar, op = {}) {
     texto(g, 'O₂', 46, 214, '#fff', 14);
     texto(g, `Tripulación: ${act.nombre}`, 110, 40, '#ffd166', 16);
     texto(g, `Consumo: ${act.consumo.toFixed(1)}`, 110, 75, '#ff9f9f', 18);
-    texto(g, `Producción: ${produccion.toFixed(1)}`, 110, 105, '#9fe0ff', 18);
+    const pedido = Number(ctrl.value);
+    texto(g, `Producción: ${produccion.toFixed(1)} ${Math.abs(pedido - produccion) > 0.2 ? `→ va hacia ${pedido.toFixed(1)}` : ''}`, 110, 105, '#9fe0ff', 18);
+    texto(g, `Consejo: pon la barra en ${act.consumo.toFixed(1)}`, 110, 200, '#c8d2ec', 14);
     texto(g, produccion > act.consumo + 0.4 ? '⬆ sube' : produccion < act.consumo - 0.4 ? '⬇ baja' : '➡ estable', 110, 135, '#fff', 18);
     texto(g, `Zona segura: ${Math.min(meta, enZona).toFixed(1)} / ${meta} s`, 110, 175, '#5be08a', 16);
     if (enZona >= meta) { ganado('equilibrio'); return terminar(true); }

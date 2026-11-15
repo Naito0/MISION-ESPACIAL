@@ -76,7 +76,8 @@ export function fuga(area, terminar, op = {}) {
     g.fillStyle = '#1a2342'; g.fillRect(150, 240, 150, 14);
     g.fillStyle = presion > 75 ? '#3cc46e' : '#e5484d'; g.fillRect(150, 240, 150 * Math.max(0, (presion - 60) / 40), 14);
     texto(g, `Presión ${presion.toFixed(0)}%`, 10, 252, '#fff', 15);
-    texto(g, aviso || 'Sigue a las partículas: ¿hacia dónde se escapa el aire?', 10, 22, '#fff', 15);
+    texto(g, !encontrada ? `Paso 1: haz CLIC donde se juntan las partículas${aviso ? ' (ahí no)' : ''}`
+      : 'Paso 2: MANTÉN apretado el clic (o Espacio) sobre el aro rojo', 10, 22, '#fff', 15);
     if (sellado >= 1) { ganado('fuga', { segundos: tiempo }); return terminar(true); }
     if (presion <= 60) return terminar(false, 'El aire que se escapa ARRASTRA las partículas hacia el agujero. Los ventiladores las empujan hacia afuera: busca el punto al que llegan, no del que salen.');
     id = requestAnimationFrame(cuadro);

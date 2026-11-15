@@ -109,6 +109,14 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Aterrizaje con alarmas */
 #hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
 #hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
+/* ---- Consola: objetivo y controles siempre a la vista ---- */
+#hud .consola-objetivo { font-size: var(--t); color: #ffe9b0; background: rgba(255, 209, 102, 0.12); border-radius: 8px; padding: 6px 10px; margin-bottom: 4px; text-align: left; }
+#hud .consola-controles { font-size: var(--tc); color: #d8e6ff; background: rgba(124, 196, 255, 0.12); border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; text-align: left; }
+/* ---- Modo prueba ---- */
+#hud .prueba { width: min(calc(560px * var(--ancho)), 94vw); max-height: 92vh; overflow-y: auto; }
+#hud .prueba-lista { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+#hud .lobby .prueba-lista button { margin: 0; text-align: left; font-size: var(--tc); }
+#hud .prueba-resultado { font-size: var(--th); text-align: center; margin: 8px 0; }
 /* ---- Menú principal y sala ---- */
 #hud .menu-principal { width: min(calc(440px * var(--ancho)), 92vw); }
 #hud .sala { width: min(calc(480px * var(--ancho)), 94vw); }

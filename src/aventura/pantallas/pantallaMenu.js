@@ -12,6 +12,8 @@ import { nuevoEscenario, cilindro, material } from '../engine/construccion.js';
 import { crearAstronauta } from '../entities/fabricaAstronautas.js';
 import personajes from '../../data/personajes.json';
 import { efecto } from '../audio.js';
+import { MINIJUEGOS, minijuegosActivos, abrirMinijuego } from '../minijuegos/index.js';
+import { TRIPULACION, colorDe, hexDe } from '../tripulacion.js';
 
 const colorNum = (hex) => parseInt(hex.replace('#', ''), 16);
 
@@ -51,7 +53,9 @@ export function iniciarPantallaMenu(ctx) {
       ${vistaUnirse
         ? `<div class="fila"><input id="codigo" maxlength="4" placeholder="CÓDIGO"><button id="entrar">Entrar</button></div>`
         : '<button id="unirse" class="secundario">🔑 Unirse con código</button>'}
+      <button id="prueba" class="secundario">🧪 Modo prueba (minijuegos)</button>
       <p class="error">${error}</p>`;
+    panel.querySelector('#prueba').onclick = () => { efecto('clic'); dibujarPrueba(); };
     const nombre = () => {
       const n = panel.querySelector('#nombre').value.trim() || 'Astronauta';
       nombreGuardado = n;
@@ -74,6 +78,38 @@ export function iniciarPantallaMenu(ctx) {
       if (r && r.error) { efecto('error'); dibujar(r.error, true); }
     };
   }
+  // ---- MODO PRUEBA: abrir cualquier minijuego directo, sin penalización ----
+  let destinoPrueba = 'luna';
+  function dibujarPrueba(resultado = '') {
+    panel.className = 'panel lobby prueba';
+    const lista = minijuegosActivos();
+    panel.innerHTML = `
+      <h1>🧪 Modo prueba</h1>
+      <p class="sub">Abre cualquier minijuego para probarlo. No cuenta para la partida.</p>
+      <div class="fila">
+        <button class="secundario ${destinoPrueba === 'luna' ? 'activo' : ''}" data-destino="luna">🌕 Luna (media)</button>
+        <button class="secundario ${destinoPrueba === 'marte' ? 'activo' : ''}" data-destino="marte">🔴 Marte (difícil)</button>
+      </div>
+      ${resultado ? `<div class="prueba-resultado">${resultado}</div>` : ''}
+      ${TRIPULACION.map((m) => `
+        <h3 style="color:${hexDe(m.rol)}">${m.icono} ${m.corto}</h3>
+        <div class="prueba-lista">${lista.filter((j) => j.rol === m.rol).map((j) => `<button data-mj="${j.id}">${j.nombre}</button>`).join('')}</div>`).join('')}
+      <button class="secundario" id="volver">⬅ Volver al menú</button>`;
+    panel.querySelectorAll('[data-destino]').forEach((b) => { b.onclick = () => { destinoPrueba = b.dataset.destino; dibujarPrueba(); }; });
+    panel.querySelector('#volver').onclick = () => { panel.className = 'panel lobby menu-principal'; dibujar(); };
+    panel.querySelectorAll('[data-mj]').forEach((b) => {
+      b.onclick = () => {
+        const j = MINIJUEGOS[b.dataset.mj];
+        panel.style.display = 'none';
+        const emergencia = { minijuego: b.dataset.mj, nombre: `🧪 ${j.nombre}`, descripcion: j.objetivo, restante: 60 };
+        abrirMinijuego(emergencia, colorDe(j.rol), (r) => {
+          panel.style.display = '';
+          dibujarPrueba(r === true ? `🏆 ¡Ganaste "${j.nombre}"!` : r === false ? `❌ Perdiste "${j.nombre}". ¡Prueba otra vez!` : `Cerraste "${j.nombre}".`);
+        }, destinoPrueba);
+      };
+    });
+  }
+  window.modoPrueba = dibujarPrueba; // para las pruebas automáticas
   dibujar();
 
   return {

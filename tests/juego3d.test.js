@@ -11,6 +11,7 @@ import { resumenDiseno, seleccionVacia } from '../src/compartido/hangar.js';
 const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 import { estrellasMision, nuevosLogros } from '../src/compartido/logros.js';
+import { parametrosRetraso, dondeFrena } from '../src/compartido/retrasoRover.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -338,6 +339,30 @@ test('sala con bots: puestos y personajes sin repetir, listos, y los bots ocupan
   const pj = Object.values(s.personajesPorRol());
   assert.equal(new Set(pj).size, 4);
   assert.equal(s.personajesPorRol().ingeniero, 'kai');
+});
+
+test('minijuego "Orden con retraso": siempre se puede ganar, en la Luna y en Marte', () => {
+  for (const destino of ['luna', 'marte']) {
+    for (let i = 0; i <= 20; i++) {
+      // Recorre los extremos del azar: retraso mínimo y máximo, rover rápido y lento
+      const valores = [i / 20, (i * 7 % 21) / 20];
+      let k = 0;
+      const p = parametrosRetraso(destino, () => valores[k++ % 2]);
+      assert.ok(p.lineaEnvio > p.x0 + 10, `${destino}: la línea amarilla tiene que estar después de la salida`);
+      const frena = dondeFrena(p, p.lineaEnvio);
+      assert.ok(frena >= p.zona.a && frena <= p.zona.b, `${destino}: enviando en la línea amarilla, el rover frena en la zona verde`);
+      if (destino === 'marte') assert.ok(p.D >= 1 && p.D <= 6, 'Marte: 4 a 24 min → 1 a 6 s');
+    }
+  }
+});
+
+test('minijuegos: cada emergencia usa un minijuego que existe y tiene objetivo/controles', () => {
+  const src = readFileSync(new URL('../src/aventura/minijuegos/index.js', import.meta.url), 'utf8');
+  const usados = new Set(JSON.stringify(EMERG).match(/"minijuego":"(\w+)"/g).map((s) => s.match(/"(\w+)"$/)[1]));
+  assert.ok(usados.size >= 8);
+  for (const id of usados) {
+    assert.match(src, new RegExp(`\\b${id}: \\{ fn: ${id}, rol: '\\w+', nombre: '[^']+',\\s*objetivo: '[^']+',\\s*controles: '[^']+',\\s*gana: '[^']+'`), `falta "${id}" con sus textos`);
+  }
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {

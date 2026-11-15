@@ -9,6 +9,7 @@
 // op = valores del destino (dificultad.json → minijuegosPorDestino).
 // =============================================================
 import { lienzo, mezclar, azar, texto, teclas } from './base.js';
+import { parametrosRetraso } from '../../compartido/retrasoRover.js';
 
 const ganado = (id, datos = {}) => window.dispatchEvent(new CustomEvent('minijuego-ganado', { detail: { id, ...datos } }));
 
@@ -64,7 +65,7 @@ export function unidades(area, terminar, op = {}) {
  * RETRASO — controlas un rover desde la Tierra. Lo que ves en tu pantalla pasó hace
  * unos segundos, y tu orden tarda lo mismo en llegar. Pulsa ESPACIO (o el botón) para
  * enviar "¡Frena!" con anticipación: el rover debe frenar en la zona verde, antes del cráter.
- * Luna: ~1,3 s. Marte: entre 4 y 24 minutos (en el juego, 1 minuto = 1/3 de segundo).
+ * Luna: ~1,3 s. Marte: entre 4 y 24 minutos (en el juego, 1 minuto = 1/4 de segundo).
  */
 export function retraso(area, terminar, op = {}) {
   const destinoId = op.destinoId || 'luna';
@@ -75,13 +76,10 @@ export function retraso(area, terminar, op = {}) {
   boton.textContent = '📡 Enviar "¡Frena!" (Espacio)';
   area.appendChild(boton);
   let ronda = 0;
-  let D; let v; let x0; let t; let enviada; let llegada; let paradoEn; let zona;
+  let D; let v; let x0; let t; let enviada; let llegada; let paradoEn; let zona; let lineaEnvio;
   function nueva() {
-    // Retraso de la señal (ida). Marte: 4 a 24 min → 1,3 a 8 s en el juego
-    D = destinoId === 'marte' ? azar(4, 24) / 3 : 1.3;
-    v = azar(28, 40);
-    x0 = 20; t = 0; enviada = null; llegada = null; paradoEn = null;
-    zona = { a: 300, b: 340 };
+    ({ D, v, x0, zona, lineaEnvio } = parametrosRetraso(destinoId));
+    t = 0; enviada = null; llegada = null; paradoEn = null;
   }
   nueva();
   const posReal = (tt) => { const tope = paradoEn ?? Infinity; return x0 + v * Math.min(tt, tope); };
@@ -101,6 +99,10 @@ export function retraso(area, terminar, op = {}) {
     g.fillStyle = '#c47a4a'; g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = 'rgba(60,196,110,0.6)'; g.fillRect(zona.a, 120, zona.b - zona.a, 40);
     g.fillStyle = '#3a1a0a'; g.fillRect(350, 115, 70, 60); texto(g, 'Cráter', 357, 190, '#fff', 13);
+    // Línea amarilla: cuando el rover QUE VES la cruza, es el momento de enviar la orden
+    g.strokeStyle = '#ffd166'; g.lineWidth = 3; g.setLineDash([6, 5]);
+    g.beginPath(); g.moveTo(lineaEnvio, 95); g.lineTo(lineaEnvio, 170); g.stroke(); g.setLineDash([]);
+    texto(g, 'Enviar aquí', lineaEnvio - 30, 90, '#ffd166', 12);
     g.fillStyle = '#dfe6f5'; g.fillRect(visto - 14, 128, 28, 18); g.fillStyle = '#333'; g.beginPath(); g.arc(visto - 8, 148, 5, 0, 7); g.arc(visto + 8, 148, 5, 0, 7); g.fill();
     if (enviada !== null && t < llegada) { const f = (t - enviada) / D; texto(g, '📡', 30 + f * 340, 60, '#fff', 22); }
     texto(g, `Lo que ves pasó hace ${D.toFixed(1)} s · tu orden tarda ${D.toFixed(1)} s en llegar`, 10, 22, '#fff', 14);
@@ -159,10 +161,15 @@ export function tormenta(area, terminar, op = {}) {
     // Antena: dial de orientación
     g.save(); g.translate(370, 90); g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 32, Math.PI, 0); g.stroke();
     g.rotate((ang - 90) * Math.PI / 180); g.strokeStyle = '#ff9fdc'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 0); g.lineTo(30, 0); g.stroke(); g.restore();
+    // Paso 1 visible: qué tan alineada está la antena (al 100% el pico verdadero es el más alto)
+    const alineacion = Math.max(0, Math.cos((ang - angReal) * Math.PI / 180 * 1.5));
+    const alineada = alineacion > 0.95;
     texto(g, 'Antena (← →)', 325, 140, '#fff', 13);
+    texto(g, alineada ? '✅ alineada' : `${Math.round(alineacion * 100)}%`, 335, 160, alineada ? '#5be08a' : '#ffd166', 15);
     g.fillStyle = '#1a2342'; g.fillRect(20, 210, 380, 14);
     g.fillStyle = senal > 0.85 ? '#5be08a' : '#f2c14e'; g.fillRect(20, 210, 380 * Math.max(0, Math.min(1, senal)), 14);
-    texto(g, senal > 0.85 ? `¡Señal clara! ${Math.max(0, meta - fuerte).toFixed(1)} s` : 'Busca un pico… ¿es el verdadero? Alinea la antena y fíjate si crece', 20, 24, '#fff', 14);
+    texto(g, senal > 0.85 ? `¡Señal clara! ${Math.max(0, meta - fuerte).toFixed(1)} s`
+      : alineada ? 'Paso 2: ↑ ↓ hasta el pico más alto' : 'Paso 1: gira la antena con ← → hasta "alineada"', 20, 24, '#fff', 15);
     if (fuerte >= meta) { ganado('tormenta'); return terminar(true); }
     if (tiempo > 45) return terminar(false, 'Los picos falsos nunca pasan de la mitad. El verdadero crece cuando ALINEAS la antena: primero gira la antena hasta que un pico suba, después ajusta la frecuencia.');
     id = requestAnimationFrame(cuadro);

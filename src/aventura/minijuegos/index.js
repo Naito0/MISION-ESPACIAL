@@ -2,7 +2,13 @@
 // Registro de los minijuegos. El campo "minijuego" de cada emergencia
 // (emergencias3d.json) usa estos nombres. Los pasos de cada uno dependen
 // del DESTINO (dificultad.json → minijuegosPorDestino: Luna media, Marte difícil).
-// "demo" = la animación de 3 segundos que se ve la primera vez.
+//
+// Cada minijuego tiene 3 textos que se ven SIEMPRE en la consola:
+//   objetivo  🎯 qué tienes que lograr
+//   controles 🎮 qué teclas o clics usar
+//   gana      🏆 cómo ganas
+// "rol" sirve para el Modo prueba y para PRUEBAS.md.
+// "activo: false" desactiva un minijuego (sin borrarlo) si no funciona bien.
 // =============================================================
 import { abrirConsola } from './base.js';
 import { esquivar, rumbo } from './comandante.js';
@@ -12,50 +18,89 @@ import { unidades, retraso, tormenta } from './comunicaciones.js';
 import configDificultad from '../../data/dificultad.json';
 
 export const MINIJUEGOS = {
-  esquivar: { fn: esquivar, inst: 'Mueve la mira con las flechas. Esquiva la BASURA gris y los MICROMETEORITOS naranjas que crecen delante de ti; las estrellas no hacen daño.',
-    demo: { teclas: ['↑', '↓', '←', '→'], texto: 'Si algo gris o naranja crece justo en tu mira, muévete.' } },
-  rumbo: { fn: rumbo, inst: 'Gira con ← → hasta que la línea punteada pase por el planeta y mantenla. Cada corrección gasta combustible.',
-    demo: { teclas: ['←', '→'], texto: 'Giros cortos: espera a ver hacia dónde va la línea.' } },
-  fuga: { fn: fuga, inst: 'Las partículas flotan HACIA la fuga. Haz clic donde está el agujero y mantén apretado para sellarlo.',
-    demo: { teclas: ['🖱 clic', 'mantener'], texto: 'Los ventiladores empujan partículas hacia afuera: no te confundas.' } },
-  interruptores: { fn: interruptores, inst: 'Cada interruptor alimenta 2 sistemas. Reinicia SOLO el que alimenta sistemas apagados (en rojo).',
-    demo: { teclas: ['🖱 clic'], texto: 'Espera a que los paneles se calmen y lee qué sistemas están en rojo.' } },
-  paneles: { fn: paneles, inst: 'Pasa el mouse sobre los paneles para limpiarlos. Elige uno (clic o 1-4) y gíralo con ← → hacia el Sol.',
-    demo: { teclas: ['🖱 limpiar', '←', '→'], texto: 'Energía = panel limpio + mirando al Sol.' } },
-  deslizadores: { fn: deslizadores, inst: 'Lleva cada barra a su marca amarilla y pulsa Confirmar.' },
-  filtro: { fn: filtro, inst: 'El filtro es cuadrado y la entrada redonda. Elige un objeto y después el paso donde va.',
-    demo: { teclas: ['🖱 objeto', '🖱 paso'], texto: 'Necesitas algo para dar forma, algo para cubrir y algo para sellar.' } },
-  equilibrio: { fn: equilibrio, inst: 'Ajusta la producción (barra o ↑ ↓) para que sea igual al consumo de la tripulación y el O₂ quede en verde.',
-    demo: { teclas: ['↑', '↓'], texto: 'La producción tarda en cambiar: anticípate.' } },
-  huerto: { fn: huerto, inst: 'Elige cada planta y pon su luz y su agua en la zona verde hasta que crezca.',
-    demo: { teclas: ['🖱 planta', '🖱 barras'], texto: 'Cada planta necesita algo distinto; demasiada agua las ahoga.' } },
-  secuencia: { fn: secuencia, inst: 'Mira la secuencia de colores del analizador y repítela. Los destellos grises no cuentan.',
-    demo: { teclas: ['🖱 colores'], texto: 'Dila en voz baja: "rojo, azul, azul…"' } },
-  unidades: { fn: unidades, inst: 'La nave usa el sistema métrico. Convierte los valores en sistema inglés antes de enviar (¡y no conviertas los que ya son métricos!).',
-    demo: { teclas: ['🖱 elegir'], texto: 'Mira la unidad de cada orden antes de responder.' } },
-  retraso: { fn: retraso, inst: 'Lo que ves ya pasó y tu orden tarda en llegar: envía "¡Frena!" con anticipación para que el rover pare en la zona verde.',
-    demo: { teclas: ['Espacio'], texto: 'Envía la orden cuando el rover todavía está lejos.' } },
-  tormenta: { fn: tormenta, inst: 'Alinea la antena (← →) y busca la frecuencia (↑ ↓). Solo el pico verdadero se vuelve fuerte con la antena alineada.',
-    demo: { teclas: ['←', '→', '↑', '↓'], texto: 'Primero gira la antena hasta que un pico crezca.' } }
+  esquivar: { fn: esquivar, rol: 'comandante', nombre: 'Esquivar basura espacial',
+    objetivo: 'Que no te choquen los objetos marcados con aro rojo.',
+    controles: 'Flechas ← → ↑ ↓ (o WASD) mueven la mira verde.',
+    gana: 'Aguantas hasta que el reloj llega a 0.' },
+  rumbo: { fn: rumbo, rol: 'comandante', nombre: 'Corregir el rumbo',
+    objetivo: 'Que la línea punteada pase por el planeta.',
+    controles: '← → giran la nave. Cada giro gasta combustible; la nave se desvía sola.',
+    gana: 'La línea queda sobre el planeta unos segundos (se pone verde).' },
+  fuga: { fn: fuga, rol: 'ingeniero', nombre: 'Cazar la fuga de aire',
+    objetivo: 'Encontrar y sellar la fuga antes de que la presión llegue a 60%.',
+    controles: 'Paso 1: clic donde se juntan las partículas. Paso 2: mantén el clic (o Espacio) sobre el aro rojo.',
+    gana: 'La barra amarilla del sellado se llena.' },
+  interruptores: { fn: interruptores, rol: 'ingeniero', nombre: 'Apagón: interruptores',
+    objetivo: 'Reiniciar el interruptor cuyos 2 sistemas están en ROJO.',
+    controles: 'Clic en un interruptor. Tienes 3 intentos.',
+    gana: 'Todos los sistemas vuelven a verde.' },
+  paneles: { fn: paneles, rol: 'ingeniero', nombre: 'Paneles con polvo',
+    objetivo: 'Llenar la batería antes de que se vacíe.',
+    controles: 'Pasa el mouse sobre un panel para limpiarlo. Clic (o 1-4) para elegir un panel y ← → para girarlo hacia el Sol.',
+    gana: 'La batería llega a 100%.' },
+  deslizadores: { fn: deslizadores, rol: 'ingeniero', nombre: 'Estabilizar el motor',
+    objetivo: 'Poner cada barra sobre su marca amarilla.',
+    controles: 'Arrastra cada barra con el mouse y pulsa "Confirmar".',
+    gana: 'Todas las barras quedan sobre su marca al confirmar.' },
+  filtro: { fn: filtro, rol: 'cientifico', nombre: 'Filtro improvisado (Apolo 13)',
+    objetivo: 'Armar el adaptador antes de que el CO₂ llegue a 100%.',
+    controles: 'Clic en un objeto y después clic en el paso donde va.',
+    gana: 'Los 3 pasos quedan con ✅.' },
+  equilibrio: { fn: equilibrio, rol: 'cientifico', nombre: 'Equilibrar el oxígeno',
+    objetivo: 'Que la PRODUCCIÓN sea igual al CONSUMO para que el O₂ quede en verde.',
+    controles: 'Barra de abajo o ↑ ↓. La producción tarda un poco en cambiar.',
+    gana: 'El O₂ se queda en la zona verde el tiempo pedido.' },
+  huerto: { fn: huerto, rol: 'cientifico', nombre: 'Huerto espacial',
+    objetivo: 'Que cada planta crezca hasta 100%.',
+    controles: 'Clic en una planta y pon sus barras de luz y agua en la zona verde.',
+    gana: 'Todas las plantas llegan a ✅.' },
+  secuencia: { fn: secuencia, rol: 'cientifico', nombre: 'Analizar una muestra',
+    objetivo: 'Repetir la secuencia de colores del analizador.',
+    controles: 'Mira los colores y después haz clic en el mismo orden. Los destellos grises no cuentan.',
+    gana: 'Repites toda la secuencia sin errores.' },
+  unidades: { fn: unidades, rol: 'comunicaciones', nombre: 'Unidades mezcladas',
+    objetivo: 'Enviar cada orden en el sistema MÉTRICO.',
+    controles: 'Lee la unidad de la orden y haz clic en el valor correcto.',
+    gana: 'Envías bien todas las órdenes.' },
+  retraso: { fn: retraso, rol: 'comunicaciones', nombre: 'Orden con retraso',
+    objetivo: 'Que el rover frene en la zona verde, antes del cráter.',
+    controles: 'Espacio (o el botón) envía "¡Frena!". Envíala cuando el rover cruce la línea amarilla.',
+    gana: 'El rover se detiene dentro de la zona verde.' },
+  tormenta: { fn: tormenta, rol: 'comunicaciones', nombre: 'Contacto perdido',
+    objetivo: 'Recuperar una señal fuerte y mantenerla.',
+    controles: 'Paso 1: ← → giran la antena hasta que diga "alineada". Paso 2: ↑ ↓ mueven la frecuencia hasta el pico más alto.',
+    gana: 'La barra de señal se pone verde el tiempo pedido.' }
 };
+
+/** Minijuegos activos (los desactivados no se usan en emergencias ni en el Modo prueba). */
+export const minijuegosActivos = () => Object.entries(MINIJUEGOS).filter(([, m]) => m.activo !== false).map(([id, m]) => ({ id, ...m }));
 
 /**
  * Abre el minijuego de una emergencia. alTerminar(resultado): true, false o null (cerrado).
  * destinoId elige los valores: Luna (media) o Marte (difícil).
+ * o = { extraTiempo: 1.5 } para dar tiempo extra (primer intento, Modo prueba).
  */
-export function abrirMinijuego(emergencia, colorHex, alTerminar, destinoId = 'luna') {
-  const m = MINIJUEGOS[emergencia.minijuego];
+export function abrirMinijuego(emergencia, colorHex, alTerminar, destinoId = 'luna', o = {}) {
+  let m = MINIJUEGOS[emergencia.minijuego];
+  // Si este minijuego está desactivado, se usa otro del MISMO rol que funcione
+  if (m.activo === false) {
+    const reemplazo = minijuegosActivos().find((x) => x.rol === m.rol);
+    emergencia = { ...emergencia, minijuego: reemplazo.id };
+    m = MINIJUEGOS[reemplazo.id];
+  }
   const valores = configDificultad.minijuegosPorDestino[destinoId] || configDificultad.minijuegosPorDestino.luna;
   const opciones = { ...(valores[emergencia.minijuego] || {}), destinoId };
   return abrirConsola({
     id: emergencia.minijuego,
     titulo: emergencia.nombre,
-    instrucciones: `${emergencia.descripcion}<br><b>${m.inst}</b>`,
+    instrucciones: emergencia.descripcion,
+    objetivo: m.objetivo,
+    controles: m.controles,
+    gana: m.gana,
     color: `#${colorHex.toString(16).padStart(6, '0')}`,
-    segundos: Math.max(20, emergencia.restante),
+    segundos: Math.max(20, emergencia.restante) * (o.extraTiempo ?? 1),
     iniciar: m.fn,
     opciones,
-    demo: m.demo,
     alTerminar
   });
 }

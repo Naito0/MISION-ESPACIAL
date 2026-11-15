@@ -62,6 +62,11 @@ export function esquivar(area, terminar, op = {}) {
         else { g.fillRect(-r * 0.3, -r, r * 0.6, r * 2); g.fillRect(-r, -r * 0.2, r * 2, r * 0.4); }
         g.restore();
       }
+      // Aro rojo: este objeto VA A CHOCAR si la mira se queda donde está
+      const rFinal = (o.meteorito ? 6 : 11) * 2.4;
+      if (o.z > 0.25 && Math.hypot(o.tx - nx, o.ty - ny) < rFinal + 18) {
+        g.strokeStyle = '#ff3b3b'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, r + 6, 0, 7); g.stroke();
+      }
       if (o.z >= 1) {
         objetos.splice(objetos.indexOf(o), 1);
         if (Math.hypot(x - nx, y - ny) < r + 18) {
@@ -132,6 +137,7 @@ export function rumbo(area, terminar, op = {}) {
     g.fillStyle = combustible / total > 0.3 ? '#ffd166' : '#e5484d'; g.fillRect(12, 232, 180 * combustible / total, 14);
     texto(g, '⛽ Combustible', 200, 244, '#fff', 14);
     texto(g, acierta ? `¡En rumbo! ${Math.max(0, meta - alineado).toFixed(1)} s` : 'Apunta la línea al planeta', 12, 24, acierta ? '#5be08a' : '#fff', 17);
+    texto(g, `La nave se desvía sola ${deriva > 0 ? '↻' : '↺'}: corrige con toques cortos`, 12, 46, '#ffd166', 13);
     if (alineado >= meta) return terminar(true);
     if (combustible <= 0 && !acierta) return terminar(false, 'Te quedaste sin combustible. Cada corrección gasta: haz giros cortos y espera a ver hacia dónde va la línea antes de corregir otra vez.');
     id = requestAnimationFrame(cuadro);

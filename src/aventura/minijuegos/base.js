@@ -17,7 +17,10 @@ export function abrirConsola(o) {
   capa.innerHTML = `
     <div class="consola panel" style="border-color:${o.color}">
       <div class="consola-cab" style="color:${o.color}">🛠 ${o.titulo}</div>
-      <div class="consola-inst">${o.instrucciones}</div>
+      ${o.objetivo
+        ? `<div class="consola-objetivo">🎯 <b>${o.objetivo}</b></div>
+           <div class="consola-controles">🎮 ${o.controles}</div>`
+        : `<div class="consola-inst">${o.instrucciones}</div>`}
       <div class="consola-area"></div>
       <div class="consola-tiempo"><div style="background:${o.color}"></div></div>
       <button class="consola-cerrar">Cerrar (Esc)</button>
