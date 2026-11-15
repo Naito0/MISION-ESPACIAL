@@ -6,6 +6,7 @@
 // Además: marca "!" flotante sobre cada consola con una emergencia.
 // =============================================================
 import * as THREE from 'three';
+import { texturaPunto } from '../engine/decoracion.js';
 
 function texturaSigno(texto, color) {
   const c = document.createElement('canvas');
@@ -49,7 +50,7 @@ export function crearEfectosViaje(escena, esc, luces, camara, conParticulas) {
     const geo = new THREE.BufferGeometry();
     const arr = new Float32Array(n * 3);
     geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    const vapor = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xe8f0ff, size: 0.35, transparent: true, opacity: 0.55, depthWrite: false }));
+    const vapor = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xe8f0ff, size: 0.35, transparent: true, opacity: 0.55, depthWrite: false, map: texturaPunto(), sizeAttenuation: true }));
     vapor.visible = false;
     escena.add(vapor);
     const semillas = Array.from({ length: n }, () => Math.random());

@@ -20,6 +20,7 @@ import { crearAstronautasFondo } from '../entities/astronautasFondo.js';
 import { colorDe } from '../tripulacion.js';
 import hechosJSON from '../../data/hechos_reales.json';
 import { aviso } from '../ui/avisos.js';
+import { texturaPunto } from '../engine/decoracion.js';
 
 const HECHOS = hechosJSON.hechos;
 
@@ -73,7 +74,7 @@ export function iniciarPantallaSuperficie(ctx) {
   // delante de la cámara, que llenaban la pantalla de gris y mareaban). Ahora son pocas,
   // chicas, casi transparentes y salen solo junto a la escotilla.
   const vapor = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(20 * 3), 3)),
-    new THREE.PointsMaterial({ color: 0xdfefff, size: 0.12, transparent: true, opacity: 0.25, depthWrite: false }));
+    new THREE.PointsMaterial({ color: 0xdfefff, size: 0.12, transparent: true, opacity: 0.25, depthWrite: false, map: texturaPunto(), sizeAttenuation: true }));
   vapor.visible = false;
   escena.add(vapor);
   const semillasVapor = Array.from({ length: 20 }, () => [Math.random() * 6.28, Math.random()]);

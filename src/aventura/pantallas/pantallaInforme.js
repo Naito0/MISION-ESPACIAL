@@ -25,6 +25,7 @@ import preguntasJSON from '../../data/preguntas.json';
 import { LOGROS, CONFIG_ESTRELLAS } from '../logros.js';
 import componentes from '../../data/componentes.json';
 import configHangar from '../../data/hangar3d.json';
+import { texturaPunto } from '../engine/decoracion.js';
 
 const CATALOGO = crearCatalogo(componentes, configHangar);
 
@@ -79,7 +80,7 @@ export function iniciarPantallaInforme(ctx) {
     const n = 60;
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
-    humo = { puntos: new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x777777, size: 0.35, transparent: true, opacity: 0.3, depthWrite: false })), semillas: Array.from({ length: n }, () => Math.random()) };
+    humo = { puntos: new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x777777, size: 0.35, transparent: true, opacity: 0.3, depthWrite: false, map: texturaPunto(), sizeAttenuation: true })), semillas: Array.from({ length: n }, () => Math.random()) };
     escena.add(humo.puntos);
   }
   motor.cambiarEscena(escena);

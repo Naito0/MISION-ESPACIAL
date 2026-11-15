@@ -120,7 +120,7 @@ export function crearSuperficie(destino, o = {}) {
 
   // Polvo que vuela (solo Marte)
   // Polvo de Marte: pocas partículas, lentas y tenues (antes 260 rápidas: mareaban)
-  const polvo = marte ? particulas(esc, { cantidad: o.particulas === false ? 40 : 110, centro: new THREE.Vector3(0, 3, 0), tamano: new THREE.Vector3(70, 6, 70), velocidad: 0.6, color: 0xe0a070, tam: 0.1, opacidad: 0.3 }) : null;
+  const polvo = marte && o.particulas !== false ? particulas(esc, { cantidad: 110, centro: new THREE.Vector3(0, 3, 0), tamano: new THREE.Vector3(70, 6, 70), velocidad: 0.6, color: 0xe0a070, tam: 0.1, opacidad: 0.3 }) : null;
 
   // Módulo de aterrizaje (sólido) y mesa de laboratorio a su lado
   const modulo = crearModulo();

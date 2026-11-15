@@ -128,7 +128,7 @@ export function cielo(esc, cantidad = 1500, radio = 180) {
   [0, 1].forEach((capa) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos.slice(capa * Math.floor(cantidad / 2) * 3, (capa + 1) * Math.floor(cantidad / 2) * 3), 3));
-    const m = new THREE.PointsMaterial({ color: 0xffffff, size: 0.9, sizeAttenuation: true, fog: false, transparent: true });
+    const m = new THREE.PointsMaterial({ color: 0xffffff, size: 0.9, sizeAttenuation: true, fog: false, transparent: true, map: texturaPunto(), alphaTest: 0.02 }); // estrellas redondas
     const capaPts = new THREE.Points(g, m);
     capaPts.onBeforeRender = () => { m.opacity = 0.7 + 0.3 * Math.sin(performance.now() / 1000 * (0.9 + capa * 0.4) + capa * 2); };
     esc.visual.add(capaPts);
@@ -141,8 +141,25 @@ export function cielo(esc, cantidad = 1500, radio = 180) {
  * Partículas que flotan en una caja (polvo) o que saltan (chispas).
  * Devuelve { puntos, actualizar(dt) }.
  */
+/**
+ * Textura de un punto REDONDO y suave (degradado), compartida por todas las partículas.
+ * Sin esto, los puntos se dibujan como cuadrados.
+ */
+let _punto = null;
+export function texturaPunto() {
+  if (!_punto) {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.4, 'rgba(255,255,255,0.6)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
+    _punto = new THREE.CanvasTexture(c);
+  }
+  return _punto;
+}
+
 export function particulas(esc, o) {
-  const n = o.cantidad ?? 120;
+  const n = Math.round((o.cantidad ?? 120) * 0.5); // pocas
   const pos = new Float32Array(n * 3);
   const vel = new Float32Array(n * 3);
   const reiniciar = (i) => {
@@ -158,7 +175,8 @@ export function particulas(esc, o) {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const puntos = new THREE.Points(g, new THREE.PointsMaterial({
-    color: o.color ?? 0xbfd8ff, size: o.tam ?? 0.05, transparent: true, opacity: o.opacidad ?? 0.6, depthWrite: false
+    color: o.color ?? 0xbfd8ff, size: o.tam ?? 0.05, transparent: true, opacity: o.opacidad ?? 0.6, depthWrite: false,
+    map: texturaPunto(), sizeAttenuation: true, alphaTest: 0.02 // redondas, suaves y más chicas a lo lejos
   }));
   esc.visual.add(puntos);
   return {
