@@ -423,3 +423,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Empujón: indicador de recarga (abajo a la derecha, pequeño) */
 #hud .recarga-empujon { position: absolute; right: 12px; bottom: 64px; padding: 4px 10px; font-size: 14px; border-radius: 12px; background: rgba(8, 14, 32, 0.78); color: #c8d2ec; }
 #hud .recarga-empujon.lista { color: #b8f5cc; border-color: rgba(91, 224, 138, 0.6); }
+
+/* Cuadros de la pared: tarjeta compacta */
+#hud .tarjeta-modal.cuadro { width: min(420px, 92vw); text-align: center; }
+#hud .cuadro-numero { font-size: 34px; font-weight: bold; color: #ffd166; margin: 6px 0 8px; }
+#hud .cuadro-linea { font-size: var(--t); margin: 6px 0; }
+#hud .cuadro-fuente { display: block; color: #9fb0d0; margin: 8px 0; }

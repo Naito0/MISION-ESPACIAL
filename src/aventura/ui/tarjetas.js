@@ -16,9 +16,9 @@ let cadena = Promise.resolve(); // fila: cada tarjeta espera a la anterior
 const dominio = (url) => { try { return new URL(url).hostname; } catch { return url || ''; } };
 
 /** Crea el fondo oscuro y la caja; devuelve { capa, caja, cerrar }. */
-function modal(clase) {
+function modal(clase, { sinPausa = false } = {}) {
   if (document.pointerLockElement) { window.consolaAbierta = true; document.exitPointerLock(); }
-  const soltar = pausar(`tarjeta-${clase}`);
+  const soltar = sinPausa ? () => {} : pausar(`tarjeta-${clase}`); // en multijugador no se pausa nada
   const capa = document.createElement('div');
   capa.className = 'consola-capa capa-tarjeta';
   const caja = document.createElement('div');
@@ -30,6 +30,31 @@ function modal(clase) {
     capa, caja,
     cerrar() { capa.remove(); window.consolaAbierta = false; soltar(); }
   };
+}
+
+/**
+ * Cuadro de la pared (cuadros.json): tarjeta compacta con título, un número destacado,
+ * 2 o 3 líneas y la fuente. En un jugador pausa; en multijugador (sinPausa) no pausa nada.
+ */
+export function mostrarCuadro(c, { sinPausa = false } = {}) {
+  cadena = cadena.then(() => new Promise((listo) => {
+    const m = modal('cuadro', { sinPausa });
+    m.caja.innerHTML = `
+      <div class="tm-etiqueta">🖼 Cuadro de la nave · ${c.sala}</div>
+      <h3>${c.titulo}</h3>
+      <div class="cuadro-numero">${c.numero}</div>
+      ${c.lineas.map((l) => `<p class="cuadro-linea">${l}</p>`).join('')}
+      <small class="cuadro-fuente">Fuente: ${dominio(c.fuente)}${c.verificar ? ' · ⚠ por verificar' : ''}</small>
+      <button class="boton tm-ok">¡Entendido!</button>`;
+    efecto('clic');
+    const ok = m.caja.querySelector('.tm-ok');
+    ok.focus();
+    const cerrar = () => { window.removeEventListener('keydown', tecla, true); m.cerrar(); listo(); };
+    const tecla = (e) => { if (e.key === 'Escape' || e.code === 'KeyE') { e.stopPropagation(); cerrar(); } };
+    setTimeout(() => window.addEventListener('keydown', tecla, true), 200);
+    ok.onclick = cerrar;
+  }));
+  return cadena;
 }
 
 /**

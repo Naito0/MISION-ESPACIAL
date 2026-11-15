@@ -39,6 +39,7 @@ export function cumple(logro, m) {
     case 'minijuego': return !!m.minijuego && m.minijuego.id === c.id && (c.segundosMax === undefined || m.minijuego.segundos < c.segundosMax);
     case 'preguntas': return (m.aciertos ?? 0) >= c.aciertos;
     case 'coleccion': return m.totalConceptos > 0 && m.aprendidos >= m.totalConceptos;
+    case 'cuadros': return (m.totalCuadros ?? 0) > 0 && (m.cuadrosLeidos ?? 0) >= m.totalCuadros;
     default: return false;
   }
 }

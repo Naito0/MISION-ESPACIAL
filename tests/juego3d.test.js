@@ -535,6 +535,37 @@ test('empujón: lo valida la sala (solo en la nave, 4 s de espera, inmunidad y n
   assert.ok(s.accion('a', 'golpe', { rol: 'nadie' }).error);
 });
 
+test('cuadros de la pared: 2 o 3 por sala, cada dato coincide con su JSON, y la medalla Curioso', () => {
+  const C = leerJSON('cuadros.json').cuadros;
+  const archivos = { 'destinos.json': leerJSON('destinos.json'), 'hechos_reales.json': leerJSON('hechos_reales.json'), 'aprendizaje.json': leerJSON('aprendizaje.json') };
+  const leer = (archivo, ruta) => {
+    const partes = ruta.split('.');
+    let x = archivos[archivo];
+    if (archivo === 'destinos.json') { const id = partes.shift(); x = x.destinos.find((d) => d.id === id); }
+    if (archivo === 'aprendizaje.json') { const id = partes.shift(); x = x.conceptos.find((d) => d.id === id); }
+    for (const k of partes) x = x[k];
+    return x;
+  };
+  const porSala = {};
+  for (const c of C) {
+    porSala[c.sala] = (porSala[c.sala] || 0) + 1;
+    assert.ok(c.lineas.length >= 2 && c.lineas.length <= 3, c.id);
+    assert.ok(c.titulo && c.numero && c.fuente && c.pos, c.id);
+    for (const d of c.dato || []) {
+      const v = leer(d.archivo, d.ruta);
+      assert.ok(v !== undefined, `${c.id}: no existe ${d.ruta}`);
+      if (d.valor !== undefined) assert.equal(v, d.valor, `${c.id}: ${d.ruta}`);
+      if (d.contiene) assert.ok(String(v).includes(d.contiene), `${c.id}: "${d.contiene}" no está en ${d.ruta}`);
+    }
+    // Sin "dato" de los JSON del juego, tiene que estar marcado para verificar
+    if (!c.dato) assert.ok(c.verificar, `${c.id}: sin dato de un JSON y sin "verificar"`);
+  }
+  for (const sala of ['Cabina', 'Ingeniería', 'Laboratorio', 'Comunicaciones']) assert.ok(porSala[sala] >= 2 && porSala[sala] <= 3, `${sala}: ${porSala[sala]}`);
+  const L = leerJSON('logros.json').logros;
+  assert.ok(nuevosLogros({ cuadrosLeidos: C.length, totalCuadros: C.length }, L).includes('curioso'));
+  assert.ok(!nuevosLogros({ cuadrosLeidos: C.length - 1, totalCuadros: C.length }, L).includes('curioso'));
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

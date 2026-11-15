@@ -1,0 +1,84 @@
+{
+  "_comentario": "Cuadros informativos colgados en las paredes de la nave (E: Leer). Los datos salen de destinos.json, aprendizaje.json y hechos_reales.json; 'dato' dice de dónde y la prueba automática lo comprueba. 'verificar' = falta confirmar algo (no se inventa nada). 'pos' = lugar en la pared (x, z) y 'rot' hacia dónde mira el cuadro. 'dibujo' = el dibujo simple hecho con código.",
+  "cuadros": [
+    {
+      "id": "gravedad", "sala": "Cabina", "titulo": "Gravedad: Luna y Marte", "numero": "1,62 · 3,71 m/s²", "dibujo": "planetas",
+      "lineas": ["En la Luna la gravedad es de 1,62 m/s²; en Marte, de 3,71 m/s².", "En la Tierra es de 9,81 m/s²: allá arriba saltarías mucho más alto."],
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+      "dato": [{ "archivo": "destinos.json", "ruta": "luna.gravedad", "valor": 1.62 }, { "archivo": "destinos.json", "ruta": "marte.gravedad", "valor": 3.71 }, { "archivo": "destinos.json", "ruta": "tierra.gravedad", "valor": 9.81 }],
+      "pos": { "x": -5.83, "z": -32.5, "rot": 1.5708 }
+    },
+    {
+      "id": "senal", "sala": "Cabina", "titulo": "Lo que tarda la señal", "numero": "1,3 s · 4–24 min", "dibujo": "onda",
+      "lineas": ["Desde la Luna, un mensaje tarda unos 1,3 segundos en llegar.", "Desde Marte tarda entre unos 4 y 24 minutos: no se puede manejar en vivo."],
+      "fuente": "https://www.nasa.gov/missions/tech-demonstration/space-communications-7-things-you-need-to-know/",
+      "dato": [{ "archivo": "destinos.json", "ruta": "luna.armado.fuenteRetraso", "contiene": "1,3 segundos" }, { "archivo": "destinos.json", "ruta": "marte.armado.retrasoMinSeg", "valor": 240 }, { "archivo": "destinos.json", "ruta": "marte.armado.retrasoMaxSeg", "valor": 1440 }],
+      "pos": { "x": 5.83, "z": -31, "rot": -1.5708 }
+    },
+    {
+      "id": "basura", "sala": "Cabina", "titulo": "Esquivar basura espacial", "numero": "Maniobra", "dibujo": "basura",
+      "lineas": ["La Estación Espacial enciende sus propulsores para esquivar basura espacial.", "Se llama maniobra de evasión de basura."],
+      "fuente": "https://www.nasa.gov/blogs/spacestation/2024/11/19/space-station-raises-orbit-avoiding-orbital-debris/",
+      "dato": [{ "archivo": "hechos_reales.json", "ruta": "hechos.esquivar.frase", "contiene": "maniobra de evasión de basura" }],
+      "pos": { "x": 5.83, "z": -33.8, "rot": -1.5708 }
+    },
+    {
+      "id": "luz_marte", "sala": "Ingeniería", "titulo": "La luz del Sol en Marte", "numero": "≈ 43 %", "dibujo": "sol",
+      "lineas": ["A Marte llega menos de la mitad de la luz del Sol que a la Tierra.", "Por eso una nave en Marte necesita más paneles solares."],
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
+      "dato": [{ "archivo": "aprendizaje.json", "ruta": "luz_marte.corta", "contiene": "43%" }],
+      "verificar": ["El 43% todavía está marcado para verificar en el juego (no se pudo abrir la ficha de Marte de la NASA)."],
+      "pos": { "x": -11.83, "z": -16, "rot": 1.5708 }
+    },
+    {
+      "id": "noche_lunar", "sala": "Ingeniería", "titulo": "La noche lunar", "numero": "≈ 15 días", "dibujo": "luna",
+      "lineas": ["En la Luna, el día y la noche duran cada uno casi 15 días terrestres.", "Una base lunar necesita muchas baterías para pasar la noche."],
+      "fuente": "https://www.nasa.gov/lunar-surface-technology/",
+      "dato": [{ "archivo": "destinos.json", "ruta": "luna.armado.nocheTexto", "contiene": "casi 15 días" }],
+      "pos": { "x": -6.6, "z": -20.83, "rot": 0 }
+    },
+    {
+      "id": "temperatura", "sala": "Ingeniería", "titulo": "Calor y frío extremos", "numero": "−173 a 117 °C", "dibujo": "termometro",
+      "lineas": ["En el ecuador de la Luna se pasa de unos −173 °C de noche a unos 117 °C de día.", "Sin aire que guarde el calor, los cambios son enormes."],
+      "fuente": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html",
+      "dato": [{ "archivo": "destinos.json", "ruta": "luna.temperatura.minC", "valor": -173 }, { "archivo": "destinos.json", "ruta": "luna.temperatura.maxC", "valor": 117 }],
+      "pos": { "x": -10.8, "z": -11.17, "rot": 3.1416 }
+    },
+    {
+      "id": "aire", "sala": "Laboratorio", "titulo": "Aire limpio: el Apolo 13", "numero": "1970", "dibujo": "aire",
+      "lineas": ["En el Apolo 13 los filtros de aire cuadrados no encajaban en las entradas redondas.", "Desde la Tierra idearon un adaptador con bolsas de plástico, cartón y cinta."],
+      "fuente": "https://www.nasa.gov/missions/apollo/apollo-13-mission-details/",
+      "dato": [{ "archivo": "hechos_reales.json", "ruta": "hechos.filtro.frase", "contiene": "bolsas de plástico, cartón y cinta" }, { "archivo": "hechos_reales.json", "ruta": "hechos.filtro.anio", "valor": 1970 }],
+      "pos": { "x": 8.5, "z": -20.83, "rot": 0 }
+    },
+    {
+      "id": "ejercicio", "sala": "Laboratorio", "titulo": "Ejercicio en el espacio", "numero": "≈ 2 h por día", "dibujo": "pesa",
+      "lineas": ["En la Estación Espacial, los astronautas hacen ejercicio unas 2 horas al día.", "Así no pierden músculo ni hueso sin gravedad."],
+      "fuente": "https://www.nasa.gov/missions/station/iss-research/counteracting-bone-and-muscle-loss-in-microgravity/",
+      "dato": [{ "archivo": "hechos_reales.json", "ruta": "hechos.ejercicio.frase", "contiene": "2 horas al día" }],
+      "verificar": ["La cita de la NASA salió de un resumen de búsqueda (ver hechos_reales.json → ejercicio)."],
+      "pos": { "x": 8, "z": -11.17, "rot": 3.1416 }
+    },
+    {
+      "id": "plantas", "sala": "Laboratorio", "titulo": "Plantas en la Estación", "numero": "Veggie", "dibujo": "planta",
+      "lineas": ["En la Estación Espacial se cultivan lechuga y kale en el experimento Veggie.", "Los astronautas se comen lo que cosechan."],
+      "fuente": "https://www.nasa.gov/image-article/astronaut-scott-tingle-tries-space-grown-lettuce/",
+      "dato": [{ "archivo": "hechos_reales.json", "ruta": "hechos.huerto.frase", "contiene": "Veggie" }],
+      "pos": { "x": 3.5, "z": -11.17, "rot": 3.1416 }
+    },
+    {
+      "id": "red_antenas", "sala": "Comunicaciones", "titulo": "La Red del Espacio Profundo", "numero": "3 complejos", "dibujo": "antena",
+      "lineas": ["La NASA tiene antenas gigantes en Goldstone (EE. UU.), Madrid (España) y Canberra (Australia).", "Están separadas unos 120°: mientras la Tierra gira, siempre hay una que ve a la nave."],
+      "fuente": "https://www.nasa.gov/directorates/somd/space-communications-navigation-program/dsn-complexes/",
+      "verificar": ["El dato se tomó del resumen de una búsqueda en nasa.gov: confirmar el texto abriendo la página."],
+      "pos": { "x": -11.1, "z": -8.83, "rot": 0 }
+    },
+    {
+      "id": "unidades", "sala": "Comunicaciones", "titulo": "El error de unidades", "numero": "1999", "dibujo": "regla",
+      "lineas": ["La sonda Mars Climate Orbiter se perdió al llegar a Marte.", "Un equipo usó unidades inglesas (libras, pies) y otro, unidades métricas."],
+      "fuente": "https://www.jpl.nasa.gov/news/mars-climate-orbiter-team-finds-likely-cause-of-loss/",
+      "dato": [{ "archivo": "hechos_reales.json", "ruta": "hechos.unidades.frase", "contiene": "unidades métricas" }, { "archivo": "hechos_reales.json", "ruta": "hechos.unidades.anio", "valor": 1999 }],
+      "pos": { "x": -4, "z": 0.83, "rot": 3.1416 }
+    }
+  ]
+}

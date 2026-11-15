@@ -13,7 +13,10 @@
 import * as THREE from 'three';
 import { crearLuces } from '../engine/luces.js';
 import { MundoFisico } from '../engine/fisica.js';
-import { crearNaveInterior } from '../escenarios/naveInterior.js';
+import { crearNaveInterior, COLOR_SALA } from '../escenarios/naveInterior.js';
+import { CuadroPared } from '../entities/CuadroPared.js';
+import cuadrosJSON from '../../data/cuadros.json';
+import { mostrarCuadro } from '../ui/tarjetas.js';
 import { JugadorLocal } from '../entities/JugadorLocal.js';
 import { TIERRA, DESTINOS, ROLES, colorRol } from '../datos3d.js';
 import { ambiente, efecto } from '../audio.js';
@@ -161,6 +164,17 @@ export function iniciarPantallaNave(ctx) {
   // Avisos pequeños arriba a la derecha (ui/avisos.js): 3 s, máximo 3 a la vez
   function avisar(texto, clase = '', ms = 3000, largo = false) {
     aviso(texto, { ms, clase, largo });
+  }
+
+  // ---- Cuadros informativos en las paredes (cuadros.json): E para leer ----
+  // En un jugador la tarjeta pausa el juego; en multijugador no se pausa nada.
+  const COLOR_DE_SALA = { 'Cabina': COLOR_SALA.comandante, 'Ingeniería': COLOR_SALA.ingeniero, 'Laboratorio': COLOR_SALA.cientifico, 'Comunicaciones': COLOR_SALA.comunicaciones };
+  const cuadros = cuadrosJSON.cuadros.map((c) => new CuadroPared(esc, c, COLOR_DE_SALA[c.sala] || 0x7cc4ff));
+  function leerCuadro(c) {
+    efecto('clic');
+    mostrarCuadro(c.datos, { sinPausa: !!conexion.enRed });
+    const leidos = ctx.aprendizaje?.leerCuadro?.(c.datos.id) ?? 0;
+    ctx.logros?.revisar({ cuadrosLeidos: leidos, totalCuadros: cuadrosJSON.cuadros.length }); // medalla "Curioso"
   }
 
   // Casilleros, cajones, paneles y ventanas: se abren con E y muestran lo que hay adentro
@@ -506,8 +520,10 @@ export function iniciarPantallaNave(ctx) {
       let abrible = null;
       if (!cercana && !consola) {
         const pies = yo.jugador.pies;
+        const cuadro = cuadros.find((c) => Math.hypot(c.posicion.x - pies.x, c.posicion.z - pies.z) < 1.6);
         const obj = (esc.objetos || []).find((o) => Math.hypot(o.posicion.x - pies.x, o.posicion.z - pies.z) < 1.6);
-        if (obj) abrible = { texto: obj.abierto ? 'Cerrar' : `Abrir ${NOMBRE_OBJETO[obj.tipo]}`, fn: () => abrirObjeto(obj) };
+        if (cuadro) abrible = { texto: `Leer: ${cuadro.datos.titulo}`, fn: () => leerCuadro(cuadro) };
+        else if (obj) abrible = { texto: obj.abierto ? 'Cerrar' : `Abrir ${NOMBRE_OBJETO[obj.tipo]}`, fn: () => abrirObjeto(obj) };
         else {
           const i = esc.puertas.findIndex((p) => p.manual && Math.hypot(p.centro.x - pies.x, p.centro.z - pies.z) < 2.4);
           if (i >= 0) {

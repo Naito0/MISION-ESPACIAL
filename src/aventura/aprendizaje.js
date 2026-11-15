@@ -9,6 +9,10 @@
 // =============================================================
 import datos from '../data/aprendizaje.json';
 import { mostrarTarjeta, hayTarjeta } from './ui/tarjetas.js';
+import cuadrosJSON from '../data/cuadros.json';
+
+const CUADROS = cuadrosJSON.cuadros;
+const CLAVE_CUADROS = 'misionEspacial.cuadrosLeidos';
 
 const CLAVE = 'misionEspacial.aprendido';
 const CLAVE_REPASO = 'misionEspacial.repaso';
@@ -57,6 +61,13 @@ export function crearAprendizaje(hud) {
     nuevaMision() { vistosMision = new Set(); cola.length = 0; },
     /** Marca un concepto como visto sin mostrar tarjeta (ej. cuando ya se explicó en la predicción). */
     marcar(id) { vistosMision.add(id); aprendidos.add(id); guardar(CLAVE, [...aprendidos]); },
+    /** Cuadro de la pared leído: se guarda para el diario. Devuelve cuántos cuadros distintos se leyeron. */
+    leerCuadro(id) {
+      const l = new Set(leer(CLAVE_CUADROS, []));
+      l.add(id);
+      guardar(CLAVE_CUADROS, [...l]);
+      return l.size;
+    },
     alPoderMostrar(fn) { puedeMostrar = fn || (() => true); },
     get cantidad() { return aprendidos.size; },
     get total() { return CONCEPTOS.length; },
@@ -80,6 +91,7 @@ export function crearAprendizaje(hud) {
           <h2>📖 Lo que aprendí</h2>
           <p class="contador">Has aprendido <b>${aprendidos.size} de ${CONCEPTOS.length}</b> conceptos</p>
           ${bloque('luna', '🌙 Luna')}${bloque('marte', '🔴 Marte')}
+          ${(() => { const leidos = leer(CLAVE_CUADROS, []); return `<h3>🖼 Cuadros de la nave <small>· ${leidos.length} de ${CUADROS.length} leídos</small></h3><div class="diario-lista">${CUADROS.map((c) => leidos.includes(c.id) ? `<div class="diario-item"><h4>${c.titulo}</h4><p><b>${c.numero}</b> · ${c.lineas[0]}</p><small>${c.sala} · Fuente: ${dominio(c.fuente)}</small></div>` : `<div class="diario-item bloqueado"><h4>🔒 ???</h4><p>Búscalo en la pared de ${c.sala}.</p></div>`).join('')}</div>`; })()}
           <button class="boton cerrar-diario">Cerrar</button>
         </div>`;
       hud.appendChild(capa);
