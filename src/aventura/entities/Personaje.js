@@ -56,13 +56,13 @@ function pieza(padre, geo, color, { pos = [0, 0, 0], esc = [1, 1, 1], rot = [0, 
 const suave = (actual, meta, k) => actual + (meta - actual) * k;
 const azar = (a, b) => a + Math.random() * (b - a);
 
-/** Cartelito de texto sobre la cabeza ("¡Achís!", "Brrr…"). */
+/** Cartelito de texto sobre la cabeza ("¡Achís!", "Brrr…"). Las paredes lo tapan. */
 function crearTexto() {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 96;
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
   s.scale.set(1.6, 0.3, 1);
   s.renderOrder = 11;
   s.visible = false;

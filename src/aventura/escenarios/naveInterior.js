@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { nuevoEscenario, caja, cilindro, material, texturaCuadricula, habitacion } from '../engine/construccion.js';
 import { consola, pantalla, franjaLuz, tuberia, pilaCajas, cielo, particulas } from '../engine/decoracion.js';
 import { Puerta } from '../entities/Puerta.js';
+import { ObjetoAbrible } from '../entities/ObjetoAbrible.js';
 
 const ALTO = 3.4;
 // Colores de cada rol (los mismos de roles.json)
@@ -183,6 +184,18 @@ export function crearNaveInterior(o = {}) {
   esc.visual.add(escotilla);
   luzSala(esc, 0, 12, 0xff6b6b, 10);
   esc.salas.esclusa = { nombre: 'Esclusa', rol: null, centro: new THREE.Vector3(0, 0, 12) };
+
+  // ---------- Cosas que se abren con E (casilleros, cajones, paneles y ventanas) ----------
+  esc.objetos = [
+    new ObjetoAbrible(esc, 'casillero', 5.5, -26, -Math.PI / 2),          // Cabina
+    new ObjetoAbrible(esc, 'cajon', -11.5, -19, Math.PI / 2),             // Ingeniería
+    new ObjetoAbrible(esc, 'panel', -8.5, -20.8, 0, 1.4),                  // Ingeniería
+    new ObjetoAbrible(esc, 'cajon', 10.4, -11.45, Math.PI),               // Laboratorio
+    new ObjetoAbrible(esc, 'ventana', -11.8, -0.8, Math.PI / 2, 1.8),     // Comunicaciones
+    new ObjetoAbrible(esc, 'casillero', 5, -8.6, 0),                      // Enfermería
+    new ObjetoAbrible(esc, 'ventana', 1.83, 2, -Math.PI / 2, 1.7),        // Pasillo
+    new ObjetoAbrible(esc, 'panel', -1.83, -10, Math.PI / 2, 1.3)         // Pasillo
+  ];
 
   // ---------- Afuera: estrellas y el planeta de destino (por el ventanal) ----------
   cielo(esc);

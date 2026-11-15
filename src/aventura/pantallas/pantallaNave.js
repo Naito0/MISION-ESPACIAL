@@ -62,7 +62,9 @@ export function iniciarPantallaNave(ctx) {
   esc.puertas.forEach((p) => mundo.dinamicos.push(p));
   // Las puertas entre las áreas quedan cerradas con llave (luz roja y candado):
   // cada astronauta trabaja en su sala. La de la esclusa solo se abre al salir a la superficie.
-  esc.puertas.forEach((p) => { if (!(estado.jugadores.length === 1 && p.centro.z <= 6)) p.bloquear(p.centro.z > 6 ? '🚪' : '🔒'); });
+  // Las puertas entre salas se abren y se cierran con E (en multijugador, para todos).
+  // La de la esclusa solo se abre al salir a la superficie.
+  esc.puertas.forEach((p, i) => { if (p.centro.z > 6) p.bloquear('🚪'); else { p.manual = true; p.abierta = !!(estado.puertas || {})[i]; } });
   motor.camara.fov = 70;
   motor.camara.updateProjectionMatrix();
   ambiente(true);
@@ -137,12 +139,22 @@ export function iniciarPantallaNave(ctx) {
   hud.querySelectorAll('.retrato').forEach((b) => { b.onclick = () => cambiarA(Number(b.dataset.i)); });
   $('.saltar-viaje').onclick = () => conexion.accion('saltar');
 
-  function avisar(texto, clase = '') {
+  function avisar(texto, clase = '', ms = 4000) {
     const d = document.createElement('div');
     d.className = `panel aviso-flotante ${clase}`;
     d.innerHTML = texto;
     $('.avisos').appendChild(d);
-    setTimeout(() => d.remove(), 4000);
+    setTimeout(() => d.remove(), ms);
+  }
+
+  // Casilleros, cajones, paneles y ventanas: se abren con E y muestran lo que hay adentro
+  const NOMBRE_OBJETO = { casillero: 'el casillero', cajon: 'el cajón', panel: 'el panel', ventana: 'la ventana' };
+  function abrirObjeto(o) {
+    const abierto = o.alternar();
+    efecto(abierto ? 'compra' : 'clic');
+    if (!abierto) return;
+    avisar(o.contenido.texto, 'amable', o.contenido.tipo === 'dato' ? 9000 : 4000);
+    if (o.contenido.tipo === 'brillante' && actual().jugador.astronauta.id === 'tuerca') actual().jugador.astronauta.decir('¡Para mi colección!');
   }
 
   /** Cambia el astronauta que controla el jugador; la cámara vuela hasta él. */
@@ -194,6 +206,8 @@ export function iniciarPantallaNave(ctx) {
   const quitarEstado = conexion.alEstado((e) => {
     if (!['viaje', 'llegada', 'fracaso'].includes(e.fase)) { ctx.irA('juego'); return; }
     bots = e.bots || [];
+    // Puertas abiertas o cerradas por cualquier jugador
+    esc.puertas.forEach((p, i) => { if (p.manual) p.abierta = !!(e.puertas || {})[i]; });
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
@@ -362,6 +376,7 @@ export function iniciarPantallaNave(ctx) {
         a.enPuerta = cerca;
       }
       esc.actualizar(dt, t);
+      (esc.objetos || []).forEach((o) => o.actualizar(dt));
       actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];
       efectos.actualizar(dt, t, activas, modoSolo ? TRIPULACION.map((m) => m.rol) : [yo.rol]);
@@ -380,11 +395,27 @@ export function iniciarPantallaNave(ctx) {
         const p = efectos.posicionConsola(e.consola);
         if (p && Math.hypot(p.x - yo.jugador.pies.x, p.z - yo.jugador.pies.z) < DISTANCIA_CONSOLA) cercana = e;
       }
+      // ¿Algo para abrir con E? (las consolas con emergencia tienen prioridad)
+      let abrible = null;
+      if (!cercana && !consola) {
+        const pies = yo.jugador.pies;
+        const obj = (esc.objetos || []).find((o) => Math.hypot(o.posicion.x - pies.x, o.posicion.z - pies.z) < 1.6);
+        if (obj) abrible = { texto: obj.abierto ? 'Cerrar' : `Abrir ${NOMBRE_OBJETO[obj.tipo]}`, fn: () => abrirObjeto(obj) };
+        else {
+          const i = esc.puertas.findIndex((p) => p.manual && Math.hypot(p.centro.x - pies.x, p.centro.z - pies.z) < 2.4);
+          if (i >= 0) {
+            const p = esc.puertas[i];
+            abrible = { texto: p.abierta ? 'Cerrar la puerta' : 'Abrir la puerta', fn: () => { p.abierta = !p.abierta; efecto('clic'); conexion.accion('puerta', { i, abierta: p.abierta }); } };
+          }
+        }
+      }
       const avisoE = $('.aviso-e');
-      avisoE.style.display = cercana && !consola ? 'block' : 'none';
+      avisoE.style.display = (cercana || abrible) && !consola ? 'block' : 'none';
       if (cercana && !consola) avisoE.innerHTML = `<span class="tecla">E</span> ${cercana.nombre}`;
+      else if (abrible) avisoE.innerHTML = `<span class="tecla">E</span> ${abrible.texto}`;
       if (entrada && entrada.interactuarPulsado && !consola) {
         if (cercana) abrir(cercana);
+        else if (abrible) abrible.fn();
         else {
           // Astronauta equivocado: se le dice con amabilidad a quién le toca
           const otra = !modoSolo && activas.find((e) => e.rol !== yo.rol);

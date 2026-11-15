@@ -377,7 +377,17 @@ test('minijuegos: cada emergencia usa un minijuego que existe y tiene objetivo/c
   }
 });
 
-test('hangar: no deja pasarse del presupuesto', () => {
+test('puertas con E: la sala guarda cuáles están abiertas (se sincroniza para todos)', () => {
+  const s = new Sala('PUER', datosCompletos);
+  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  assert.deepEqual(s.accion('b', 'puerta', { i: 2, abierta: true }), { ok: true });
+  assert.equal(s.estadoPublico().puertas[2], true);
+  s.accion('a', 'puerta', { i: 2, abierta: false });
+  assert.equal(s.estadoPublico().puertas[2], false);
+  assert.ok(s.accion('a', 'puerta', { i: 'x', abierta: true }).error);
+});
+
+test('hangar: no deja pasarse del presupuesto', () => { 
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120
   s.accion('a', 'comprar', { opcion: 'estr_blindada' }); // 45

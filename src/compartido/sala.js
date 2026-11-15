@@ -97,6 +97,7 @@ export class Sala {
     const r = this.resumen();
     if (r) this.diseno = r.diseno;
     this.viaje = nuevoViaje(this.configViaje, this.diseno);
+    this.puertas = {}; // las puertas empiezan cerradas
     this.fase = 'viaje';
     this.cambio('🚀 ¡Despegamos! Atentos a las emergencias.');
   }
@@ -362,6 +363,10 @@ export class Sala {
       this.viaje.leyendo = activo ? [...otros, ...j.roles] : otros;
       return { ok: true };
     },
+    /** Abrir o cerrar una puerta de la nave con E (todos la ven igual). */
+    puerta(j, { i, abierta }) {
+      return this.abrirPuerta(i, abierta);
+    },
     /** Saltar: llegar ya al destino cuando no quedan emergencias, o saltar la escena final. */
     saltar(j) {
       if (this.fase === 'viaje' && this.viaje && !this.viaje.emergencias.length && this.viaje.lanzadas >= (this.viaje.total ?? 0)) {
@@ -407,6 +412,14 @@ export class Sala {
     this.informe.diseno = { ...this.diseno };
     this.fase = 'informe';
     this.cambio('📋 Informe de la misión');
+  }
+
+  /** Puertas de la nave abiertas con E: { índice: true/false } (se sincroniza para todos). */
+  abrirPuerta(i, abierta) {
+    if (!Number.isInteger(i) || i < 0 || i > 20) return { error: 'Puerta desconocida.' };
+    this.puertas = { ...(this.puertas || {}), [i]: !!abierta };
+    this.cambio();
+    return { ok: true };
   }
 
   /** Posición de un jugador (no sube la versión: se envía aparte, 15 veces por segundo). */
@@ -465,6 +478,7 @@ export class Sala {
       nivel: this.nivel,
       informe: this.fase === 'informe' ? this.informe : null,
       bots: this.bots || [],
+      puertas: this.puertas || {},
       personajesPorRol: this.personajesPorRol(),
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,

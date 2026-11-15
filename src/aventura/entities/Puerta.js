@@ -1,6 +1,6 @@
 // =============================================================
-// Puerta.js — Puerta corrediza que se abre SOLA cuando un astronauta
-// se acerca. Mientras está cerrada es sólida (la física la tiene en
+// Puerta.js — Puerta corrediza. Se abre SOLA cuando un astronauta se acerca,
+// o, en modo manual (puerta.manual = true), con la tecla E (puerta.abierta). Mientras está cerrada es sólida (la física la tiene en
 // cuenta como un "obstáculo dinámico"); abierta, se puede pasar.
 // =============================================================
 import * as THREE from 'three';
@@ -69,7 +69,8 @@ export class Puerta {
 
   /** @param posiciones lista de THREE.Vector3 (pies de los astronautas) */
   actualizar(dt, posiciones) {
-    const cerca = !this.bloqueada && posiciones.some((p) => p.distanceTo(this.centro) < 3.2);
+    // manual = se abre y se cierra con E (this.abierta); si no, se abre sola al acercarse
+    const cerca = !this.bloqueada && (this.manual ? !!this.abierta : posiciones.some((p) => p.distanceTo(this.centro) < 3.2));
     this.apertura = THREE.MathUtils.clamp(this.apertura + (cerca ? 3 : -2) * dt, 0, 1);
     for (const { g, lado } of this.hojas) {
       const desplazamiento = lado * (this.ancho / 4 + this.apertura * this.ancho / 2);
