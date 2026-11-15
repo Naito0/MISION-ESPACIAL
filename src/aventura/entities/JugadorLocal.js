@@ -29,7 +29,7 @@ export class JugadorLocal {
     this.astronauta.gravedad = mundo.gravedad; // Luna y Marte: saltos flotantes
     escena.add(this.astronauta.raiz);
     this.cuerpo = new CuerpoJugador(mundo, escenario.puntoInicio);
-    this.camara = new CamaraTercera(camara, escenario.colisiones, { interior: !!escenario.interior, puertas: escenario.puertas || [] });
+    this.camara = new CamaraTercera(camara, escenario.colisiones, { interior: !!escenario.interior, puertas: escenario.puertas || [], decorados: escenario.visual || null });
     this.camara.distancia = escenario.interior ? 3.6 : 5;
     this.control = control;
     this.bloqueado = false; // true mientras usa una consola (no camina)

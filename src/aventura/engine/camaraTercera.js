@@ -27,6 +27,8 @@ export class CamaraTercera {
     this.camara = camara;
     this.solidos = solidos;
     this.puertas = o.puertas || [];
+    this.decorados = o.decorados || null; // lo que solo se ve (tuberías, anillos del motor…): no frena, pero se aclara
+    this.cuadro = 0;
     this.limites = o.interior ? LIMITES.interior : LIMITES.exterior;
     this.yaw = 0;        // giro horizontal (radianes)
     this.pitch = 0.35;   // inclinación (radianes, positivo = desde arriba)
@@ -35,6 +37,7 @@ export class CamaraTercera {
     this.sensibilidad = 1;
     this.objetivo = new THREE.Vector3();
     this.rayo = new THREE.Raycaster();
+    this.rayo.camera = camara; // necesario para revisar sprites (letreros, candados)
     this.posicionDeseada = new THREE.Vector3();
     this.primera = true;
     this.transparentes = new Map(); // malla → material original (paredes que tapan al personaje)
@@ -79,19 +82,51 @@ export class CamaraTercera {
     return libre;
   }
 
-  /** Paredes entre la cámara y el personaje: semitransparentes (y las demás vuelven a la normalidad). */
+  /** Esferas que envuelven cada decoración (se calculan una vez: la nave no se mueve). */
+  esferasDecorados() {
+    if (!this._esferas && this.decorados) {
+      this._esferas = [];
+      const caja = new THREE.Box3();
+      for (const hijo of this.decorados.children) {
+        if (hijo.isLight || hijo.isSprite || hijo.isPoints) continue;
+        caja.setFromObject(hijo);
+        if (caja.isEmpty()) continue;
+        const s = caja.getBoundingSphere(new THREE.Sphere());
+        if (s.radius > 6) continue; // pisos, cielo y cosas enormes no
+        this._esferas.push({ hijo, s });
+      }
+    }
+    return this._esferas || [];
+  }
+
+  /**
+   * Lo que tapa al personaje se vuelve semitransparente: paredes entre la cámara y el
+   * personaje, decoraciones en el medio (tuberías, anillos del motor…) y decoraciones
+   * que quedan MUY cerca de la cámara (para que la cámara nunca "esté adentro" de algo).
+   */
   aclararParedes(desde, hasta) {
-    const dir = this._d.subVectors(hasta, desde);
+    this.cuadro++;
+    if (this.cuadro % 3 !== 0 && this.transparentes.size === 0 && this._ultimoVacio) return; // cada 3 cuadros alcanza
+    // El rayo sale DESDE EL PERSONAJE hacia la cámara: así encuentra la pared aunque la cámara
+    // ya esté detrás de ella mientras se acerca (y esa pared se aclara en vez de tapar)
+    const dir = this._d.subVectors(desde, hasta);
     const largo = dir.length();
     const tapan = new Set();
     if (largo > 0.3) {
-      this.rayo.set(desde, dir.normalize());
-      this.rayo.far = largo - 0.2;
+      this.rayo.set(hasta, dir.normalize());
+      this.rayo.far = largo + 0.3;
       for (const h of this.rayo.intersectObjects(this.solidos.children, true)) {
         if (h.face && h.face.normal.y > 0.7) continue; // el piso no
         tapan.add(h.object);
       }
+      if (this.decorados) for (const h of this.rayo.intersectObjects(this.decorados.children, true)) {
+        if (h.object.isMesh && !h.object.isSprite && !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.5)) tapan.add(h.object);
+      }
     }
+    for (const { hijo, s } of this.esferasDecorados()) {
+      if (s.distanceToPoint(desde) < 0.35) hijo.traverse((m) => { if (m.isMesh) tapan.add(m); });
+    }
+    this._ultimoVacio = tapan.size === 0;
     for (const m of tapan) {
       if (this.transparentes.has(m) || !m.material || Array.isArray(m.material)) continue;
       this.transparentes.set(m, m.material);
@@ -121,13 +156,16 @@ export class CamaraTercera {
     // Paredes, techo y puertas: se acerca RÁPIDO si choca y se aleja DESPACIO
     const libre = this.sinParedes ? this.distancia : Math.max(0.5, this.distanciaLibre(this.objetivo, desplazamiento, this.distancia) - 0.3);
     const meta = Math.min(this.distancia, libre);
+    // Sin saltos: al chocar se acerca SUAVE (lo justo, a ritmo parejo) y se aleja más despacio;
+    // si algo queda en el medio mientras tanto, se vuelve transparente (aclararParedes)
     if (this.primera) this.distanciaReal = meta;
-    else if (meta < this.distanciaReal) this.distanciaReal += (meta - this.distanciaReal) * (1 - Math.exp(-30 * dt));
-    else this.distanciaReal += (meta - this.distanciaReal) * (1 - Math.exp(-4 * dt));
+    else if (meta < this.distanciaReal) this.distanciaReal += (meta - this.distanciaReal) * (1 - Math.exp(-8 * dt));
+    else this.distanciaReal += (meta - this.distanciaReal) * (1 - Math.exp(-3 * dt));
+    this.cambioCuadro = Math.abs(this.distanciaReal - (this._anterior ?? this.distanciaReal)); this._anterior = this.distanciaReal; this.maxCambio = Math.max(this.maxCambio || 0, this.cambioCuadro); // (para revisar saltos)
 
     this.posicionDeseada.copy(this.objetivo).addScaledVector(desplazamiento, this.distanciaReal);
     if (this.primera) this.camara.position.copy(this.posicionDeseada);
-    else this.camara.position.lerp(this.posicionDeseada, 1 - Math.exp(-14 * dt));
+    else this.camara.position.lerp(this.posicionDeseada, 1 - Math.exp(-20 * dt));
     this.camara.lookAt(this.objetivo);
     if (!this.sinParedes) this.aclararParedes(this.camara.position, this.objetivo);
     this.primera = false;
