@@ -197,8 +197,8 @@ export function crearNaveInterior(o = {}) {
     new ObjetoAbrible(esc, 'cajon', 10.4, -11.45, Math.PI),               // Laboratorio
     new ObjetoAbrible(esc, 'ventana', -11.8, -0.8, Math.PI / 2, 1.8),     // Comunicaciones
     new ObjetoAbrible(esc, 'casillero', 5, -8.6, 0),                      // Enfermería
-    new ObjetoAbrible(esc, 'ventana', 1.83, 2, -Math.PI / 2, 1.7),        // Pasillo
-    new ObjetoAbrible(esc, 'panel', -1.83, -10, Math.PI / 2, 1.3)         // Pasillo
+    new ObjetoAbrible(esc, 'ventana', 1.85, 2, -Math.PI / 2, 1.7),        // Pasillo (pegada a la cara de la pared)
+    new ObjetoAbrible(esc, 'panel', -1.85, -10, Math.PI / 2, 1.3)         // Pasillo (pegado a la cara de la pared)
   ];
 
   // ---------- Afuera: estrellas y el planeta de destino (por el ventanal) ----------

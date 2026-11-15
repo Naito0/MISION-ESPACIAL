@@ -55,8 +55,10 @@ export class ObjetoAbrible {
       caja(0.84, 0.3, 0.55, color, 0, 0, 0, this.pivote);     // cajón que sale hacia adelante
       caja(0.3, 0.05, 0.05, oscuro, 0, 0, 0.3, this.pivote);  // manija
     } else if (tipo === 'panel') {
-      caja(0.9, 0.7, 0.06, oscuro, 0, 0, 0);
-      this.pivote.position.set(0, -0.35, 0.05);               // bisagra abajo
+      // Empotrado en la pared (antes sobresalía y parecía flotar): marco claro + fondo hundido
+      caja(1.02, 0.82, 0.03, metal, 0, 0, -0.005);             // marco pegado a la pared
+      caja(0.9, 0.7, 0.02, oscuro, 0, 0, 0.012);               // fondo
+      this.pivote.position.set(0, -0.35, 0.035);              // bisagra abajo
       caja(0.9, 0.7, 0.04, color, 0, 0.35, 0, this.pivote);
       const luz = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.02), new THREE.MeshBasicMaterial({ color: 0xffd166 }));
       luz.position.set(0.3, 0.6, 0.03); this.pivote.add(luz);
@@ -67,7 +69,7 @@ export class ObjetoAbrible {
       const g = c.getContext('2d'); g.fillStyle = '#02030a'; g.fillRect(0, 0, 128, 128);
       for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(255,255,255,${0.4 + Math.random() * 0.6})`; g.fillRect(Math.random() * 128, Math.random() * 128, 1.5, 1.5); }
       const cielo = new THREE.Mesh(new THREE.CircleGeometry(0.44, 28), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) }));
-      cielo.position.z = -0.02; this.grupo.add(cielo);
+      cielo.position.z = 0.01; this.grupo.add(cielo); // delante de la pared (antes quedaba justo en ella y parpadeaba)
       this.pivote.position.set(0, 0, 0.03);
       caja(0.86, 0.86, 0.03, color, 0, 0, 0, this.pivote);    // persiana que sube
     }
