@@ -80,7 +80,7 @@ export function iniciarPantallaSala(ctx) {
     panel.innerHTML = `
       <h1>${enRed ? `Sala <span class="codigo">${e.codigo}</span>` : '🧑‍🚀 Jugar solo'}</h1>
       ${enRed ? `<div class="red-estado"></div>` : ''}
-      ${enRed ? `<button class="secundario copiar">📋 Copiar código</button><p class="sub">Los demás abren el juego, eligen <b>"Unirse con código"</b> y escriben <b>${e.codigo}</b>.</p>` : '<p class="sub">Tú eliges un puesto; los otros 3 los ocupan bots. En una emergencia de un bot, tomas su control con 1-4.</p>'}
+      ${enRed ? `<button class="secundario copiar">📋 Copiar código</button><p class="sub">Los demás abren el juego, eligen <b>"Unirse con código"</b> y escriben <b>${e.codigo}</b>.</p>` : '<p class="sub">Elige tu puesto y tu personaje. <b>Tú resuelves todas las emergencias</b>; los otros 3 personajes trabajan de fondo en sus salas.</p>'}
       <h3>1. Elige tu puesto</h3>
       <div class="roles">${TRIPULACION.map((m) => {
         const duenio = e.jugadores.find((j) => j.roles.includes(m.rol));

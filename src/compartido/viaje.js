@@ -25,7 +25,7 @@ export function nuevoViaje(config, diseno = {}) {
     registro: [],             // historia para el informe: { id, nombre, rol, resultado, agravada, t }
     proxima: config.primeraEmergencia ?? 6, // segundos hasta la próxima emergencia
     ultimaPorRol: {},         // para no repetir la misma tarea dos veces seguidas
-    rolesUsados: [],          // modo misión: cada rol recibe como máximo una emergencia por viaje
+    rolesUsados: [],          // modo misión: roles que ya recibieron emergencia (para repartirlas)
     lanzadas: 0,
     total: config.emergenciasPorViaje ?? null,
     contador: 0,
@@ -42,13 +42,18 @@ export function estaAgravada(emergencia, diseno) {
 /** Elige una emergencia al azar respetando las reglas. Devuelve null si no hay ninguna posible. */
 export function elegirEmergencia(v, catalogo, rng = Math.random) {
   const ocupadas = new Set(v.emergencias.map((e) => e.consola));
-  const candidatas = catalogo.filter((e) =>
+  // Modo misión: las emergencias se REPARTEN entre los roles (con 5-6 por viaje,
+  // ningún rol recibe más de 2 y siempre se elige entre los roles menos usados)
+  const usos = (rol) => v.rolesUsados.filter((r) => r === rol).length;
+  const maxPorRol = v.total ? Math.ceil(v.total / 4) : Infinity;
+  let candidatas = catalogo.filter((e) =>
     !ocupadas.has(e.consola) &&                    // una emergencia por consola
     v.ultimaPorRol[e.rol] !== e.id &&               // no repetir la misma tarea seguida en un rol
-    !(v.total && v.rolesUsados.includes(e.rol)) &&  // modo misión: una por rol en todo el viaje
+    usos(e.rol) < maxPorRol &&                      // modo misión: repartidas entre los roles
     !(v.leyendo || []).includes(e.rol) &&           // multijugador: su jugador todavía está leyendo una tarjeta
     !v.emergencias.some((a) => a.rol === e.rol));   // un rol no recibe dos a la vez
   if (!candidatas.length) return null;
+  if (v.total) { const menor = Math.min(...candidatas.map((e) => usos(e.rol))); candidatas = candidatas.filter((e) => usos(e.rol) === menor); }
   const pesos = candidatas.map((e) => (estaAgravada(e, v.diseno) ? 2 : 1));
   let r = rng() * pesos.reduce((s, p) => s + p, 0);
   for (let i = 0; i < candidatas.length; i++) {

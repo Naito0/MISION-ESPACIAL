@@ -211,29 +211,37 @@ test('dificultad: Fácil da 1 emergencia a la vez, más tiempo, menos daño y m�
   assert.ok(n.configViaje.tiempoParaResolver < s.configViaje.tiempoParaResolver);
 });
 
-test('viaje (modo misión): 3-4 emergencias, una por rol, de a una y con 10-15 s de calma', () => {
-  const config = { ...EMERG.config, emergenciasPorViaje: 4, maxSimultaneas: 1, tiempoParaResolver: 60 };
-  const v = nuevoViaje(config, {});
-  let ultimaFin = null;
-  const calmas = [];
-  let t = 0;
-  while (!v.terminado && t < 1000) {
-    avanzarViaje(v, 0.5, EMERG.emergencias, config, Math.random);
-    t += 0.5;
-    assert.ok(v.emergencias.length <= 1, 'de a una');
-    // Resolver enseguida cada emergencia (como si el jugador fuera rápido)
-    if (v.emergencias.length) {
-      if (ultimaFin !== null) calmas.push(t - ultimaFin);
-      resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true);
-      ultimaFin = t;
+test('viaje (modo misión): 5-6 emergencias repartidas entre los roles, de a una, la primera antes de 20 s', () => {
+  for (const [destino, total] of [['luna', 5], ['marte', 6]]) {
+    assert.equal(EMERG.config.emergenciasPorDestino[destino], total);
+    const config = { ...EMERG.config, emergenciasPorViaje: total, maxSimultaneas: 1 };
+    const v = nuevoViaje(config, {});
+    let ultimaFin = null; let primera = null;
+    const calmas = [];
+    let t = 0;
+    while (!v.terminado && t < 1000) {
+      avanzarViaje(v, 0.5, EMERG.emergencias, config, Math.random);
+      t += 0.5;
+      assert.ok(v.emergencias.length <= 1, 'de a una');
+      // Resolver enseguida cada emergencia (como si el jugador fuera rápido)
+      if (v.emergencias.length) {
+        if (primera === null) primera = t;
+        if (ultimaFin !== null) calmas.push(t - ultimaFin);
+        resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true);
+        ultimaFin = t;
+      }
     }
+    assert.equal(v.terminado, 'llegada');
+    assert.equal(v.registro.length, total, `${destino}: hubo ${v.registro.length}`);
+    assert.ok(primera < 20, `la primera llegó a los ${primera} s`);
+    // Roles variados: los 4 roles reciben al menos una y ninguno más de 2
+    const porRol = {};
+    for (const r of v.registro) porRol[r.rol] = (porRol[r.rol] || 0) + 1;
+    assert.equal(Object.keys(porRol).length, 4, JSON.stringify(porRol));
+    assert.ok(Object.values(porRol).every((n) => n <= 2), JSON.stringify(porRol));
+    for (const c of calmas) assert.ok(c >= 8 && c <= 13, `calma de ${c} s`);
   }
-  assert.equal(v.terminado, 'llegada');
-  assert.ok(v.registro.length >= 3 && v.registro.length <= 4, `hubo ${v.registro.length}`);
-  assert.equal(new Set(v.registro.map((r) => r.rol)).size, v.registro.length, 'una por rol');
-  for (const c of calmas) assert.ok(c >= 10 && c <= 16, `calma de ${c} s`);
 });
-
 test('viaje: sin emergencias pendientes avanza más rápido; un rol que está leyendo no recibe emergencias', () => {
   const config = { ...EMERG.config, emergenciasPorViaje: 1, maxSimultaneas: 1, tiempoParaResolver: 60 };
   const v = nuevoViaje(config, {});

@@ -62,7 +62,7 @@ export function iniciarPantallaNave(ctx) {
   esc.puertas.forEach((p) => mundo.dinamicos.push(p));
   // Las puertas entre las áreas quedan cerradas con llave (luz roja y candado):
   // cada astronauta trabaja en su sala. La de la esclusa solo se abre al salir a la superficie.
-  esc.puertas.forEach((p) => p.bloquear(p.centro.z > 6 ? '🚪' : '🔒'));
+  esc.puertas.forEach((p) => { if (!(estado.jugadores.length === 1 && p.centro.z <= 6)) p.bloquear(p.centro.z > 6 ? '🚪' : '🔒'); });
   motor.camara.fov = 70;
   motor.camara.updateProjectionMatrix();
   ambiente(true);
@@ -76,6 +76,10 @@ export function iniciarPantallaNave(ctx) {
   let bots = estado.bots || []; // cambia si alguien se desconecta (su puesto pasa a un bot)
   const pjDe = (rol) => PERSONAJES.find((p) => p.id === (estado.personajesPorRol || {})[rol]);
   const yoJ = estado.jugadores.find((j) => j.id === conexion.id);
+  // MODO UN JUGADOR (Jugar solo o sala con 1 jugador): manejas SOLO a tu personaje y
+  // te llegan TODAS las emergencias; los otros 3 trabajan de fondo en sus salas.
+  const modoSolo = estado.jugadores.length === 1;
+  const esMio = (rol) => !!(yoJ && yoJ.roles.includes(rol));
   const astronautas = TRIPULACION.map((m) => {
     const consolaRol = esc.consolas.find((c) => c.rol === m.rol);
     const pos = new THREE.Vector3();
@@ -86,7 +90,7 @@ export function iniciarPantallaNave(ctx) {
     esc.puntoInicio = puesto;
     const pj = pjDe(m.rol);
     const j = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDe(m.rol), pj?.id); // traje del color del ROL
-    j.limitarA(m.limites);
+    j.limitarA(modoSolo && esMio(m.rol) ? null : m.limites); // solo: tu personaje recorre toda la nave
     j.astronauta.raiz.rotation.y = Math.atan2(-haciaCentro.x, -haciaCentro.z); // mira a la consola
     j.anguloAnterior = j.astronauta.raiz.rotation.y;
     j.camara.yaw = j.astronauta.raiz.rotation.y + Math.PI; // la cámara empieza detrás
@@ -119,7 +123,7 @@ export function iniciarPantallaNave(ctx) {
     </div>
     <div class="retratos">${TRIPULACION.map((m, i) => `
       <button class="panel retrato" data-i="${i}" style="border-color:${hexDe(m.rol)}">
-        <span class="r-icono">${m.icono}</span><span class="r-txt"><b>${m.tecla}</b> ${m.corto}<small class="r-quien">${astronautas[i].bot ? `🤖 bot · ${astronautas[i].personaje?.nombre || ''}` : (astronautas[i].personaje?.nombre || '')}</small></span>
+        <span class="r-icono">${m.icono}</span><span class="r-txt"><b>${m.tecla}</b> ${m.corto}<small class="r-quien">${modoSolo && !esMio(m.rol) ? `🔧 trabajando · ${astronautas[i].personaje?.nombre || ''}` : astronautas[i].bot ? `🤖 bot · ${astronautas[i].personaje?.nombre || ''}` : (astronautas[i].personaje?.nombre || '')}</small></span>
       </button>`).join('')}</div>
     <div class="alertas"></div>
     <div class="velocidad" hidden></div>
@@ -160,6 +164,7 @@ export function iniciarPantallaNave(ctx) {
   let tiempoEnvio = 0;
   function cambiarA(i) {
     if (i === activo || consola || final) return;
+    if (modoSolo) { avisar(`Tú manejas a <b>${actual().personaje?.nombre || 'tu personaje'}</b> y resuelves todas las emergencias. Los demás trabajan solos.`, 'amable'); return; }
     const otro = deOtroJugador(TRIPULACION[i].rol);
     if (otro) { avisar(`Ese astronauta lo maneja <b>${otro}</b>`, 'amable'); efecto('error'); return; }
     const antes = actual().jugador.camara;
@@ -337,7 +342,11 @@ export function iniciarPantallaNave(ctx) {
         if (!final && j.pies.distanceTo(a.puesto) < 2.5) {
           mirarA.copy(a.consolaPos).sub(j.pies);
           j.astronauta.raiz.rotation.y = Math.atan2(mirarA.x, mirarA.z);
-          j.astronauta.mantener(Math.sin(t * 0.7 + i * 2) > -0.3 ? 'interactuar' : 'reparar');
+          // Trabajan en su sala: el ingeniero repara, el científico revisa las plantas y
+          // muestras, los demás escriben en las consolas. A ratos descansan (y hacen su gag).
+          const ciclo = Math.sin(t * 0.5 + i * 2);
+          const trabajo = { ingeniero: 'reparar', cientifico: 'recoger' }[a.rol] || 'interactuar';
+          if (ciclo > -0.55) j.astronauta.mantener(ciclo > 0.3 ? trabajo : 'interactuar');
         }
       });
       const yo = actual();
@@ -355,7 +364,7 @@ export function iniciarPantallaNave(ctx) {
       esc.actualizar(dt, t);
       actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];
-      efectos.actualizar(dt, t, activas, [yo.rol]);
+      efectos.actualizar(dt, t, activas, modoSolo ? TRIPULACION.map((m) => m.rol) : [yo.rol]);
       if (activas.length) ctx.guia?.evento('emergencia');
 
       // El planeta de la ventana se acerca a medida que avanza el viaje
@@ -365,7 +374,7 @@ export function iniciarPantallaNave(ctx) {
       }
 
       // ¿Este astronauta está cerca de una consola con una emergencia SUYA? → E
-      const mias = activas.filter((e) => e.rol === yo.rol);
+      const mias = activas.filter((e) => modoSolo || e.rol === yo.rol); // solo: todas son tuyas
       let cercana = null;
       for (const e of mias) {
         const p = efectos.posicionConsola(e.consola);
@@ -378,7 +387,7 @@ export function iniciarPantallaNave(ctx) {
         if (cercana) abrir(cercana);
         else {
           // Astronauta equivocado: se le dice con amabilidad a quién le toca
-          const otra = activas.find((e) => e.rol !== yo.rol);
+          const otra = !modoSolo && activas.find((e) => e.rol !== yo.rol);
           if (otra) { const m = miembro(otra.rol); avisar(`Esa tarea le toca a <b>${m.corto}</b>: pulsa <span class="tecla">${m.tecla}</span>`, 'amable'); efecto('clic'); }
         }
       }
@@ -411,7 +420,7 @@ export function iniciarPantallaNave(ctx) {
       derecha.set(-adelante.z, 0, adelante.x);
       const html = activas.map((e) => {
         const m = miembro(e.rol);
-        const esMia = e.rol === yo.rol;
+        const esMia = modoSolo || e.rol === yo.rol;
         let flecha = '';
         if (esMia) {
           const p = efectos.posicionConsola(e.consola);
@@ -420,7 +429,7 @@ export function iniciarPantallaNave(ctx) {
           flecha = `<span class="flecha" style="transform:rotate(${ang.toFixed(2)}rad)">⬆</span>`;
         }
         return `<div class="panel alerta-grande ${e.restante <= 10 ? 'urgente' : ''}" style="border-color:${hexDe(e.rol)}">
-          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : deOtroJugador(e.rol) ? `Le toca a <b>${deOtroJugador(e.rol)}</b> (${m.corto})` : `Pulsa <span class="tecla">${m.tecla}</span> → ${m.corto}${bots.includes(e.rol) ? ' (toma el control del bot 🤖)' : ''}`}</div>
+          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a ${modoSolo ? `<b>${m.sala}</b>, ` : ''}a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : deOtroJugador(e.rol) ? `Le toca a <b>${deOtroJugador(e.rol)}</b> (${m.corto})` : `Pulsa <span class="tecla">${m.tecla}</span> → ${m.corto}${bots.includes(e.rol) ? ' (toma el control del bot 🤖)' : ''}`}</div>
           <div class="ag-porque">${porQueDe(e.id)} · ⏱ ${e.restante} s</div></div>`;
       }).join('');
       if (html !== alertasPrevias) { $('.alertas').innerHTML = html; alertasPrevias = html; }

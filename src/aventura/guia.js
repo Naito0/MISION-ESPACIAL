@@ -21,9 +21,8 @@ const PASOS = {
     { texto: '¡Nave completa! Pulsa <b>"¡Listo!"</b>', resaltar: '#listo' }
   ],
   viaje: [
-    { texto: 'Pulsa <span class="tecla">2</span> para cambiar al Ingeniero', resaltar: '.retrato[data-i="1"]', hasta: 'cambio' },
-    { texto: 'Espera la primera emergencia: el aviso rojo dice a quién le toca', hasta: 'emergencia' },
-    { texto: 'Pulsa la tecla del aviso, ve a la consola con <b>"!"</b> y pulsa <span class="tecla">E</span>', resaltar: '.alerta-grande', hasta: 'resuelta' },
+    { texto: 'Espera la primera emergencia: el aviso rojo dice qué pasó y adónde ir', hasta: 'emergencia' },
+    { texto: 'Sigue la flecha ⬆ hasta la consola con <b>"!"</b> y pulsa <span class="tecla">E</span>', resaltar: '.alerta-grande', hasta: 'resuelta' },
     { texto: '¡Bien! Así se resuelven todas', dura: 4 }
   ],
   aterrizaje: [
