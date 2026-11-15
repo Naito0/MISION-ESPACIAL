@@ -47,7 +47,7 @@ hud.innerHTML = `
   <div class="panel ayuda">
     Clic + mouse: cámara · <span class="tecla">WASD</span> moverse ·
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
-    <span class="tecla">E</span> usar · <span class="tecla">1-4</span> astronauta · <span class="tecla">Esc</span> menú
+    <span class="tecla">E</span> usar · <span class="tecla">1-4</span> astronauta · <span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">Esc</span> menú
   </div>
   <div class="fps"></div>`;
 const capa = document.createElement('div'); // capa de cada pantalla
@@ -117,7 +117,7 @@ ctx.alJugarSolo = async (nombre) => {
   const partida = crearPartidaSolo();
   await partida.crear(nombre);
   await partida.accion('puesto', { rol: 'comandante' });
-  await partida.accion('personaje', { id: 'nova' });
+  await partida.accion('personaje', { id: 'faro' });
   await partida.accion('dificultad', { nivel: dificultad() });
   ctx.conexionActiva = partida;
   irA(); // → sala

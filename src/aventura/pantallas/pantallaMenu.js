@@ -28,12 +28,13 @@ export function iniciarPantallaMenu(ctx) {
   crearLuces(escena, { sombras: false, intensidad: 0.8, intensidadSol: 2.4, posicionSol: new THREE.Vector3(-6, 10, 8) });
   escena.add(esc.raiz);
   const figuras = personajes.personajes.map((p, i) => {
-    const a = crearAstronauta(colorNum(p.color));
+    const a = crearAstronauta(colorDe(p.rolPorDefecto), p.id);
     a.raiz.position.set(-3.3 + i * 2.2, 0, 0);
     escena.add(a.raiz);
     return a;
   });
   motor.cambiarEscena(escena);
+  let proximoEmote = 1.5;
   motor.camara.fov = 50;
   motor.camara.updateProjectionMatrix();
 
@@ -123,6 +124,9 @@ export function iniciarPantallaMenu(ctx) {
       motor.camara.position.set(Math.sin(ang) * 9, 2.6, Math.cos(ang) * 9);
       motor.camara.lookAt(0, 1.1, 0);
       figuras.forEach((a) => a.actualizar(dt, { velocidad: 0, apoyado: true, velocidadVertical: 0, giro: 0 }));
+      // De vez en cuando alguno saluda, baila o ríe
+      proximoEmote -= dt;
+      if (proximoEmote <= 0) { proximoEmote = 2.5 + Math.random() * 2; figuras[Math.floor(Math.random() * figuras.length)].emote(Math.floor(Math.random() * 3)); }
     },
     salir() { panel.remove(); }
   };

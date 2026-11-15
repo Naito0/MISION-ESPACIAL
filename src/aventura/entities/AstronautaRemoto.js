@@ -26,8 +26,9 @@ export function crearEtiqueta(texto, colorHex = 0x7cc4ff) {
 }
 
 export class AstronautaRemoto {
-  constructor(escena, nombre, colorRol) {
-    this.astronauta = crearAstronauta(colorRol);
+  constructor(escena, nombre, colorRol, personajeId = null, gravedad = 9.81) {
+    this.astronauta = crearAstronauta(colorRol, personajeId);
+    this.astronauta.gravedad = gravedad;
     this.etiqueta = crearEtiqueta(nombre, colorRol);
     this.etiqueta.position.y = 2.25;
     this.astronauta.raiz.add(this.etiqueta);

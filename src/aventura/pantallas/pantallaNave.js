@@ -25,6 +25,7 @@ import diagnosticosJSON from '../../data/diagnosticos.json';
 import { mostrarDiagnostico, mostrarTarjeta } from '../ui/tarjetas.js';
 import hechosJSON from '../../data/hechos_reales.json';
 import personajesJSON from '../../data/personajes.json';
+import { crearEtiqueta } from '../entities/AstronautaRemoto.js';
 
 const PERSONAJES = personajesJSON.personajes;
 
@@ -84,13 +85,23 @@ export function iniciarPantallaNave(ctx) {
     const puesto = pos.clone().add(haciaCentro).setY(0.05);
     esc.puntoInicio = puesto;
     const pj = pjDe(m.rol);
-    const j = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, pj ? parseInt(pj.color.slice(1), 16) : colorDe(m.rol));
+    const j = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDe(m.rol), pj?.id); // traje del color del ROL
     j.limitarA(m.limites);
     j.astronauta.raiz.rotation.y = Math.atan2(-haciaCentro.x, -haciaCentro.z); // mira a la consola
     j.anguloAnterior = j.astronauta.raiz.rotation.y;
     j.camara.yaw = j.astronauta.raiz.rotation.y + Math.PI; // la cámara empieza detrás
     return { ...m, jugador: j, puesto, consolaPos: pos, bot: bots.includes(m.rol), personaje: pj };
   });
+  // MULTIJUGADOR: el nombre de cada jugador flota sobre la cabeza de su personaje
+  if (conexion.enRed) {
+    for (const a of astronautas) {
+      const duenio = estado.jugadores.find((x) => x.roles.includes(a.rol));
+      if (!duenio) continue;
+      const et = crearEtiqueta(duenio.id === conexion.id ? `${duenio.nombre} (tú)` : duenio.nombre, colorDe(a.rol));
+      et.position.y = 2.35;
+      a.jugador.astronauta.raiz.add(et);
+    }
+  }
   // El jugador empieza con SU astronauta (el de su puesto en la sala)
   const propio = Math.max(0, TRIPULACION.findIndex((m) => yoJ && yoJ.roles.includes(m.rol)));
   let activo = propio;
@@ -181,7 +192,7 @@ export function iniciarPantallaNave(ctx) {
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
-        if (m.texto.startsWith('⚠')) efecto('alarma'); // la emergencia ya se ve en el aviso grande
+        if (m.texto.startsWith('⚠')) { efecto('alarma'); astronautas.forEach((a) => a.jugador.astronauta.alarma?.()); } // cada personaje reacciona a su manera
         else avisar(m.texto);
       }
     }
@@ -215,6 +226,7 @@ export function iniciarPantallaNave(ctx) {
   // en el juego 1 minuto real = 1 segundo, para que se vea sin esperar tanto.
   let senal = null;
   function enviarSenal() {
+    astronautas.forEach((a) => a.jugador.astronauta.senal?.()); // las orejas de Zuri captan la señal
     const r = retrasoSenal(destino);
     const segundosReales = r.min + Math.random() * (r.max - r.min);
     const enJuego = segundosReales < 60 ? segundosReales : segundosReales / 60;
@@ -334,6 +346,12 @@ export function iniciarPantallaNave(ctx) {
       tiempoEnvio += dt;
       if (conexion.enRed && tiempoEnvio >= 0.1) { tiempoEnvio = 0; conexion.enviarPosicion({ ...yo.jugador.estadoRed(), rol: yo.rol }); }
       esc.puertas.forEach((p) => p.actualizar(dt, astronautas.map((a) => a.jugador.pies)));
+      // Al pasar por una puerta, a Faro se le traban los cuernos
+      for (const a of astronautas) {
+        const cerca = esc.puertas.some((p) => Math.hypot(p.centro.x - a.jugador.pies.x, p.centro.z - a.jugador.pies.z) < 0.9);
+        if (cerca && !a.enPuerta) a.jugador.astronauta.puerta?.();
+        a.enPuerta = cerca;
+      }
       esc.actualizar(dt, t);
       actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];

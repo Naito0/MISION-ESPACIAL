@@ -1,9 +1,46 @@
 {
-  "_comentario": "Personajes para elegir en la sala. Son originales (no copian personajes de series, películas ni videojuegos). Cualquier personaje puede tener cualquier rol. 'color' = color del traje. 'modelo' = archivo GLB en public/models/ (null = el astronauta hecho con formas). 'rolPorDefecto' = rol que toma si queda como bot. Para cambiar a animales: poner aquí el nombre, el color y el modelo, y anotar los créditos en CREDITOS.md.",
+  "_comentario": "Personajes ORIGINALES del equipo (no copian a ningún personaje de series, películas ni videojuegos). Se dibujan con formas 3D en src/aventura/entities/Personaje.js, sin modelos descargados. 'colores' = colores naturales del animal; el traje y la mochila usan el color del ROL que tenga. 'color' = color del botón en la sala. 'rolPorDefecto' = rol que toma si queda como bot. Cualquier personaje puede tener cualquier rol.",
   "personajes": [
-    { "id": "nova", "nombre": "Nova", "color": "#ff8c42", "modelo": null, "rolPorDefecto": "comandante" },
-    { "id": "kai", "nombre": "Kai", "color": "#4cc9f0", "modelo": null, "rolPorDefecto": "ingeniero" },
-    { "id": "lumi", "nombre": "Lumi", "color": "#8ee26b", "modelo": null, "rolPorDefecto": "cientifico" },
-    { "id": "rocco", "nombre": "Rocco", "color": "#f15bb5", "modelo": null, "rolPorDefecto": "comunicaciones" }
+    {
+      "id": "kelvin",
+      "nombre": "Kelvin",
+      "especie": "pingüino",
+      "rolPorDefecto": "cientifico",
+      "color": "#2b3040",
+      "colores": { "pelo": "#23262f", "cara": "#f4f3ee", "pico": "#f39a2b", "patas": "#f39a2b", "bufanda": "#d9474b", "tirita": "#f2c2a0" },
+      "frase": "¿Alguien más tiene frío? ¡Brrr! Hasta junto al motor…",
+      "gag": "Siempre tiene frío: tiembla, lleva bufanda y una tirita, y se le congela el casco.",
+      "origenNombre": "Su nombre viene de la escala de temperatura Kelvin."
+    },
+    {
+      "id": "faro",
+      "nombre": "Faro",
+      "especie": "venado",
+      "rolPorDefecto": "comandante",
+      "color": "#a8693a",
+      "colores": { "pelo": "#a8693a", "cara": "#f1dfc2", "nariz": "#2a1a12", "cuernos": "#e8d6b0", "patas": "#4a2c1a", "orejas": "#d9a27a" },
+      "frase": "¡Todo bajo control! …¿Eso fue una alarma?",
+      "gag": "Cuando suena una alarma se queda paralizado con ojos enormes; sus cuernos se traban en las puertas."
+    },
+    {
+      "id": "zuri",
+      "nombre": "Zuri",
+      "especie": "zorra del desierto",
+      "rolPorDefecto": "comunicaciones",
+      "color": "#e2b67a",
+      "colores": { "pelo": "#e7c08a", "cara": "#fbf3e4", "nariz": "#2a1e18", "orejas": "#f2a9a0", "patas": "#c9965e", "cola": "#3a2a20" },
+      "frase": "¡Shh! Mis orejas captan una señal… ¡A-achís!",
+      "gag": "Sus orejas enormes se mueven como antenas al captar señales; su estornudo la hace girar."
+    },
+    {
+      "id": "tuerca",
+      "nombre": "Tuerca",
+      "especie": "mapache",
+      "rolPorDefecto": "ingeniero",
+      "color": "#8c9099",
+      "colores": { "pelo": "#8c9099", "cara": "#f2f2f2", "antifaz": "#26272c", "nariz": "#1d1d20", "patas": "#3a3b40", "cola": "#3a3b40" },
+      "frase": "Ooh, ¡qué tornillo tan brillante! …Lo guardo para después.",
+      "gag": "Colecciona cosas brillantes: saca tornillos de la nave y los guarda; en las emergencias saca de la mochila la pieza justa."
+    }
   ]
 }

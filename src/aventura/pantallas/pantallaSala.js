@@ -13,12 +13,11 @@ import { cielo } from '../engine/decoracion.js';
 import { nuevoEscenario, cilindro, material } from '../engine/construccion.js';
 import { crearAstronauta } from '../entities/fabricaAstronautas.js';
 import { crearEtiqueta } from '../entities/AstronautaRemoto.js';
-import { TRIPULACION, hexDe } from '../tripulacion.js';
+import { TRIPULACION, hexDe, colorDe } from '../tripulacion.js';
 import personajesJSON from '../../data/personajes.json';
 import { efecto } from '../audio.js';
 
 const PERSONAJES = personajesJSON.personajes;
-const colorNum = (hex) => parseInt(hex.replace('#', ''), 16);
 
 /** ctx = { motor, hud, conexionActiva, irA, alSalirDeSala() } */
 export function iniciarPantallaSala(ctx) {
@@ -42,6 +41,12 @@ export function iniciarPantallaSala(ctx) {
   panel.className = 'panel lobby sala';
   ctx.hud.appendChild(panel);
   let error = '';
+  let presentar = null; // personaje que se presenta al elegirlo
+  let fraseActual = null;
+  const pintarFrase = () => {
+    const el = panel.querySelector('.frase-pj');
+    if (el && fraseActual) el.innerHTML = `💬 <b>${fraseActual.nombre}</b> (${fraseActual.especie}): «${fraseActual.frase}»<br><small>${fraseActual.gag}</small>`;
+  };
 
   function dibujarFondo(e) {
     const porRol = e.personajesPorRol || {};
@@ -53,10 +58,12 @@ export function iniciarPantallaSala(ctx) {
       if (clave === f.clave) continue;
       f.clave = clave;
       if (f.a) f.a.raiz.removeFromParent();
-      f.a = crearAstronauta(colorNum(pj.color));
+      f.a = crearAstronauta(colorDe(f.m.rol), pj.id); // traje del color del rol
+      // Si es el personaje que ACABO de elegir: presentación con su frase
+      if (presentar === pj.id) { f.a.presentar(); f.a.decir('¡Hola!'); fraseActual = pj; presentar = null; pintarFrase(); }
       f.a.raiz.position.set(-3.3 + f.i * 2.2, 0, 0);
-      f.etiqueta = crearEtiqueta(texto, colorNum(pj.color));
-      f.etiqueta.position.y = 2.25;
+      f.etiqueta = crearEtiqueta(texto, colorDe(f.m.rol));
+      f.etiqueta.position.y = 2.6;
       f.a.raiz.add(f.etiqueta);
       escena.add(f.a.raiz);
     }
@@ -86,8 +93,9 @@ export function iniciarPantallaSala(ctx) {
         const duenio = e.jugadores.find((j) => j.personaje === p.id);
         const mio = duenio && duenio.id === yo.id;
         return `<button class="personaje ${mio ? 'activo' : ''}" data-pj="${p.id}" ${duenio && !mio ? 'disabled' : ''}>
-          <span class="pj-color" style="background:${p.color}"></span>${p.nombre}${duenio && !mio ? `<small> · ${duenio.nombre}</small>` : ''}</button>`;
+          <span class="pj-color" style="background:${p.color}"></span><span>${p.nombre} <small>${p.especie}</small></span>${duenio && !mio ? `<small> · ${duenio.nombre}</small>` : ''}</button>`;
       }).join('')}</div>
+      <p class="frase-pj"></p>
       <h3>3. ¿Listo?</h3>
       <button id="listo" class="${yo.listo ? 'activo' : ''}">${yo.listo ? '✋ Ya no estoy listo' : '✅ ¡Listo!'}</button>
       ${soyAnfitrion
@@ -97,7 +105,7 @@ export function iniciarPantallaSala(ctx) {
       <p class="error">${error}</p>`;
     const responder = async (p) => { const r = await p; if (r && r.error) { error = r.error; efecto('error'); dibujar(conexion.estado); } else { error = ''; efecto('clic'); } };
     panel.querySelectorAll('[data-rol]').forEach((b) => { b.onclick = () => responder(conexion.accion('puesto', { rol: b.dataset.rol })); });
-    panel.querySelectorAll('[data-pj]').forEach((b) => { b.onclick = () => responder(conexion.accion('personaje', { id: b.dataset.pj })); });
+    panel.querySelectorAll('[data-pj]').forEach((b) => { b.onclick = () => { presentar = b.dataset.pj; responder(conexion.accion('personaje', { id: b.dataset.pj })); }; });
     panel.querySelector('#listo').onclick = () => responder(conexion.accion('listoSala'));
     const iniciar = panel.querySelector('#iniciar');
     if (iniciar) iniciar.onclick = () => responder(conexion.accion('empezarConBots'));
@@ -107,6 +115,7 @@ export function iniciarPantallaSala(ctx) {
       navigator.clipboard?.writeText(e.codigo).then(() => { copiar.textContent = '✅ ¡Copiado!'; }, () => { copiar.textContent = `Código: ${e.codigo}`; });
     };
     dibujarFondo(e);
+    pintarFrase();
     pintarRed();
   }
   // Indicador de conexión: "Conectando…", "Conectado" o "Error: …" (en español)

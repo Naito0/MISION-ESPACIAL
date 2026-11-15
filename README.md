@@ -59,6 +59,9 @@ Todo corre dentro del navegador: no hace falta servidor ni internet. El juego co
 
 **Link publicado:** https://naito0.github.io/MISION-ESPACIAL/
 
+### Personajes
+Cuatro animales astronautas originales: **Kelvin** (pingüino friolento), **Faro** (venado asustadizo), **Zuri** (zorra del desierto con orejas-antena) y **Tuerca** (mapache coleccionista). Cualquiera puede tener cualquier puesto: el traje y la mochila toman el color del puesto. Se eligen en la sala; al elegirlo, se presenta con su frase. Ver [CREDITOS.md](CREDITOS.md).
+
 ### Jugar solo
 Escribe tu nombre → **🧑‍🚀 Jugar solo** → elige tu puesto y tu personaje → **¡Listo!** → **Iniciar partida**. Los otros 3 puestos los ocupan bots. Funciona **sin internet**.
 
@@ -147,8 +150,9 @@ npm test           # pruebas de las reglas (hangar, viaje, recomendaciones, apre
 | Correr / saltar | **Shift** / **Espacio** |
 | Usar una consola, recoger, analizar, salir por la esclusa | **E** |
 | Aterrizar | Mantener **Espacio** (o **W**, o el botón "Motor") para frenar · **← →** para ir a la zona verde · **I** ignorar una alarma (**O** abortar) |
-| Minijuegos | Cada uno muestra sus teclas en una demo de 3 segundos la primera vez (flechas, mouse, Espacio) |
+| Minijuegos | La primera vez se ve una demostración (el minijuego se juega solo) o una tarjeta con objetivo, controles y cómo ganar; después, botón **❓ Ver cómo se juega** |
 | Tarjetas y diagnóstico | Clic en la respuesta · **"¡Entendido!"** para seguir (mientras tanto el juego está en pausa) |
+| Emotes (se ven en multijugador) | **5** saludar · **6** bailar · **7** reír · **8** el gag de tu personaje |
 | Zoom de la cámara | Rueda del mouse |
 | Menú | **Esc**: **"📖 Lo que aprendí"**, **"🏆 Sala de trofeos"**, dificultad, **tamaño de texto (Normal / Grande)**, calidad gráfica, sensibilidad y sonido |
 
@@ -261,6 +265,7 @@ Claude Code (un asistente de programación con inteligencia artificial) escribi�
 - El motor 3D, los escenarios, los astronautas y los minijuegos.
 - Las reglas del juego (viaje, hangar, recomendaciones, logros) y las pruebas automáticas.
 - El multijugador con PeerJS, el Modo prueba y las demostraciones animadas de los minijuegos.
+- Los 4 personajes (Kelvin, Faro, Zuri y Tuerca) dibujados con formas 3D, a partir de las ideas del equipo (animal, nombre, frase y gag).
 - Los textos de las tarjetas, los diagnósticos y la documentación.
 
 También buscó en páginas de la NASA los datos y los hechos reales, y guardó cada uno con su enlace y una cita. Lo que no pudo confirmar quedó marcado "verificar" o se quitó, para que lo revisemos nosotros. Probó cada cambio en un navegador automático.

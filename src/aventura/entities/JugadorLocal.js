@@ -10,13 +10,23 @@ import { CamaraTercera } from '../engine/camaraTercera.js';
 import { crearAstronauta } from './fabricaAstronautas.js';
 import { sensibilidad3D } from '../../systems/preferencias.js';
 
+// EMOTES (teclas 5 a 8): los hace el personaje que el jugador está manejando ahora.
+// Se ven en multijugador porque viajan en estadoRed() como la acción del personaje.
+let jugadorActivo = null;
+window.addEventListener('keydown', (ev) => {
+  if (window.consolaAbierta || !jugadorActivo) return;
+  const n = ['Digit5', 'Digit6', 'Digit7', 'Digit8', 'Numpad5', 'Numpad6', 'Numpad7', 'Numpad8'].indexOf(ev.code);
+  if (n >= 0) jugadorActivo.astronauta.emote?.(n % 4);
+});
+
 export class JugadorLocal {
   /**
    * @param escena THREE.Scene · @param mundo MundoFisico · @param escenario (con colisiones y puntoInicio)
    * @param camara THREE.PerspectiveCamera · @param control (entrada.js) · @param colorRol
    */
-  constructor(escena, mundo, escenario, camara, control, colorRol) {
-    this.astronauta = crearAstronauta(colorRol);
+  constructor(escena, mundo, escenario, camara, control, colorRol, personajeId = null) {
+    this.astronauta = crearAstronauta(colorRol, personajeId);
+    this.astronauta.gravedad = mundo.gravedad; // Luna y Marte: saltos flotantes
     escena.add(this.astronauta.raiz);
     this.cuerpo = new CuerpoJugador(mundo, escenario.puntoInicio);
     this.camara = new CamaraTercera(camara, escenario.colisiones);
@@ -76,6 +86,7 @@ export class JugadorLocal {
    *               false = está "en espera" trabajando en su área (no mueve la cámara).
    */
   actualizar(dt, activo = true) {
+    if (activo) jugadorActivo = this;
     const e = activo ? this.control.leer() : null;
     this.ultimaEntrada = e;
     if (activo) {

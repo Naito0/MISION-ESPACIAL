@@ -51,7 +51,8 @@ export function iniciarPantallaSuperficie(ctx) {
   esc.puntoInicio = new THREE.Vector3(-0.6 + indice * 1.2, 0.05, 2.8);
   // En la superficie el jugador controla al CIENTÍFICO (analiza las muestras);
   // los otros 3 trabajan de fondo (astronautasFondo.js)
-  const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, soyCientifico ? colorDe('cientifico') : colorDeJugador(yo));
+  const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, soyCientifico ? colorDe('cientifico') : colorDeJugador(yo),
+    soyCientifico ? (e0.personajesPorRol || {}).cientifico : (yo.personaje || (e0.personajesPorRol || {})[yo.roles[0]]));
   ambiente(true);
   ctx.aprendizaje?.evento('superficie:llegada', destino.id); // en Marte: tormentas de polvo
 
@@ -105,7 +106,7 @@ export function iniciarPantallaSuperficie(ctx) {
       if (!remotos.has(id)) {
         const j = e.jugadores.find((x) => x.id === id);
         if (!j) continue;
-        remotos.set(id, new AstronautaRemoto(escena, j.nombre, colorDeJugador(j)));
+        remotos.set(id, new AstronautaRemoto(escena, j.nombre, colorDeJugador(j), j.personaje || (conexion.estado.personajesPorRol || {})[j.roles[0]], destino.gravedad));
       }
       remotos.get(id).recibir(p);
     }

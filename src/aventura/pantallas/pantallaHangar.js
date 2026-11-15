@@ -79,7 +79,7 @@ export function iniciarPantallaHangar(ctx) {
   // Astronautas de la tripulación alrededor de la plataforma
   const tripulacion = [];
   conexion.estado.jugadores.forEach((j, i) => {
-    const a = crearAstronauta(colorDeJugador(j));
+    const a = crearAstronauta(colorDeJugador(j), j.personaje || (conexion.estado?.personajesPorRol || {})[j.roles[0]]);
     const ang = Math.PI * 0.75 + i * 0.5;
     a.raiz.position.set(Math.sin(ang) * 5.2, 0, Math.cos(ang) * 5.2);
     a.raiz.rotation.y = ang + Math.PI;

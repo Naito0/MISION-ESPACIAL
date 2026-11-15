@@ -326,8 +326,8 @@ test('sala con bots: puestos y personajes sin repetir, listos, y los bots ocupan
   assert.deepEqual(s.accion('a', 'puesto', { rol: 'ingeniero' }), { ok: true });
   assert.ok(s.accion('b', 'puesto', { rol: 'ingeniero' }).error, 'puesto repetido');
   s.accion('b', 'puesto', { rol: 'cientifico' });
-  s.accion('a', 'personaje', { id: 'kai' });
-  assert.ok(s.accion('b', 'personaje', { id: 'kai' }).error, 'personaje repetido');
+  s.accion('a', 'personaje', { id: 'zuri' });
+  assert.ok(s.accion('b', 'personaje', { id: 'zuri' }).error, 'personaje repetido');
   assert.ok(s.accion('a', 'empezarConBots').error, 'faltan listos');
   s.accion('a', 'listoSala'); s.accion('b', 'listoSala');
   assert.ok(s.accion('b', 'empezarConBots').error, 'solo el anfitrión inicia');
@@ -338,7 +338,7 @@ test('sala con bots: puestos y personajes sin repetir, listos, y los bots ocupan
   // Cada rol tiene un personaje y no se repiten
   const pj = Object.values(s.personajesPorRol());
   assert.equal(new Set(pj).size, 4);
-  assert.equal(s.personajesPorRol().ingeniero, 'kai');
+  assert.equal(s.personajesPorRol().ingeniero, 'zuri');
   // Si Beto se desconecta en plena partida, su puesto pasa a ser un bot
   s.salir('b');
   assert.deepEqual([...s.bots].sort(), ['cientifico', 'comandante', 'comunicaciones']);

@@ -126,6 +126,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .consola-botones { display: flex; gap: 8px; justify-content: center; }
 #hud .consola-ayuda { font-size: var(--tc); }
 @keyframes parpadeo { 50% { opacity: 0.55; } }
+#hud .frase-pj { font-size: var(--t); color: #ffe9b0; margin: 6px 0; }
+#hud .frase-pj:empty { display: none; }
+#hud .frase-pj small { color: #c8d2ec; font-size: var(--tc); }
 /* ---- Indicador de conexión (multijugador) ---- */
 #hud .red-estado { font-size: var(--t); font-weight: bold; padding: 6px 10px; border-radius: 8px; margin: 6px 0; background: rgba(255, 209, 102, 0.15); color: #ffe9b0; }
 #hud .red-estado.conectado { background: rgba(91, 224, 138, 0.15); color: #b8f5cc; }

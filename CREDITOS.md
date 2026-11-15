@@ -10,31 +10,20 @@
 | [Express](https://expressjs.com/) 5.1.0 | Servidor del anfitrión | MIT |
 | [Vite](https://vite.dev/) | Compilar el juego | MIT |
 
-## Modelos 3D
+## Personajes y modelos 3D
 
-**Por ahora el juego no usa modelos descargados.** Los astronautas, la nave, las salas y los planetas están hechos con formas simples de Three.js dentro del código (`src/aventura/entities/` y `src/aventura/escenarios/`). Los sonidos se generan con Web Audio (no hay archivos de audio).
+**El juego no usa modelos descargados.** Todo está hecho con formas simples de Three.js dentro del código (`src/aventura/entities/` y `src/aventura/escenarios/`). Los sonidos se generan con Web Audio (no hay archivos de audio).
 
-### Opcional: astronauta en 3D descargado (CC0)
+Los 4 tripulantes son **personajes originales del equipo**: no copian a personajes de series, películas ni videojuegos.
 
-El juego busca el archivo **`public/models/astronauta.glb`**. Si existe, lo usa en lugar del astronauta hecho con formas; si no, sigue funcionando igual.
+| Personaje | Animal | Su gag |
+|---|---|---|
+| **Kelvin** | pingüino | Siempre tiene frío: tiembla, lleva bufanda y una tirita, y se le congela el casco. Su nombre viene de la escala de temperatura Kelvin. |
+| **Faro** | venado | Con una alarma se queda paralizado con ojos enormes; sus cuernos se traban en las puertas. |
+| **Zuri** | zorra del desierto | Sus orejas enormes se mueven como antenas al captar señales; su estornudo la hace girar. |
+| **Tuerca** | mapache | Colecciona cosas brillantes: saca tornillos de la nave; en las emergencias saca de la mochila la pieza justa. |
 
-Opción sugerida (licencia **CC0**, de dominio público, se puede usar sin pedir permiso):
-
-1. Abrir **Quaternius – Ultimate Space Kit**: https://quaternius.com/packs/ultimatespacekit.html
-2. Pulsar el botón de descarga y elegir el formato **glTF**.
-3. Dentro del ZIP, buscar un **personaje** (astronauta). *Antes de usarlo, comprobar que el paquete trae un astronauta con animaciones: no lo pudimos verificar sin descargarlo.*
-4. Si el archivo es **`.glb`**: renombrarlo a `astronauta.glb` y copiarlo a `public/models/`.
-   Si es **`.gltf`** (con un `.bin` aparte): convertirlo a un solo archivo con
-   `npx gltf-pipeline -i personaje.gltf -o public/models/astronauta.glb`.
-5. Ejecutar `npm run servidor` (o `npm run build`) y comprobar en el juego que se ve bien.
-6. **Anotar aquí abajo** el nombre del paquete, el autor, el enlace y la licencia.
-
-Otras fuentes CC0 revisadas: [Kenney – Space Kit](https://kenney.nl/assets/space-kit), Quaternius – Sci-Fi Essentials Kit y Modular Sci-Fi Megakit.
-
-| Modelo | Autor | Enlace | Licencia |
-|---|---|---|---|
-| *(ninguno todavía)* | | | |
-
+Están en `src/aventura/entities/Personaje.js` (formas, sombreado tipo caricatura, contorno, ojos, bocas y animaciones) y sus datos en `src/data/personajes.json` (nombre, colores, frase y gag). El astronauta viejo (`Astronauta.js`) quedó en el código sin usarse.
 ## Datos
 
 Ver la sección **"Fuentes de los datos"** del [README](README.md) (fichas técnicas de la NASA, NSSDC, y misiones reales con sus enlaces).

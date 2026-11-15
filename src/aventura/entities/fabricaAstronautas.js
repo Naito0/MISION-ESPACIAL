@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as clonarConEsqueleto } from 'three/addons/utils/SkeletonUtils.js';
 import { Astronauta } from './Astronauta.js';
+import { Personaje, PERSONAJES } from './Personaje.js';
 
 // Ruta RELATIVA a donde está publicado el juego (BASE_URL = './'), así funciona
 // aunque el link esté dentro de una subcarpeta (por ejemplo en GitHub Pages).
@@ -34,8 +35,18 @@ export async function prepararModelos(alProgreso = () => {}) {
   }
 }
 
-/** Crea un astronauta del color del rol. */
-export function crearAstronauta(colorRol) {
+/**
+ * Crea un tripulante: uno de los 4 PERSONAJES originales (Personaje.js) con el
+ * traje del color del rol. Si no se dice cuál, se van turnando.
+ * (El astronauta viejo, Astronauta.js / AstronautaGLB, queda en el código sin usarse.)
+ */
+let turno = 0;
+export function crearAstronauta(colorRol, personajeId = null) {
+  const id = personajeId || PERSONAJES[turno++ % PERSONAJES.length].id;
+  return new Personaje(id, colorRol);
+}
+/** Versión vieja (no se usa): astronauta GLB o procedural. */
+export function crearAstronautaViejo(colorRol) {
   return plantilla ? new AstronautaGLB(plantilla, colorRol) : new Astronauta(colorRol);
 }
 
