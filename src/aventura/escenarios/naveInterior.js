@@ -17,6 +17,7 @@ import { nuevoEscenario, caja, cilindro, material, texturaCuadricula, habitacion
 import { consola, pantalla, franjaLuz, tuberia, pilaCajas, cielo, particulas } from '../engine/decoracion.js';
 import { Puerta } from '../entities/Puerta.js';
 import { ObjetoAbrible } from '../entities/ObjetoAbrible.js';
+import { texturasNave, vestirPared, agregarDetallesNave } from './detallesNave.js';
 
 const ALTO = 3.4;
 // Colores de cada rol (los mismos de roles.json)
@@ -32,9 +33,12 @@ export function crearNaveInterior(o = {}) {
   esc.salas = {};
   const animados = []; // cosas que se mueven cada cuadro
 
-  const piso = material(0xffffff, { textura: texturaCuadricula('#262d40', '#3a4565', 24), rugosidad: 0.7, metal: 0.3 });
-  const pared = material(0x5a6481, { rugosidad: 0.55, metal: 0.45 });
-  const paredClara = material(0x8a95b3, { rugosidad: 0.5, metal: 0.35 });
+  // Piso de rejilla metálica y paredes con paneles (texturas hechas con código, compartidas)
+  const calidad = o.calidad || 'medio';
+  const texPiso = texturasNave().piso.clone(); texPiso.repeat.set(24, 24); texPiso.needsUpdate = true;
+  const piso = material(0xffffff, { textura: texPiso, rugosidad: 0.55, metal: 0.55 });
+  const pared = vestirPared(material(0x7d88a6, { rugosidad: 0.55, metal: 0.45 }), calidad, [4, 1]);
+  const paredClara = vestirPared(material(0xa4aecb, { rugosidad: 0.5, metal: 0.35 }), calidad, [6, 1]);
 
   // ---------- Pasillo central (z de -24 a 8) ----------
   caja(esc, 4, 0.2, 32, piso, 0, -0.1, -8, { sombra: false });
@@ -215,6 +219,27 @@ export function crearNaveInterior(o = {}) {
   esc.puntoInicio = new THREE.Vector3(0, 0.05, 2);
   esc.colorFondo = 0x02030a;
   esc.niebla = null;
+  // ---- Detalles: luces LED, paneles de luz, tuberías y cables, marcos de puerta, letreros y rincones ----
+  agregarDetallesNave(esc, {
+    calidad, alto: ALTO,
+    salas: [
+      { cx: 0, cz: -30, ancho: 12, prof: 12, color: COLOR_SALA.comandante, tuberias: { x: 5.65, z: -30, largo: 10, eje: 'z' } },
+      { cx: -7, cz: -16, ancho: 10, prof: 10, color: COLOR_SALA.ingeniero, tuberias: { x: -11.65, z: -16, largo: 9, eje: 'z' } },
+      { cx: 7, cz: -16, ancho: 10, prof: 10, color: COLOR_SALA.cientifico, tuberias: { x: 11.65, z: -16, largo: 9, eje: 'z' } },
+      { cx: -7, cz: -4, ancho: 10, prof: 10, color: COLOR_SALA.comunicaciones, tuberias: { x: -7, z: -8.65, largo: 9, eje: 'x' } },
+      { cx: 7, cz: -4, ancho: 10, prof: 10, color: COLOR_SALA.neutro, tuberias: { x: 11.65, z: -4, largo: 9, eje: 'z' } },
+      { cx: 0, cz: 12, ancho: 6, prof: 8, color: 0xff6b6b },
+      { cx: 0, cz: -8, ancho: 4, prof: 32, color: 0x2b5cab }
+    ],
+    puertas: [
+      { puerta: esc.puertas[0], texto: '🔧 INGENIERÍA', color: COLOR_SALA.ingeniero, haciaX: 1, haciaZ: 0 },
+      { puerta: esc.puertas[1], texto: '🔬 LABORATORIO', color: COLOR_SALA.cientifico, haciaX: -1, haciaZ: 0 },
+      { puerta: esc.puertas[2], texto: '📡 COMUNICACIONES', color: COLOR_SALA.comunicaciones, haciaX: 1, haciaZ: 0 },
+      { puerta: esc.puertas[3], texto: '🩺 ENFERMERÍA', color: COLOR_SALA.neutro, haciaX: -1, haciaZ: 0 },
+      { puerta: esc.puertas[4], texto: '👨‍✈️ CABINA', color: COLOR_SALA.comandante, haciaX: 0, haciaZ: 1 },
+      { puerta: esc.puertas[5], texto: '🚪 ESCLUSA', color: 0xff6b6b, haciaX: 0, haciaZ: -1 }
+    ]
+  });
   esc.interior = true;
   esc.actualizar = (dt, t) => animados.forEach((f) => f(dt, t));
   return esc;

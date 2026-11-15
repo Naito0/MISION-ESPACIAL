@@ -55,7 +55,7 @@ export function iniciarPantallaNave(ctx) {
   // Por el ventanal se ve el destino elegido (su color sale de destinos.json)
   const destino = DESTINOS.find((d) => d.id === estado.destinoId);
   const colorPlaneta = destino ? parseInt(destino.color.replace('#', ''), 16) : ctx.colorPlaneta;
-  const esc = crearNaveInterior({ colorPlaneta, particulas: motor.calidad.sombras });
+  const esc = crearNaveInterior({ colorPlaneta, particulas: motor.calidad.sombras, calidad: motor.nivelCalidad });
   const escena = new THREE.Scene();
   escena.background = new THREE.Color(esc.colorFondo);
   const luces = crearLuces(escena, { sombras: false, intensidad: 0.55, intensidadSol: 0.25 });
