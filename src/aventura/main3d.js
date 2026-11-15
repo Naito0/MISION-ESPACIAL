@@ -27,6 +27,7 @@ import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
 import { pausar, reanudar, estaPausado } from './pausa.js';
+import { confirmarEnJuego } from './ui/confirmar.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
@@ -50,7 +51,8 @@ hud.innerHTML = `
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
     <span class="tecla">E</span> usar · <span class="ayuda-cambio" hidden><span class="tecla">1-4</span> tomar un bot · </span><span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">Esc</span> menú
   </div>
-  <div class="fps"></div>`;
+  <div class="fps"></div>
+  <button class="panel salir-menu" hidden>🚪 Salir al menú</button>`;
 const capa = document.createElement('div'); // capa de cada pantalla
 hud.appendChild(capa);
 // Tarjetas "¿Qué aprendiste?" y diario "Lo que aprendí"
@@ -62,7 +64,8 @@ const menu = crearMenuPausa(hud, {
   alCerrar: () => reanudar('menu'),
   extras: [
     { texto: '📖 Lo que aprendí', accion: () => { pausar('diario'); aprendizaje.abrirDiario(() => reanudar('diario')); } },
-    { texto: '🏆 Sala de trofeos', accion: () => { pausar('trofeos'); logros.abrirSala(() => reanudar('trofeos')); } }
+    { texto: '🏆 Sala de trofeos', accion: () => { pausar('trofeos'); logros.abrirSala(() => reanudar('trofeos')); } },
+    { texto: '🚪 Salir al menú', accion: () => pedirSalida() }
   ]
 });
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.pointerLockElement && !window.consolaAbierta) menu.alternar(); });
@@ -81,6 +84,8 @@ function irA() {
   capa.innerHTML = '';
   // La pantalla que corresponde a la fase actual de la partida
   const fase = ctx.conexionActiva?.estado?.fase;
+  // Botón "Salir al menú": durante la partida (no en el menú ni en la sala, que ya tiene "Volver")
+  hud.querySelector('.salir-menu').hidden = !ctx.conexionActiva || fase === 'lobby';
   if (!ctx.conexionActiva) pantalla = iniciarPantallaMenu(ctx);
   else if (fase === 'lobby') pantalla = iniciarPantallaSala(ctx);
   else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
@@ -147,6 +152,22 @@ ctx.alCrearSala = async (nombre) => {
 };
 ctx.alUnirse = async (codigo, nombre) => entrarEnRed(await unirseASalaEnRed(codigo, nombre));
 ctx.alSalirDeSala = () => { const c = ctx.conexionActiva; ctx.conexionActiva = null; c?.salir?.(); irA(); };
+
+// ---- Salir al menú (botón del HUD y menú de Esc), con confirmación dentro del juego ----
+// Un jugador: vuelve al menú. Invitado: su puesto pasa a un bot (la sala lo detecta al
+// cerrarse la conexión). Anfitrión: la partida termina y todos vuelven al menú con un mensaje.
+async function pedirSalida() {
+  const c = ctx.conexionActiva;
+  if (!c) return;
+  const yo = c.estado?.jugadores?.find((j) => j.id === c.id);
+  const detalle = !c.enRed ? 'Vas a volver al menú principal y se pierde esta misión.'
+    : yo?.anfitrion ? 'Eres el anfitrión: la partida terminará para todos.'
+      : 'Tu puesto lo ocupará un bot y la partida sigue para los demás.';
+  if (!(await confirmarEnJuego('¿Seguro que quieres salir?', detalle))) return;
+  if (window.consolaAbierta) document.querySelector('.consola-cerrar')?.click();
+  ctx.alSalirDeSala();
+}
+hud.querySelector('.salir-menu').onclick = () => pedirSalida();
 
 const reloj = new THREE.Clock();
 motor.renderer.setAnimationLoop(() => {

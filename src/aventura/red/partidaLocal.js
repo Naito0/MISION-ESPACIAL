@@ -34,7 +34,7 @@ export function crearPartidaLocal() {
   // El reloj de la partida: 15 veces por segundo. Con la PAUSA REAL (tarjetas,
   // menú, diagnósticos) el tiempo de la misión no avanza.
   const PERIODO = 1000 / 15;
-  setInterval(() => {
+  const reloj = setInterval(() => {
     if (!sala) return;
     if (!estaPausado()) sala.tick(PERIODO / 1000);
     emitir();
@@ -54,5 +54,6 @@ export function crearPartidaLocal() {
   };
   c.enviarPosicion = (p) => sala && sala.posicion(c.id, p);
   c.infoServidor = async () => null;
+  c.salir = () => { clearInterval(reloj); sala = null; }; // "Salir al menú": se detiene el reloj de la partida
   return c;
 }

@@ -383,3 +383,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 
 /* Versión visible en el menú */
 #hud .version { font-size: 14px; color: #8a96b8; margin: 6px 0 0; text-align: center; }
+
+/* Salir al menú: botón del HUD y ventana de confirmación dentro del juego */
+#hud .salir-menu { position: absolute; top: 10px; right: 10px; width: auto; margin: 0; padding: 6px 12px; font-size: var(--tc); pointer-events: auto; cursor: pointer; z-index: 5; }
+#hud .salir-menu[hidden] { display: none; }
+#hud .confirmar-capa { position: absolute; inset: 0; background: rgba(0, 5, 15, 0.6); display: flex; align-items: center; justify-content: center; pointer-events: auto; z-index: 20; }
+#hud .confirmar { width: min(440px, 92vw); text-align: center; }
+#hud .confirmar .fila { display: flex; gap: 10px; justify-content: center; }
