@@ -10,7 +10,7 @@
 // =============================================================
 import { pausar } from '../pausa.js';
 import { efecto } from '../audio.js';
-import { mezclarLista } from '../../compartido/preguntas.js';
+import { opcionesDiagnostico, opcionesPrediccion } from '../../compartido/preguntas.js';
 
 let cadena = Promise.resolve(); // fila: cada tarjeta espera a la anterior
 const dominio = (url) => { try { return new URL(url).hostname; } catch { return url || ''; } };
@@ -65,17 +65,18 @@ export function mostrarDiagnostico(d, titulo = 'Diagnóstico') {
   cadena = cadena.then(() => new Promise((listo) => {
     const m = modal('diagnostico');
     const letras = ['A', 'B', 'C', 'D'];
-    const opciones = mezclarLista(d.opciones); // orden al azar: la correcta no es siempre la A
+    // Orden NUEVO al azar cada vez (Fisher-Yates); la correcta se reconoce por su id
+    const opciones = opcionesDiagnostico(d);
     m.caja.innerHTML = `
       <div class="tm-etiqueta">🔎 ${titulo}: piensa antes de arreglar</div>
       <h3>${d.pregunta}</h3>
-      <div class="dg-opciones">${opciones.map((o, i) => `<button class="boton dg-op" data-i="${i}"><b>${letras[i]})</b> ${o.texto}</button>`).join('')}</div>
+      <div class="dg-opciones">${opciones.map((o, i) => `<button class="boton dg-op" data-id="${o.id}"><b>${letras[i]})</b> ${o.texto}</button>`).join('')}</div>
       <p class="dg-explica"></p>
       <button class="boton tm-ok" hidden>🛠 ¡A arreglarlo!</button>`;
     let intentos = 0;
     m.caja.querySelectorAll('.dg-op').forEach((b) => {
       b.onclick = () => {
-        const o = opciones[Number(b.dataset.i)];
+        const o = opciones.find((x) => x.id === b.dataset.id);
         intentos++;
         const p = m.caja.querySelector('.dg-explica');
         if (o.correcta) {
@@ -106,15 +107,14 @@ export function mostrarDiagnostico(d, titulo = 'Diagnóstico') {
 export function mostrarPrediccion(p) {
   cadena = cadena.then(() => new Promise((listo) => {
     const m = modal('prediccion');
-    // Orden al azar; se recuerda cuál es la correcta por su texto
-    const opciones = mezclarLista(p.opciones);
-    const correcta = opciones.indexOf(p.opciones[p.correcta]);
+    // Orden NUEVO al azar cada vez; la correcta se reconoce por su id
+    const opciones = opcionesPrediccion(p);
     m.caja.innerHTML = `
       <div class="tm-etiqueta">🤔 Antes de comprar: ¿qué crees?</div>
       <h3>${p.pregunta}</h3>
-      <div class="pr-opciones">${opciones.map((o, i) => `<button class="boton pr-op" data-i="${i}">${o}</button>`).join('')}</div>`;
+      <div class="pr-opciones">${opciones.map((o) => `<button class="boton pr-op" data-id="${o.id}">${o.texto}</button>`).join('')}</div>`;
     m.caja.querySelectorAll('.pr-op').forEach((b) => {
-      b.onclick = () => { m.cerrar(); listo(Number(b.dataset.i) === correcta); };
+      b.onclick = () => { m.cerrar(); listo(opciones.find((x) => x.id === b.dataset.id).correcta); };
     });
   }));
   return cadena;

@@ -4,6 +4,10 @@ import { defineConfig } from 'vite';
 // (server/) o desde cualquier carpeta.
 export default defineConfig({
   base: './',
+  // Versión visible en el menú (para saber si el navegador muestra la última)
+  define: {
+    __VERSION__: JSON.stringify(`v10 · ${new Date().toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`)
+  },
   build: {
     outDir: 'dist',
     chunkSizeWarningLimit: 2000

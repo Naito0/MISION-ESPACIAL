@@ -22,6 +22,7 @@ import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
 import { crearPartidaSolo, crearSalaEnRed, unirseASalaEnRed } from '../red/conexion.js';
 import { abrirMinijuego, nuevaMisionMinijuegos } from './minijuegos/index.js';
+import { mostrarDiagnostico, mostrarPrediccion } from './ui/tarjetas.js';
 import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
@@ -159,7 +160,7 @@ motor.renderer.setAnimationLoop(() => {
   if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · calidad ${motor.calidad.nombre}`; cuadros = 0; acumulado = 0; }
 });
 
-window.aventura = { motor, THREE, irA, ctx, abrirMinijuego };
+window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, mostrarPrediccion }; // (para probar)
 
 // ---- Arranque: modelos → partida → primera pantalla ----
 (async () => {

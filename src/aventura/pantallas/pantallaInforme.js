@@ -146,7 +146,7 @@ export function iniciarPantallaInforme(ctx) {
     <ul class="causas aprendido">${resumen.map((f) => `<li class="bien"><span class="ap-icono">${f.icono}</span> <b>${f.titulo}:</b> ${f.texto}</li>`).join('')}</ul>
     <h3>❓ 3 preguntas rápidas</h3>
     <div class="repaso">${preguntas.map((p, i) => `<div class="pregunta" data-q="${i}"><p><b>${i + 1}. ${p.texto}</b></p>
-      <div class="fila">${p.opciones.map((o, k) => `<button class="boton respuesta" data-k="${k}">${o}</button>`).join('')}</div><button class="secundario pista">💡 Pista</button><p class="texto-pista"></p><p class="explicacion"></p></div>`).join('')}
+      <div class="fila">${p.opciones.map((o) => `<button class="boton respuesta" data-id="${o.id}">${o.texto}</button>`).join('')}</div><button class="secundario pista">💡 Pista</button><p class="texto-pista"></p><p class="explicacion"></p></div>`).join('')}
       <p class="resultado-repaso"></p></div>
     <h3>Causas y efectos</h3>
     <ul class="causas">${inf.causas.map((c) => `<li class="${c.tipo}"><b>${c.tipo === 'bien' ? '👍' : '⚠'} ${c.causa}</b> → ${c.efecto}</li>`).join('') || '<li>Viaje tranquilo, sin sorpresas.</li>'}</ul>
@@ -171,9 +171,9 @@ export function iniciarPantallaInforme(ctx) {
     };
     div.querySelectorAll('.respuesta').forEach((b) => {
       b.onclick = () => {
-        const bien = Number(b.dataset.k) === p.correcta;
+        const bien = p.opciones.find((o) => o.id === b.dataset.id).correcta; // por id, no por posición
         div.querySelector('.pista').disabled = true;
-        div.querySelectorAll('.respuesta').forEach((x) => { x.disabled = true; x.classList.toggle('correcta', Number(x.dataset.k) === p.correcta); });
+        div.querySelectorAll('.respuesta').forEach((x) => { x.disabled = true; x.classList.toggle('correcta', p.opciones.find((o) => o.id === x.dataset.id).correcta); });
         if (!bien) b.classList.add('incorrecta');
         div.querySelector('.explicacion').innerHTML = `${bien ? '✅ ¡Correcto!' : '❌ Casi.'} ${p.explicacion}`;
         efecto(bien ? 'exito' : 'error');

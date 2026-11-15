@@ -384,3 +384,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .lobby .rol.activo { background: #1f4a3a; box-shadow: 0 0 12px rgba(91, 224, 138, 0.5); }
 #hud .lobby .error { color: #ff6b6b; min-height: 18px; }
 #hud .cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--th); background: #05070f; }
+
+/* Versión visible en el menú */
+#hud .version { font-size: 14px; color: #8a96b8; margin: 6px 0 0; text-align: center; }

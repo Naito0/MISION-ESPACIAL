@@ -4,113 +4,253 @@
     "trayectoria": {
       "pregunta": "La nave se salió del rumbo. ¿Qué hay que hacer?",
       "opciones": [
-        { "texto": "Encender el motor un momento para corregir", "correcta": true, "porque": "Un encendido corto cambia la dirección. Por eso las naves llevan combustible de reserva." },
-        { "texto": "Esperar: la nave vuelve sola al rumbo", "porque": "En el espacio no hay aire que frene ni empuje: si nadie corrige, el desvío sigue para siempre." },
-        { "texto": "Apagar todos los sistemas", "porque": "Apagar no corrige nada: la nave seguiría desviándose." }
+        {
+          "texto": "Encender el motor un momento para corregir",
+          "correcta": true,
+          "porque": "Un encendido corto cambia la dirección. Por eso las naves llevan combustible de reserva."
+        },
+        {
+          "texto": "Esperar: la nave vuelve sola al rumbo",
+          "porque": "En el espacio no hay aire que frene ni empuje: si nadie corrige, el desvío sigue para siempre."
+        },
+        {
+          "texto": "Girar la nave sin encender el motor",
+          "porque": "Girar solo cambia hacia dónde apunta la nave: para cambiar el rumbo hay que empujar con el motor."
+        }
       ]
     },
     "frenado": {
       "pregunta": "Hay que frenar. ¿Hacia dónde debe apuntar la tobera del motor?",
       "opciones": [
-        { "texto": "Hacia adelante, en el sentido en que viaja la nave", "correcta": true, "porque": "El motor empuja al revés de donde sale el gas: si la tobera apunta hacia adelante, la nave frena." },
-        { "texto": "Hacia atrás, como al despegar", "porque": "Así el motor empuja hacia adelante: la nave aceleraría en vez de frenar." },
-        { "texto": "Hacia un costado", "porque": "Así solo cambia la dirección, no la velocidad." }
+        {
+          "texto": "Hacia adelante, en el sentido en que viaja la nave",
+          "correcta": true,
+          "porque": "El motor empuja al revés de donde sale el gas: si la tobera apunta hacia adelante, la nave frena."
+        },
+        {
+          "texto": "Hacia atrás, como al despegar",
+          "porque": "Así el motor empuja hacia adelante: la nave aceleraría en vez de frenar."
+        },
+        {
+          "texto": "Hacia un costado",
+          "porque": "Así solo cambia la dirección, no la velocidad."
+        }
       ]
     },
     "meteoritos": {
       "pregunta": "El radar muestra micrometeoritos al frente. ¿Qué haces?",
       "opciones": [
-        { "texto": "Maniobrar para esquivarlos", "correcta": true, "porque": "Moverse fuera de su camino es lo más seguro: así lo hacen las estaciones espaciales con la basura espacial." },
-        { "texto": "Acelerar para pasar rápido", "porque": "Más velocidad hace que cada choque sea más fuerte." },
-        { "texto": "No hacer nada: son muy chiquitos", "porque": "Aunque sean chiquitos, viajan rapidísimo y pueden perforar la nave." }
+        {
+          "texto": "Maniobrar para esquivarlos",
+          "correcta": true,
+          "porque": "Moverse fuera de su camino es lo más seguro: así lo hacen las estaciones espaciales con la basura espacial."
+        },
+        {
+          "texto": "Acelerar para pasar rápido",
+          "porque": "Más velocidad hace que cada choque sea más fuerte."
+        },
+        {
+          "texto": "No hacer nada: son muy chiquitos",
+          "porque": "Aunque sean chiquitos, viajan rapidísimo y pueden perforar la nave."
+        }
       ]
     },
     "motores": {
       "pregunta": "El motor pierde potencia y las luces parpadean. ¿Cuál es la causa más probable?",
       "opciones": [
-        { "texto": "Varios sistemas piden más energía de la que hay", "correcta": true, "porque": "Cuando la energía no alcanza, hay que repartirla: primero lo más importante." },
-        { "texto": "Se acabó el aire de la cabina", "porque": "El motor no usa el aire de la cabina: su problema es la energía." },
-        { "texto": "Afuera hace mucho frío", "porque": "El frío no apaga el motor de golpe; las luces que parpadean indican un problema de energía." }
+        {
+          "texto": "Varios sistemas piden más energía de la que hay",
+          "correcta": true,
+          "porque": "Cuando la energía no alcanza, hay que repartirla: primero lo más importante."
+        },
+        {
+          "texto": "Las luces están gastadas",
+          "porque": "Si fueran solo las luces, el motor no perdería potencia: los dos síntomas juntos apuntan a la energía."
+        },
+        {
+          "texto": "El motor se quedó sin combustible",
+          "porque": "Sin combustible el motor se apaga, pero eso no hace parpadear las luces: el problema es de energía eléctrica."
+        }
       ]
     },
     "circuitos": {
       "pregunta": "La batería se vació de golpe. ¿Por qué?",
       "opciones": [
-        { "texto": "Un cable roto o un cortocircuito", "correcta": true, "porque": "Una caída de golpe indica un corte: hay que encontrar la falla y reconectar." },
-        { "texto": "La nave pasó a la sombra", "porque": "A la sombra la batería se vacía despacio y se recarga al volver al sol; aquí cayó de golpe." },
-        { "texto": "Los paneles tienen polvo", "porque": "En el espacio no hay polvo que tape los paneles: eso pasa en la superficie de Marte." }
+        {
+          "texto": "Un cable roto o un cortocircuito",
+          "correcta": true,
+          "porque": "Una caída de golpe indica un corte: hay que encontrar la falla y reconectar."
+        },
+        {
+          "texto": "La nave pasó a la sombra",
+          "porque": "A la sombra la batería se vacía despacio y se recarga al volver al sol; aquí cayó de golpe."
+        },
+        {
+          "texto": "Los paneles tienen polvo",
+          "porque": "En el espacio no hay polvo que tape los paneles: eso pasa en la superficie de Marte."
+        }
       ]
     },
     "fuga_casco": {
       "pregunta": "La presión del aire baja despacio. ¿Qué buscas?",
       "opciones": [
-        { "texto": "Una fuga: un agujerito por donde se escapa el aire", "correcta": true, "porque": "Si la presión baja, el aire se está escapando: hay que encontrar el agujero y sellarlo." },
-        { "texto": "Que la tripulación respira demasiado", "porque": "Respirar cambia el oxígeno por dióxido de carbono, pero no hace bajar la presión." },
-        { "texto": "Que el planeta está lejos", "porque": "La distancia no cambia la presión dentro de la nave." }
+        {
+          "texto": "Una fuga: un agujerito por donde se escapa el aire",
+          "correcta": true,
+          "porque": "Si la presión baja, el aire se está escapando: hay que encontrar el agujero y sellarlo."
+        },
+        {
+          "texto": "Que la tripulación respira demasiado",
+          "porque": "Respirar cambia el oxígeno por dióxido de carbono, pero no hace bajar la presión."
+        },
+        {
+          "texto": "Que hace frío y el aire se encoge",
+          "porque": "El frío puede bajar un poco la presión, pero no hace que baje y baje sin parar: eso indica que el aire se escapa."
+        }
       ]
     },
     "oxigeno": {
       "pregunta": "El oxígeno de la cabina baja. ¿Qué lo explica?",
       "opciones": [
-        { "texto": "La tripulación lo respira y no se repone a tiempo", "correcta": true, "porque": "Cada astronauta consume oxígeno todo el tiempo: hay que producir tanto como se gasta." },
-        { "texto": "Se escapa por las ventanas abiertas", "porque": "Las ventanas de una nave no se abren: están selladas." },
-        { "texto": "Las plantas se lo comen", "porque": "Con luz, las plantas producen oxígeno; no lo gastan." }
+        {
+          "texto": "La tripulación lo respira y no se repone a tiempo",
+          "correcta": true,
+          "porque": "Cada astronauta consume oxígeno todo el tiempo: hay que producir tanto como se gasta."
+        },
+        {
+          "texto": "El sensor de oxígeno está mal",
+          "porque": "Puede pasar, pero primero se revisa lo más común: la tripulación consume oxígeno todo el tiempo y el sistema tiene que reponerlo."
+        },
+        {
+          "texto": "El filtro de CO₂ está lleno",
+          "porque": "Ese filtro quita el CO₂, no produce oxígeno: si se llena, lo que sube es el CO₂ (es otra emergencia)."
+        }
       ]
     },
     "muestra_viaje": {
       "pregunta": "Una muestra se contaminó. ¿Qué pudo pasar?",
       "opciones": [
-        { "texto": "Se abrió fuera de su recipiente sellado", "correcta": true, "porque": "Al tocar el aire de la nave, la muestra recibe sustancias que no son suyas y el análisis falla." },
-        { "texto": "Viajó demasiado rápido", "porque": "La velocidad no contamina: lo que importa es que esté bien sellada." },
-        { "texto": "Hace demasiado frío", "porque": "El frío la conserva; el problema es que se mezcló con otras sustancias." }
+        {
+          "texto": "Se abrió fuera de su recipiente sellado",
+          "correcta": true,
+          "porque": "Al tocar el aire de la nave, la muestra recibe sustancias que no son suyas y el análisis falla."
+        },
+        {
+          "texto": "El recipiente estaba demasiado lleno",
+          "porque": "Un recipiente lleno no contamina la muestra: se contamina cuando toca algo de afuera."
+        },
+        {
+          "texto": "La foto de la muestra salió borrosa",
+          "porque": "Una foto borrosa no cambia la muestra: se contamina cuando se abre fuera de su recipiente sellado."
+        }
       ]
     },
     "invernadero": {
       "pregunta": "Las plantas del invernadero se marchitan. ¿Qué les falta?",
       "opciones": [
-        { "texto": "Agua y luz en la cantidad justa", "correcta": true, "porque": "Como en la Tierra, las plantas necesitan agua y luz para crecer." },
-        { "texto": "Más gravedad", "porque": "En la Estación Espacial se cultivan plantas: pueden crecer sin gravedad si tienen agua y luz." },
-        { "texto": "Oscuridad total", "porque": "Sin luz las plantas no pueden fabricar su alimento." }
+        {
+          "texto": "Agua y luz en la cantidad justa",
+          "correcta": true,
+          "porque": "Como en la Tierra, las plantas necesitan agua y luz para crecer."
+        },
+        {
+          "texto": "Más fertilizante",
+          "porque": "El fertilizante ayuda, pero una planta sin agua ni luz se marchita igual."
+        },
+        {
+          "texto": "Más calor",
+          "porque": "Demasiado calor también las seca: lo que necesitan es agua y luz en la cantidad justa."
+        }
       ]
     },
     "co2": {
       "pregunta": "El dióxido de carbono (CO₂) sube en la cabina. ¿Qué pasa?",
       "opciones": [
-        { "texto": "El filtro que lo quita del aire se gastó", "correcta": true, "porque": "Al respirar soltamos CO₂: un filtro lo saca del aire. Si se gasta, el CO₂ se acumula." },
-        { "texto": "Entra CO₂ desde afuera", "porque": "La nave está cerrada: el CO₂ viene de la respiración de la tripulación." },
-        { "texto": "Las plantas producen demasiado", "porque": "Con luz, las plantas toman CO₂ y sueltan oxígeno: ayudan, no empeoran." }
+        {
+          "texto": "El filtro que lo quita del aire se gastó",
+          "correcta": true,
+          "porque": "Al respirar soltamos CO₂: un filtro lo saca del aire. Si se gasta, el CO₂ se acumula."
+        },
+        {
+          "texto": "Entra CO₂ desde afuera",
+          "porque": "La nave está cerrada: el CO₂ viene de la respiración de la tripulación."
+        },
+        {
+          "texto": "Las plantas producen demasiado",
+          "porque": "Con luz, las plantas toman CO₂ y sueltan oxígeno: ayudan, no empeoran."
+        }
       ]
     },
     "unidades": {
       "pregunta": "Una orden dice \"200 millas\" y la computadora usa kilómetros. ¿Qué haces?",
       "opciones": [
-        { "texto": "Convertir a kilómetros antes de enviar", "correcta": true, "porque": "Si todos usan la misma unidad no hay confusión: la computadora entiende el número que espera." },
-        { "texto": "Enviar 200 tal cual", "porque": "La computadora leería 200 km en vez de 200 millas: la maniobra quedaría mal." },
-        { "texto": "Borrar la unidad", "porque": "Sin la unidad nadie sabe qué significa el número." }
+        {
+          "texto": "Convertir a kilómetros antes de enviar",
+          "correcta": true,
+          "porque": "Si todos usan la misma unidad no hay confusión: la computadora entiende el número que espera."
+        },
+        {
+          "texto": "Enviar 200 tal cual",
+          "porque": "La computadora leería 200 km en vez de 200 millas: la maniobra quedaría mal."
+        },
+        {
+          "texto": "Cambiar la palabra \"millas\" por \"kilómetros\" sin convertir",
+          "porque": "El número seguiría siendo de millas: 200 millas no son 200 kilómetros."
+        }
       ]
     },
     "frecuencia": {
       "pregunta": "La radio se llenó de ruido de repente. ¿Por qué?",
       "opciones": [
-        { "texto": "Una tormenta solar interfiere con la señal", "correcta": true, "porque": "Las tormentas solares pueden meter ruido en las comunicaciones: hay que buscar la frecuencia limpia." },
-        { "texto": "La Tierra está demasiado lejos", "porque": "La distancia hace que la señal tarde y llegue débil, pero no causa ruido de golpe." },
-        { "texto": "Alguien está hablando muy fuerte", "porque": "El sonido no viaja por el vacío del espacio; la radio usa ondas de radio." }
+        {
+          "texto": "Una tormenta solar interfiere con la señal",
+          "correcta": true,
+          "porque": "Las tormentas solares pueden meter ruido en las comunicaciones: hay que buscar la frecuencia limpia."
+        },
+        {
+          "texto": "La Tierra está demasiado lejos",
+          "porque": "La distancia hace que la señal tarde y llegue débil, pero no causa ruido de golpe."
+        },
+        {
+          "texto": "Se rompió el micrófono",
+          "porque": "Un micrófono roto deja sin sonido; no llena de ruido la señal que llega."
+        }
       ]
     },
     "senal": {
       "pregunta": "Tu orden tarda en llegar al rover. ¿Cuándo debes enviar \"¡Frena!\"?",
       "opciones": [
-        { "texto": "Antes de que llegue a la zona, para que la orden llegue a tiempo", "correcta": true, "porque": "La señal viaja a la velocidad de la luz, pero las distancias son enormes: hay que anticiparse." },
-        { "texto": "Justo cuando lo veo en la zona", "porque": "Lo que ves ya pasó, y la orden todavía tiene que viajar: llegaría tarde." },
-        { "texto": "Cuando ya está en el cráter", "porque": "Demasiado tarde: la orden llegaría cuando el rover ya cayó." }
+        {
+          "texto": "Antes de que llegue a la zona, para que la orden llegue a tiempo",
+          "correcta": true,
+          "porque": "La señal viaja a la velocidad de la luz, pero las distancias son enormes: hay que anticiparse."
+        },
+        {
+          "texto": "Justo cuando lo veo en la zona",
+          "porque": "Lo que ves ya pasó, y la orden todavía tiene que viajar: llegaría tarde."
+        },
+        {
+          "texto": "Da igual: la orden llega al instante",
+          "porque": "La señal es rapidísima pero no instantánea: desde Marte tarda entre 4 y 24 minutos."
+        }
       ]
     },
     "paquetes": {
       "pregunta": "Los datos llegaron desordenados. ¿Qué haces antes de enviarlos?",
       "opciones": [
-        { "texto": "Ordenarlos y revisarlos", "correcta": true, "porque": "Si los datos llegan desordenados, en la Tierra no se pueden leer: hay que revisarlos antes de enviar." },
-        { "texto": "Enviarlos igual, rápido", "porque": "Enviar datos desordenados gasta tiempo de antena y la Tierra recibe basura." },
-        { "texto": "Borrarlos todos", "porque": "Se perdería la ciencia de la misión: hay que ordenarlos, no borrarlos." }
+        {
+          "texto": "Ordenarlos y revisarlos",
+          "correcta": true,
+          "porque": "Si los datos llegan desordenados, en la Tierra no se pueden leer: hay que revisarlos antes de enviar."
+        },
+        {
+          "texto": "Enviarlos igual, rápido",
+          "porque": "Enviar datos desordenados gasta tiempo de antena y la Tierra recibe basura."
+        },
+        {
+          "texto": "Enviar solo los primeros que llegaron",
+          "porque": "Faltarían datos y el resto seguiría desordenado: primero hay que ordenarlos y revisarlos."
+        }
       ]
     }
   }

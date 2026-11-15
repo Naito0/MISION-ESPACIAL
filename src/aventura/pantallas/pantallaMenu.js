@@ -56,7 +56,8 @@ export function iniciarPantallaMenu(ctx) {
         ? `<div class="fila"><input id="codigo" maxlength="4" placeholder="CÓDIGO"><button id="entrar">Entrar</button></div>`
         : '<button id="unirse" class="secundario">🔑 Unirse con código</button>'}
       <button id="prueba" class="secundario">🧪 Modo prueba (minijuegos)</button>
-      <p class="error">${error}</p>`;
+      <p class="error">${error}</p>
+      <p class="version">Versión ${typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'local'} · si no es la última, pulsa Ctrl+F5</p>`;
     panel.querySelector('#prueba').onclick = () => { efecto('clic'); dibujarPrueba(); };
     const nombre = () => {
       const n = panel.querySelector('#nombre').value.trim() || 'Astronauta';

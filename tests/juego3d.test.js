@@ -12,7 +12,7 @@ const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 import { estrellasMision, nuevosLogros } from '../src/compartido/logros.js';
 import { parametrosRetraso, dondeFrena } from '../src/compartido/retrasoRover.js';
-import { elegirPreguntas, prepararPregunta } from '../src/compartido/preguntas.js';
+import { elegirPreguntas, prepararPregunta, opcionesDiagnostico, opcionesPrediccion } from '../src/compartido/preguntas.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -429,14 +429,41 @@ test('preguntas: 3 al azar sin repetir las de la partida anterior y con las opci
   assert.equal(primera.length, 3);
   const segunda = elegirPreguntas(pool, 3, primera.map((p) => p.id));
   assert.ok(segunda.every((p) => !primera.some((q) => q.id === p.id)), 'no se repiten');
-  // La correcta no queda siempre en el mismo lugar, y siempre se la encuentra
-  const lugares = new Set();
-  for (let i = 0; i < 200; i++) {
-    const q = prepararPregunta(pool[0]);
-    assert.equal(q.opciones[q.correcta], pool[0].correcta);
-    lugares.add(q.correcta);
+  // La correcta se reconoce por id y siempre es el mismo texto
+  const q = prepararPregunta(pool[0]);
+  assert.equal(q.opciones.filter((o) => o.correcta).length, 1);
+  assert.equal(q.opciones.find((o) => o.correcta).texto, pool[0].correcta);
+});
+
+test('TODAS las preguntas de opción múltiple: mostradas 30 veces, la correcta queda repartida entre A, B, C (y D)', (tc) => {
+  const DIAG = leerJSON('diagnosticos.json').diagnosticos;
+  const APR = leerJSON('aprendizaje.json');
+  const PREG = leerJSON('preguntas.json');
+  const todas = [
+    ...Object.entries(DIAG).map(([id, d]) => ({ nombre: `Diagnóstico ${id}`, mostrar: () => opcionesDiagnostico(d) })),
+    ...Object.entries(APR.predicciones).map(([id, p]) => ({ nombre: `Predicción ${id}`, mostrar: () => opcionesPrediccion(p) })),
+    ...['luna', 'marte'].flatMap((dest) => PREG[dest].map((p) => ({ nombre: `Final ${p.id}`, mostrar: () => prepararPregunta(p).opciones })))
+  ];
+  const letras = 'ABCD';
+  const total = { A: 0, B: 0, C: 0, D: 0 };
+  const filas = [];
+  for (const q of todas) {
+    const conteo = {};
+    let n = 0;
+    for (let i = 0; i < 30; i++) {
+      const ops = q.mostrar();
+      n = ops.length;
+      const pos = letras[ops.findIndex((o) => o.correcta)];
+      conteo[pos] = (conteo[pos] || 0) + 1; total[pos]++;
+    }
+    filas.push(`${q.nombre.padEnd(30)} ${[...letras.slice(0, n)].map((l) => `${l}:${String(conteo[l] || 0).padStart(2)}`).join('  ')}`);
+    // Con 30 repeticiones, la correcta tiene que aparecer en todas las posiciones posibles
+    for (const l of letras.slice(0, n)) assert.ok(conteo[l] > 0, `${q.nombre}: la correcta nunca quedó en ${l}`);
+    assert.ok(Math.max(...Object.values(conteo)) < 30, `${q.nombre}: siempre en el mismo lugar`);
   }
-  assert.equal(lugares.size, 4, 'la correcta aparece en las 4 posiciones');
+  filas.push(`TOTAL (${todas.length} preguntas × 30)   A:${total.A}  B:${total.B}  C:${total.C}  D:${total.D}`);
+  tc.diagnostic('\n' + filas.join('\n'));
+  if (process.env.CONTEO) console.log(filas.join('\n'));
 });
 
 test('hangar: no deja pasarse del presupuesto', () => {  
