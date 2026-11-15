@@ -46,6 +46,7 @@ export function elegirEmergencia(v, catalogo, rng = Math.random) {
     !ocupadas.has(e.consola) &&                    // una emergencia por consola
     v.ultimaPorRol[e.rol] !== e.id &&               // no repetir la misma tarea seguida en un rol
     !(v.total && v.rolesUsados.includes(e.rol)) &&  // modo misión: una por rol en todo el viaje
+    !(v.leyendo || []).includes(e.rol) &&           // multijugador: su jugador todavía está leyendo una tarjeta
     !v.emergencias.some((a) => a.rol === e.rol));   // un rol no recibe dos a la vez
   if (!candidatas.length) return null;
   const pesos = candidatas.map((e) => (estaAgravada(e, v.diseno) ? 2 : 1));
@@ -72,8 +73,12 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
   const modoMision = !!v.total;
   const hayEmergencia = v.emergencias.length > 0;
 
-  // El reloj de llegada se detiene durante una emergencia (modo misión)
-  if (!(modoMision && hayEmergencia)) v.restante = Math.max(0, v.restante - dt);
+  // El reloj de llegada se detiene durante una emergencia (modo misión).
+  // Si ya no quedan emergencias por venir, el viaje avanza más rápido (sin tiempo muerto).
+  const sinPendientes = modoMision && v.lanzadas >= v.total;
+  v.acelerado = sinPendientes && !hayEmergencia;
+  const ritmo = v.acelerado ? (config.aceleracionFinal ?? 1) : 1;
+  if (!(modoMision && hayEmergencia)) v.restante = Math.max(0, v.restante - dt * ritmo);
 
   if (modoMision) {
     // Una emergencia a la vez; la siguiente llega después de la calma

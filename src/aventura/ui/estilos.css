@@ -109,6 +109,17 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Aterrizaje con alarmas */
 #hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
 #hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
+/* ---- Menos espera: cuenta regresiva, viaje acelerado ---- */
+#hud .hv-proxima { color: #ffd166; font-size: var(--tc); min-height: 22px; }
+#hud .rumbo-directo { position: absolute; left: 50%; top: 64px; transform: translateX(-50%); padding: 8px 14px; display: flex; gap: 12px; align-items: center; font-size: var(--t); border-color: #5be08a; }
+#hud .rumbo-directo[hidden] { display: none; }
+#hud .rumbo-directo .boton { width: auto; margin: 0; padding: 6px 14px; background: #2f9e5b; }
+#hud .velocidad { position: absolute; inset: 0; pointer-events: none; opacity: 0.55;
+  background: repeating-conic-gradient(from 0deg at 50% 45%, rgba(200, 230, 255, 0.0) 0deg 6deg, rgba(200, 230, 255, 0.18) 6deg 7deg);
+  -webkit-mask: radial-gradient(circle at 50% 45%, transparent 18%, #000 60%); mask: radial-gradient(circle at 50% 45%, transparent 18%, #000 60%);
+  animation: girar-vel 1.2s linear infinite; }
+@keyframes girar-vel { from { transform: scale(1); } to { transform: scale(1.12); } }
+#hud .final .saltar-final { width: auto; display: inline-block; padding: 8px 20px; }
 /* ---- Esclusa ---- */
 #hud .esclusa { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: min(520px, 80vw); padding: 14px 20px; text-align: center; font-size: var(--t); border-color: #ffb020; border-width: 3px; }
 #hud .esclusa .hv-barra { margin: 10px 0; height: 20px; }

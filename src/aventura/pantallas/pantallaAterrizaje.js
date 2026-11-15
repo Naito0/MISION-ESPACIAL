@@ -154,7 +154,7 @@ export function iniciarPantallaAterrizaje(ctx) {
         await mostrarTarjeta({ etiqueta: '📜 Esto pasó de verdad', icono: h.icono, titulo: `${h.mision} (${h.anio})`, frase: h.frase, detalle: `“${h.cita}”`, fuente: h.fuente });
       }
       conexion.accion('aterrizar', { velocidad: v });
-    }, 1800);
+    }, 1000); // un momento para ver el resultado (antes 1,8 s)
   }
 
   /** Muestra una alarma de la computadora: ¿ignorar o abortar? */

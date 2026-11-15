@@ -283,6 +283,25 @@ export class Sala {
       return { ok: true };
     },
     /** Resultado del minijuego de una emergencia. */
+    /**
+     * Multijugador: el jugador está leyendo una tarjeta (o terminó de leer).
+     * El reloj compartido no se congela, pero sus roles no reciben emergencias nuevas mientras lee.
+     */
+    leyendo(j, { activo }) {
+      if (!this.viaje) return { ok: true };
+      const otros = (this.viaje.leyendo || []).filter((r) => !j.roles.includes(r));
+      this.viaje.leyendo = activo ? [...otros, ...j.roles] : otros;
+      return { ok: true };
+    },
+    /** Saltar: llegar ya al destino cuando no quedan emergencias, o saltar la escena final. */
+    saltar(j) {
+      if (this.fase === 'viaje' && this.viaje && !this.viaje.emergencias.length && this.viaje.lanzadas >= (this.viaje.total ?? 0)) {
+        this.viaje.restante = 0;
+        return { ok: true };
+      }
+      if (this.fase === 'llegada' || this.fase === 'fracaso') { this.esperaFinal = 999; return { ok: true }; }
+      return { error: 'Ahora no se puede saltar.' };
+    },
     resolver(j, { uid, exito }) {
       if (this.fase !== 'viaje' || !this.viaje) return { error: 'No hay viaje en curso.' };
       const r = resolverEmergencia(this.viaje, uid, j.roles, !!exito);
@@ -380,6 +399,10 @@ export class Sala {
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
       viaje: this.viaje && {
         duracion: this.viaje.duracion, restante: Math.ceil(this.viaje.restante), vida: this.viaje.vida,
+        // Para la cuenta regresiva "Próxima emergencia en N s" y el viaje acelerado
+        proxima: this.viaje.emergencias.length || this.viaje.lanzadas >= (this.viaje.total ?? Infinity) ? null : Math.max(0, Math.ceil(this.viaje.proxima)),
+        pendientes: this.viaje.total ? this.viaje.total - this.viaje.lanzadas : null,
+        acelerado: !!this.viaje.acelerado,
         emergencias: this.viaje.emergencias.map((e) => ({ ...e, restante: Math.ceil(e.restante) })),
         // copia: en el modo de un jugador el estado no viaja por la red, y sin copia
         // la pantalla vería la misma lista y no notaría lo que se agregó

@@ -93,12 +93,15 @@ export function iniciarPantallaNave(ctx) {
     <div class="panel hud-viaje">
       <div class="hv-fila"><span>❤ Nave</span><div class="hv-barra"><div class="hv-vida"></div></div><b class="hv-num"></b></div>
       <div class="hv-fila"><span>🕒 Llegada</span><b class="hv-tiempo"></b></div>
+      <div class="hv-proxima"></div>
     </div>
     <div class="retratos">${TRIPULACION.map((m, i) => `
       <button class="panel retrato" data-i="${i}" style="border-color:${hexDe(m.rol)}">
         <span class="r-icono">${m.icono}</span><span class="r-txt"><b>${m.tecla}</b> ${m.corto}</span>
       </button>`).join('')}</div>
     <div class="alertas"></div>
+    <div class="velocidad" hidden></div>
+    <div class="panel rumbo-directo" hidden>🚀 No quedan emergencias: ¡rumbo directo! <button class="boton saltar-viaje">Saltar al destino ⏩</button></div>
     <div class="panel senal-tierra" hidden></div>
     <div class="panel aviso-e"></div>
     <div class="avisos"></div>
@@ -106,6 +109,7 @@ export function iniciarPantallaNave(ctx) {
   ctx.hud.appendChild(hud);
   const $ = (s) => hud.querySelector(s);
   hud.querySelectorAll('.retrato').forEach((b) => { b.onclick = () => cambiarA(Number(b.dataset.i)); });
+  $('.saltar-viaje').onclick = () => conexion.accion('saltar');
 
   function avisar(texto, clase = '') {
     const d = document.createElement('div');
@@ -243,8 +247,10 @@ export function iniciarPantallaNave(ctx) {
       <h1>${final === 'llegada' ? '🪐 ¡Llegamos!' : '💫 ¡Misión fallida!'}</h1>
       <p>${final === 'llegada' ? `La nave llegó con <b>${v.vida}</b> de vida.` : '¡La tripulación quedó mareada en el piso! 😵'}</p>
       <p>Resueltas: <b>${resueltas}</b> · sin resolver: <b>${fallidas.length}</b></p>
-      <p class="nota">Preparando el informe…</p>`;
+      <p class="nota">Preparando el informe…</p>
+      <button class="boton saltar-final">Saltar ⏩</button>`;
     hud.appendChild(panel);
+    panel.querySelector('.saltar-final').onclick = () => conexion.accion('saltar');
     if (document.pointerLockElement) {
       window.consolaAbierta = true;
       document.exitPointerLock();
@@ -332,6 +338,13 @@ export function iniciarPantallaNave(ctx) {
         $('.hv-vida').style.background = viaje.vida > 50 ? '#3cc46e' : viaje.vida > 25 ? '#f2c14e' : '#e5484d';
         $('.hv-num').textContent = viaje.vida;
         $('.hv-tiempo').textContent = `${Math.floor(viaje.restante / 60)}:${String(viaje.restante % 60).padStart(2, '0')}`;
+        // Cuenta regresiva hasta la próxima emergencia (para no esperar sin saber)
+        $('.hv-proxima').innerHTML = !final && viaje.proxima !== null && viaje.proxima !== undefined
+          ? `⏱ Próxima emergencia en <b>${viaje.proxima} s</b>` : '';
+        // Sin emergencias pendientes: el viaje se acelera (líneas de velocidad) y se puede saltar
+        const acelerado = !final && viaje.acelerado;
+        $('.velocidad').hidden = !acelerado;
+        $('.rumbo-directo').hidden = !acelerado;
       }
       // Retratos: el activo resaltado; el que tiene una emergencia parpadea
       hud.querySelectorAll('.retrato').forEach((b, i) => {

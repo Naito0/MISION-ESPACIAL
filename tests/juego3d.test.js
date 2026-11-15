@@ -210,7 +210,7 @@ test('dificultad: Fácil da 1 emergencia a la vez, más tiempo, menos daño y m�
   assert.ok(n.configViaje.tiempoParaResolver < s.configViaje.tiempoParaResolver);
 });
 
-test('viaje (modo misión): 3-4 emergencias, una por rol, de a una y con 30-45 s de calma', () => {
+test('viaje (modo misión): 3-4 emergencias, una por rol, de a una y con 10-15 s de calma', () => {
   const config = { ...EMERG.config, emergenciasPorViaje: 4, maxSimultaneas: 1, tiempoParaResolver: 60 };
   const v = nuevoViaje(config, {});
   let ultimaFin = null;
@@ -230,7 +230,21 @@ test('viaje (modo misión): 3-4 emergencias, una por rol, de a una y con 30-45 s
   assert.equal(v.terminado, 'llegada');
   assert.ok(v.registro.length >= 3 && v.registro.length <= 4, `hubo ${v.registro.length}`);
   assert.equal(new Set(v.registro.map((r) => r.rol)).size, v.registro.length, 'una por rol');
-  for (const c of calmas) assert.ok(c >= 30, `calma de ${c} s`);
+  for (const c of calmas) assert.ok(c >= 10 && c <= 16, `calma de ${c} s`);
+});
+
+test('viaje: sin emergencias pendientes avanza más rápido; un rol que está leyendo no recibe emergencias', () => {
+  const config = { ...EMERG.config, emergenciasPorViaje: 1, maxSimultaneas: 1, tiempoParaResolver: 60 };
+  const v = nuevoViaje(config, {});
+  // Mientras lee el comandante, la emergencia no puede ser del comandante
+  v.leyendo = ['comandante'];
+  while (!v.emergencias.length) avanzarViaje(v, 0.5, EMERG.emergencias, config);
+  assert.notEqual(v.emergencias[0].rol, 'comandante');
+  resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true);
+  const antes = v.restante;
+  avanzarViaje(v, 1, EMERG.emergencias, config);
+  assert.equal(v.acelerado, true);
+  assert.equal(antes - v.restante, config.aceleracionFinal, 'avanza aceleracionFinal segundos por segundo');
 });
 
 test('recomendaciones: dependen del destino (paneles, combustible, baterías, antena)', () => {
