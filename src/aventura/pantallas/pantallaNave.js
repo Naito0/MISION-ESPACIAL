@@ -2,11 +2,11 @@
 // pantallaNave.js — EL VIAJE dentro de la nave (un jugador, 4 astronautas).
 // - Hay 4 astronautas, cada uno en su sala: Piloto (cabina), Ingeniero
 //   (ingeniería), Científico (laboratorio) y Comunicaciones.
-// - El jugador cambia de astronauta con 1, 2, 3, 4, Tab o clic en los retratos;
+// - Multijugador: el jugador toma el astronauta de un bot con 1, 2, 3, 4 o Tab;
 //   la cámara "vuela" suavemente hasta el elegido.
 // - Los que no controlas trabajan en sus consolas.
 // - Cada emergencia es de UN rol: un aviso grande dice qué pasó, a quién le
-//   toca, qué tecla pulsar y por qué; el retrato de ese rol parpadea.
+//   toca, qué tecla pulsar y por qué; el panel de ese rol brilla.
 // - E junto a la consola con "!" abre el minijuego.
 // (La versión en red de esta pantalla quedó guardada en pantallaNaveRed.js.)
 // =============================================================
@@ -115,6 +115,25 @@ export function iniciarPantallaNave(ctx) {
   const actual = () => astronautas[activo];
 
   // ---- HUD ----
+  // Panel de arriba a la izquierda (debajo de la vida de la nave):
+  //  - un jugador: solo MI personaje y MI rol (no se puede cambiar de personaje)
+  //  - multijugador: cada jugador con su personaje y su rol (sin números)
+  function htmlRetratos() {
+    const porRol = estado.personajesPorRol || {};
+    const tarjeta = (rol, titulo, sub) => {
+      const m = miembro(rol);
+      return `<div class="panel retrato" data-rol="${rol}" style="border-color:${hexDe(rol)}"><span class="r-icono">${m.icono}</span><span class="r-txt"><strong>${titulo}</strong><small class="r-quien">${sub}</small></span></div>`;
+    };
+    if (modoSolo) {
+      const a = astronautas[propio];
+      return tarjeta(a.rol, `${a.personaje?.nombre || ''} <small>${a.personaje?.especie || ''}</small>`, `Tu rol: ${a.corto}`);
+    }
+    return estado.jugadores.map((j) => {
+      const rol = j.roles[0];
+      const pj = PERSONAJES.find((p) => p.id === (j.personaje || porRol[rol]));
+      return tarjeta(rol, `${j.nombre}${j.id === conexion.id ? ' (tú)' : ''}`, `${pj?.nombre || ''} · ${miembro(rol).corto}`);
+    }).join('');
+  }
   const hud = document.createElement('div');
   hud.innerHTML = `
     <div class="panel titulo sala-actual"></div>
@@ -123,10 +142,7 @@ export function iniciarPantallaNave(ctx) {
       <div class="hv-fila"><span>🕒 Llegada</span><b class="hv-tiempo"></b></div>
       <div class="hv-proxima"></div>
     </div>
-    <div class="retratos">${TRIPULACION.map((m, i) => `
-      <button class="panel retrato" data-i="${i}" style="border-color:${hexDe(m.rol)}">
-        <span class="r-icono">${m.icono}</span><span class="r-txt"><b>${m.tecla}</b> ${m.corto}<small class="r-quien">${modoSolo && !esMio(m.rol) ? `🔧 trabajando · ${astronautas[i].personaje?.nombre || ''}` : astronautas[i].bot ? `🤖 bot · ${astronautas[i].personaje?.nombre || ''}` : (astronautas[i].personaje?.nombre || '')}</small></span>
-      </button>`).join('')}</div>
+    <div class="retratos">${htmlRetratos()}</div>
     <div class="alertas"></div>
     <div class="velocidad" hidden></div>
     <div class="panel senal-tierra" hidden></div>
@@ -135,7 +151,9 @@ export function iniciarPantallaNave(ctx) {
     <div class="vineta"></div>`;
   ctx.hud.appendChild(hud);
   const $ = (s) => hud.querySelector(s);
-  hud.querySelectorAll('.retrato').forEach((b) => { b.onclick = () => cambiarA(Number(b.dataset.i)); });
+  // Barra de controles: "1-4 tomar un bot" solo en multijugador (en un jugador no se cambia de personaje)
+  const ayudaCambio = document.querySelector('.ayuda-cambio');
+  if (ayudaCambio) ayudaCambio.hidden = modoSolo;
 
   function avisar(texto, clase = '', ms = 4000) {
     const d = document.createElement('div');
@@ -440,9 +458,9 @@ export function iniciarPantallaNave(ctx) {
         $('.velocidad').hidden = final !== 'llegada';
       }
       // Retratos: el activo resaltado; el que tiene una emergencia parpadea
-      hud.querySelectorAll('.retrato').forEach((b, i) => {
-        b.classList.toggle('activo', i === activo);
-        b.classList.toggle('alerta', activas.some((e) => e.rol === TRIPULACION[i].rol));
+      hud.querySelectorAll('.retrato').forEach((b) => {
+        b.classList.toggle('activo', b.dataset.rol === yo.rol);
+        b.classList.toggle('alerta', activas.some((e) => modoSolo || e.rol === b.dataset.rol));
       });
       // Avisos grandes de emergencia: qué pasó, a quién le toca, qué tecla y por qué
       motor.camara.getWorldDirection(adelante); adelante.y = 0; adelante.normalize();
@@ -468,6 +486,7 @@ export function iniciarPantallaNave(ctx) {
       window.removeEventListener('keydown', teclaCambio);
       ctx.aprendizaje?.alPoderMostrar(null);
       hud.remove(); ambiente(false); quitarEstado(); quitarPos();
+      if (ayudaCambio) ayudaCambio.hidden = true;
     }
   };
 }
