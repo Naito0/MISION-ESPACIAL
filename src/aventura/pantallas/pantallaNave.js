@@ -129,7 +129,6 @@ export function iniciarPantallaNave(ctx) {
       </button>`).join('')}</div>
     <div class="alertas"></div>
     <div class="velocidad" hidden></div>
-    <div class="panel rumbo-directo" hidden>🚀 No quedan emergencias: ¡rumbo directo! <button class="boton saltar-viaje">Saltar al destino ⏩</button></div>
     <div class="panel senal-tierra" hidden></div>
     <div class="panel aviso-e"></div>
     <div class="avisos"></div>
@@ -137,7 +136,6 @@ export function iniciarPantallaNave(ctx) {
   ctx.hud.appendChild(hud);
   const $ = (s) => hud.querySelector(s);
   hud.querySelectorAll('.retrato').forEach((b) => { b.onclick = () => cambiarA(Number(b.dataset.i)); });
-  $('.saltar-viaje').onclick = () => conexion.accion('saltar');
 
   function avisar(texto, clase = '', ms = 4000) {
     const d = document.createElement('div');
@@ -310,10 +308,8 @@ export function iniciarPantallaNave(ctx) {
       <h1>${final === 'llegada' ? '🪐 ¡Llegamos!' : '💫 ¡Misión fallida!'}</h1>
       <p>${final === 'llegada' ? `La nave llegó con <b>${v.vida}</b> de vida.` : '¡La tripulación quedó mareada en el piso! 😵'}</p>
       <p>Resueltas: <b>${resueltas}</b> · sin resolver: <b>${fallidas.length}</b></p>
-      <p class="nota">Preparando el informe…</p>
-      <button class="boton saltar-final">Saltar ⏩</button>`;
+      <p class="nota">${final === 'llegada' ? '🛬 Preparando el aterrizaje…' : 'Preparando el informe…'}</p>`;
     hud.appendChild(panel);
-    panel.querySelector('.saltar-final').onclick = () => conexion.accion('saltar');
     if (document.pointerLockElement) {
       window.consolaAbierta = true;
       document.exitPointerLock();
@@ -382,10 +378,14 @@ export function iniciarPantallaNave(ctx) {
       efectos.actualizar(dt, t, activas, modoSolo ? TRIPULACION.map((m) => m.rol) : [yo.rol]);
       if (activas.length) ctx.guia?.evento('emergencia');
 
-      // El planeta de la ventana se acerca a medida que avanza el viaje
+      // El planeta de la ventana se acerca con cada emergencia superada;
+      // al llegar, se agranda del todo (animación corta de llegada)
       if (esc.planeta && viaje) {
-        const progreso = 1 - viaje.restante / viaje.duracion;
-        esc.planeta.scale.setScalar(escalaPlaneta * (0.5 + progreso * 2.5));
+        const hechas = viaje.registro.length;
+        const progreso = hechas / ((hechas + (viaje.pendientes ?? 0) + viaje.emergencias.length) || 1);
+        const meta = escalaPlaneta * (final === 'llegada' ? 4.5 : 0.5 + progreso * 2);
+        const s = esc.planeta.scale.x + (meta - esc.planeta.scale.x) * (1 - Math.exp(-(final ? 1.5 : 2) * dt));
+        esc.planeta.scale.setScalar(s);
       }
 
       // ¿Este astronauta está cerca de una consola con una emergencia SUYA? → E
@@ -436,10 +436,8 @@ export function iniciarPantallaNave(ctx) {
         // Cuenta regresiva hasta la próxima emergencia (para no esperar sin saber)
         $('.hv-proxima').innerHTML = !final && viaje.proxima !== null && viaje.proxima !== undefined
           ? `⏱ Próxima emergencia en <b>${viaje.proxima} s</b>` : '';
-        // Sin emergencias pendientes: el viaje se acelera (líneas de velocidad) y se puede saltar
-        const acelerado = !final && viaje.acelerado;
-        $('.velocidad').hidden = !acelerado;
-        $('.rumbo-directo').hidden = !acelerado;
+        // Animación de llegada: líneas de velocidad mientras el planeta se agranda
+        $('.velocidad').hidden = final !== 'llegada';
       }
       // Retratos: el activo resaltado; el que tiene una emergencia parpadea
       hud.querySelectorAll('.retrato').forEach((b, i) => {

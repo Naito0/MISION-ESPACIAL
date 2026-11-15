@@ -242,7 +242,7 @@ test('viaje (modo misión): 5-6 emergencias repartidas entre los roles, de a una
     for (const c of calmas) assert.ok(c >= 8 && c <= 13, `calma de ${c} s`);
   }
 });
-test('viaje: sin emergencias pendientes avanza más rápido; un rol que está leyendo no recibe emergencias', () => {
+test('viaje: sin tiempo muerto (se llega 1,5 s después de la última emergencia); un rol que está leyendo no recibe emergencias', () => {
   const config = { ...EMERG.config, emergenciasPorViaje: 1, maxSimultaneas: 1, tiempoParaResolver: 60 };
   const v = nuevoViaje(config, {});
   // Mientras lee el comandante, la emergencia no puede ser del comandante
@@ -250,12 +250,12 @@ test('viaje: sin emergencias pendientes avanza más rápido; un rol que está le
   while (!v.emergencias.length) avanzarViaje(v, 0.5, EMERG.emergencias, config);
   assert.notEqual(v.emergencias[0].rol, 'comandante');
   resolverEmergencia(v, v.emergencias[0].uid, [v.emergencias[0].rol], true);
-  const antes = v.restante;
   avanzarViaje(v, 1, EMERG.emergencias, config);
-  assert.equal(v.acelerado, true);
-  assert.equal(antes - v.restante, config.aceleracionFinal, 'avanza aceleracionFinal segundos por segundo');
+  assert.equal(v.terminado, null, 'todavía muestra el "Resuelto"');
+  avanzarViaje(v, 1, EMERG.emergencias, config);
+  assert.equal(v.terminado, 'llegada', 'llega sin esperar el resto del viaje');
+  assert.ok(v.restante === 0);
 });
-
 test('recomendaciones: dependen del destino (paneles, combustible, baterías, antena)', () => {
   const DEST = leerJSON('destinos.json').destinos;
   const luna = DEST.find((d) => d.id === 'luna');

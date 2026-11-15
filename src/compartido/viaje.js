@@ -79,11 +79,15 @@ export function avanzarViaje(v, dt, catalogo, config, rng = Math.random) {
   const hayEmergencia = v.emergencias.length > 0;
 
   // El reloj de llegada se detiene durante una emergencia (modo misión).
-  // Si ya no quedan emergencias por venir, el viaje avanza más rápido (sin tiempo muerto).
+  // SIN TIEMPO MUERTO: cuando ya no quedan emergencias, se llega al destino
+  // 1,5 s después de resolver la última (lo justo para ver el "✅ Resuelto").
   const sinPendientes = modoMision && v.lanzadas >= v.total;
-  v.acelerado = sinPendientes && !hayEmergencia;
-  const ritmo = v.acelerado ? (config.aceleracionFinal ?? 1) : 1;
-  if (!(modoMision && hayEmergencia)) v.restante = Math.max(0, v.restante - dt * ritmo);
+  v.acelerado = false;
+  if (!(modoMision && hayEmergencia)) v.restante = Math.max(0, v.restante - dt);
+  if (sinPendientes && !hayEmergencia) {
+    v.finEn = (v.finEn ?? 1.5) - dt;
+    if (v.finEn <= 0) v.restante = 0;
+  }
 
   if (modoMision) {
     // Una emergencia a la vez; la siguiente llega después de la calma

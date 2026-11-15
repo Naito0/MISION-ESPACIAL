@@ -14,7 +14,7 @@
     "_notaAceleracion": "'aceleracionFinal' = cuántas veces más rápido avanza el viaje cuando ya no quedan emergencias (para no tener tiempo muerto).",
     "aceleracionFinal": 5,
     "vidaInicial": 100,
-    "segundosFinal": 2.5,
+    "segundosFinal": 3,
     "aterrizajeSuave": 2.5,
     "aterrizajeDuro": 5,
     "danioChoque": 25,
