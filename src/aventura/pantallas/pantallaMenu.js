@@ -49,7 +49,7 @@ export function iniciarPantallaMenu(ctx) {
       <p class="sub">Diseña, viaja y explora una misión a la Luna o a Marte.</p>
       <label>Tu nombre <input id="nombre" maxlength="14" value="${nombreGuardado}" placeholder="Astronauta"></label>
       <button id="solo">🧑‍🚀 Jugar solo</button>
-      <button id="crear" class="secundario">✨ Crear sala</button>
+      <button id="crear" class="secundario">✨ Crear sala <small>(online)</small></button>
       ${vistaUnirse
         ? `<div class="fila"><input id="codigo" maxlength="4" placeholder="CÓDIGO"><button id="entrar">Entrar</button></div>`
         : '<button id="unirse" class="secundario">🔑 Unirse con código</button>'}
@@ -63,17 +63,20 @@ export function iniciarPantallaMenu(ctx) {
       return n;
     };
     panel.querySelector('#solo').onclick = () => { efecto('clic'); ctx.alJugarSolo(nombre()); };
+    const esperando = () => { panel.querySelectorAll('button').forEach((x) => { x.disabled = true; }); panel.querySelector('.error').innerHTML = '<span class="red-estado conectando">⏳ Conectando…</span>'; };
     panel.querySelector('#crear').onclick = async () => {
       efecto('clic');
+      esperando();
       const r = await ctx.alCrearSala(nombre());
       if (r && r.error) { efecto('error'); dibujar(r.error); }
     };
     const unirse = panel.querySelector('#unirse');
-    if (unirse) unirse.onclick = () => { efecto('clic'); dibujar('', true); };
+    if (unirse) unirse.onclick = () => { efecto('clic'); nombre(); dibujar('', true); }; // nombre(): guarda lo escrito antes de redibujar
     const entrar = panel.querySelector('#entrar');
     if (entrar) entrar.onclick = async () => {
       const codigo = panel.querySelector('#codigo').value.trim().toUpperCase();
       if (codigo.length !== 4) { efecto('error'); return dibujar('El código tiene 4 letras.', true); }
+      esperando();
       const r = await ctx.alUnirse(codigo, nombre());
       if (r && r.error) { efecto('error'); dibujar(r.error, true); }
     };
@@ -110,7 +113,9 @@ export function iniciarPantallaMenu(ctx) {
     });
   }
   window.modoPrueba = dibujarPrueba; // para las pruebas automáticas
-  dibujar();
+  // Mensaje al volver de una sala (ej.: "El anfitrión cerró la sala")
+  dibujar(ctx.mensajeMenu || '');
+  ctx.mensajeMenu = '';
 
   return {
     actualizar(dt, t) {

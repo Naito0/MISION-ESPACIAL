@@ -57,6 +57,36 @@ npm run preview    # el juego en http://localhost:4173
 
 Todo corre dentro del navegador: no hace falta servidor ni internet. El juego compilado es un **sitio estático**: la carpeta `dist` (pesa menos de 1 MB) es todo lo que hay que subir.
 
+**Link publicado:** https://naito0.github.io/MISION-ESPACIAL/
+
+### Jugar solo
+Escribe tu nombre → **🧑‍🚀 Jugar solo** → elige tu puesto y tu personaje → **¡Listo!** → **Iniciar partida**. Los otros 3 puestos los ocupan bots. Funciona **sin internet**.
+
+### Jugar con amigos (online, 2 a 4 jugadores)
+1. **Crear sala:** una persona (el *anfitrión*) escribe su nombre y pulsa **✨ Crear sala**. Aparece un código de 4 letras (ej. `MCFS`) y el botón **📋 Copiar código**.
+2. **Unirse:** los demás abren el mismo link, escriben su nombre, pulsan **🔑 Unirse con código**, escriben las 4 letras y pulsan **Entrar**.
+3. Cada uno elige **un puesto** y **un personaje** (no se repiten) y pulsa **¡Listo!**.
+4. Cuando todos están listos, el anfitrión pulsa **🚀 Iniciar partida**. Los puestos libres los ocupan bots; en una emergencia de un bot, cualquiera toma su control con 1-4.
+
+Arriba en la sala se ve el estado: **⏳ Conectando…**, **🟢 Conectado** o **🔴 Error: …** (con el problema explicado).
+
+**Cómo funciona:** usamos **PeerJS** con su servidor gratuito en la nube (sin cuenta ni claves) solo para "presentar" a las computadoras; después se hablan directo. El **anfitrión manda**: la partida corre en su navegador, recibe las acciones de los demás y les envía el estado 10 veces por segundo. Todo el código de red está en un solo archivo: `src/red/conexion.js`.
+
+**Si alguien se va:** si se desconecta un jugador, su puesto pasa a ser un bot. Si se va el anfitrión (o cierra la pestaña), la partida termina y todos vuelven al menú con un mensaje.
+
+### Problemas de conexión
+| Mensaje | Qué hacer |
+|---|---|
+| "Ese código no existe" | Revisa las 4 letras. La sala solo existe mientras el anfitrión tiene el juego abierto. |
+| "No se pudo llegar al servidor de PeerJS, revisa el internet" | Revisa el internet. Algunas redes de colegios o empresas bloquean PeerJS: prueben con los datos del celular. |
+| "No se pudo abrir la conexión directa" | La red bloquea las conexiones entre computadoras. Prueben otra red (por ejemplo, el celular como punto de acceso). |
+| "El anfitrión cerró la sala" / "Se perdió la conexión" | El anfitrión se fue o se le cortó el internet: creen una sala nueva. |
+
+Si el online falla en la demo, usen **Jugar solo**: no depende de internet.
+
+### Modo prueba (minijuegos)
+**🧪 Modo prueba** en el menú: abre cualquier minijuego en Luna o Marte, sin penalización. La tabla para anotar los resultados está en [PRUEBAS.md](PRUEBAS.md).
+
 ## 3. Publicar: un link para que cualquiera juegue
 
 Antes de publicar, siempre:
@@ -181,9 +211,9 @@ mision-espacial/
 
 Regla del equipo: **las reglas van en `src/compartido/`** (sin dibujo, con pruebas); lo visual va en `src/aventura/`. Después de cambiar un JSON, ejecuten `npm test`.
 
-### Modo en red (desactivado)
+### Multijugador
 
-El modo multijugador en red (lobby con código y servidor Socket.IO) **sigue en el código pero no se usa**: `pantallas/pantallaLobby.js`, `pantallas/pantallaNaveRed.js`, `red/conexion.js` (`conectarServidor`) y `server/`. El juego arranca directamente en modo de un jugador desde `src/aventura/main3d.js`.
+La red pasa **solo** por `src/red/conexion.js` (PeerJS). La versión vieja con servidor Socket.IO sigue en el código pero **desactivada**: `pantallas/pantallaLobby.js`, `pantallas/pantallaNaveRed.js`, `aventura/red/conexion.js` y `server/`. No hay código de Firebase: ese plan se cambió por PeerJS antes de programarlo.
 
 ---
 
@@ -230,6 +260,7 @@ Claude Code (un asistente de programación con inteligencia artificial) escribi�
 
 - El motor 3D, los escenarios, los astronautas y los minijuegos.
 - Las reglas del juego (viaje, hangar, recomendaciones, logros) y las pruebas automáticas.
+- El multijugador con PeerJS, el Modo prueba y las demostraciones animadas de los minijuegos.
 - Los textos de las tarjetas, los diagnósticos y la documentación.
 
 También buscó en páginas de la NASA los datos y los hechos reales, y guardó cada uno con su enlace y una cita. Lo que no pudo confirmar quedó marcado "verificar" o se quitó, para que lo revisemos nosotros. Probó cada cambio en un navegador automático.

@@ -71,6 +71,7 @@ export function iniciarPantallaSala(ctx) {
     const listosTodos = e.jugadores.every((j) => j.roles.length && j.listo);
     panel.innerHTML = `
       <h1>${enRed ? `Sala <span class="codigo">${e.codigo}</span>` : '🧑‍🚀 Jugar solo'}</h1>
+      ${enRed ? `<div class="red-estado"></div>` : ''}
       ${enRed ? `<button class="secundario copiar">📋 Copiar código</button><p class="sub">Los demás abren el juego, eligen <b>"Unirse con código"</b> y escriben <b>${e.codigo}</b>.</p>` : '<p class="sub">Tú eliges un puesto; los otros 3 los ocupan bots. En una emergencia de un bot, tomas su control con 1-4.</p>'}
       <h3>1. Elige tu puesto</h3>
       <div class="roles">${TRIPULACION.map((m) => {
@@ -106,7 +107,17 @@ export function iniciarPantallaSala(ctx) {
       navigator.clipboard?.writeText(e.codigo).then(() => { copiar.textContent = '✅ ¡Copiado!'; }, () => { copiar.textContent = `Código: ${e.codigo}`; });
     };
     dibujarFondo(e);
+    pintarRed();
   }
+  // Indicador de conexión: "Conectando…", "Conectado" o "Error: …" (en español)
+  function pintarRed() {
+    const el = panel.querySelector('.red-estado');
+    if (!el || !conexion.red) return;
+    const { estado, mensaje } = conexion.red;
+    el.className = `red-estado ${estado}`;
+    el.textContent = estado === 'conectado' ? `🟢 ${mensaje}` : estado === 'error' ? `🔴 Error: ${mensaje}` : `⏳ ${mensaje}`;
+  }
+  const quitarRed = conexion.alRed ? conexion.alRed(pintarRed) : () => {};
 
   const quitarEstado = conexion.alEstado((e) => {
     if (e.fase !== 'lobby') { ctx.irA(); return; }
@@ -121,6 +132,6 @@ export function iniciarPantallaSala(ctx) {
       motor.camara.lookAt(0, 1.1, 0);
       figuras.forEach((f) => f.a && f.a.actualizar(dt, { velocidad: 0, apoyado: true, velocidadVertical: 0, giro: 0 }));
     },
-    salir() { panel.remove(); quitarEstado(); }
+    salir() { panel.remove(); quitarEstado(); quitarRed(); }
   };
 }

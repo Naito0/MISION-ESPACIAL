@@ -339,6 +339,10 @@ test('sala con bots: puestos y personajes sin repetir, listos, y los bots ocupan
   const pj = Object.values(s.personajesPorRol());
   assert.equal(new Set(pj).size, 4);
   assert.equal(s.personajesPorRol().ingeniero, 'kai');
+  // Si Beto se desconecta en plena partida, su puesto pasa a ser un bot
+  s.salir('b');
+  assert.deepEqual([...s.bots].sort(), ['cientifico', 'comandante', 'comunicaciones']);
+  assert.ok(s.rolesDe(s.jugadores.get('a')).includes('cientifico'));
 });
 
 test('minijuego "Orden con retraso": siempre se puede ganar, en la Luna y en Marte', () => {

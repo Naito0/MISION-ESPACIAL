@@ -47,6 +47,25 @@ export class JugadorLocal {
   }
 
   /**
+   * MULTIJUGADOR: este astronauta lo maneja OTRO jugador. Se mueve suavemente
+   * (interpolación) hacia la última posición recibida p = estadoRed() de ese jugador.
+   */
+  seguirRemoto(dt, p) {
+    const k = 1 - Math.exp(-12 * dt);
+    this._deseo.set((p.x - this.pies.x) * k, (p.y - this.pies.y) * k, (p.z - this.pies.z) * k);
+    this.cuerpo.capsula.translate(this._deseo);
+    this.cuerpo.velocidad.set(0, 0, 0);
+    this.cuerpo.pies(this.pies);
+    const a = this.astronauta;
+    a.raiz.position.copy(this.pies);
+    const dif = Math.atan2(Math.sin(p.ry - a.raiz.rotation.y), Math.cos(p.ry - a.raiz.rotation.y));
+    a.raiz.rotation.y += dif * k;
+    this.anguloAnterior = a.raiz.rotation.y;
+    if (p.acc) a.mantener(p.acc);
+    a.actualizar(dt, { velocidad: p.v || 0, apoyado: true, velocidadVertical: 0, giro: 0 });
+  }
+
+  /**
    * Límites del área donde puede moverse (rectángulo en el piso).
    * l = { xMin, xMax, zMin, zMax } o null (sin límites).
    */

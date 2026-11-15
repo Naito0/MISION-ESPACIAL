@@ -125,6 +125,8 @@ export class Sala {
     if (!j) return;
     this.jugadores.delete(id);
     this.posiciones.delete(id);
+    // Si la partida ya empezó, sus puestos los ocupan BOTS
+    if (this.fase !== 'lobby' && j.roles.length) this.bots = [...new Set([...(this.bots || []), ...j.roles])];
     // Si se fue el anfitrión, el siguiente pasa a serlo
     if (j.anfitrion) {
       const siguiente = this.jugadores.values().next().value;

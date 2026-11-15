@@ -5,7 +5,8 @@
 | Biblioteca | Para qué | Licencia |
 |---|---|---|
 | [Three.js](https://threejs.org/) 0.187.0 | Gráficos 3D | MIT |
-| [Socket.IO](https://socket.io/) 4.8.1 | Juego en red en tiempo real | MIT |
+| [PeerJS](https://peerjs.com/) 1.5.4 | Multijugador online (con su servidor gratuito en la nube) | MIT |
+| [Socket.IO](https://socket.io/) 4.8.1 | Modo en red viejo (desactivado) | MIT |
 | [Express](https://expressjs.com/) 5.1.0 | Servidor del anfitrión | MIT |
 | [Vite](https://vite.dev/) | Compilar el juego | MIT |
 

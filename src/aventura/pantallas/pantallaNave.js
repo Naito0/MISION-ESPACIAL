@@ -72,7 +72,7 @@ export function iniciarPantallaNave(ctx) {
   // Cada uno empieza en su "puesto": frente a la primera consola de su rol.
   // Personajes: el traje de cada astronauta tiene el color de su personaje
   // (el que eligió su jugador o el del bot). Ver src/data/personajes.json.
-  const bots = estado.bots || [];
+  let bots = estado.bots || []; // cambia si alguien se desconecta (su puesto pasa a un bot)
   const pjDe = (rol) => PERSONAJES.find((p) => p.id === (estado.personajesPorRol || {})[rol]);
   const yoJ = estado.jugadores.find((j) => j.id === conexion.id);
   const astronautas = TRIPULACION.map((m) => {
@@ -131,8 +131,26 @@ export function iniciarPantallaNave(ctx) {
   }
 
   /** Cambia el astronauta que controla el jugador; la cámara vuela hasta él. */
+  // MULTIJUGADOR: astronautas que maneja OTRO jugador (rol → su posición)
+  let remotos = {};
+  const quitarPos = conexion.enRed ? conexion.alPosiciones((pos) => {
+    const r = {};
+    for (const [id, p] of Object.entries(pos)) if (id !== conexion.id && p && p.rol) r[p.rol] = p;
+    remotos = r;
+  }) : () => {};
+  const deOtroJugador = (rol) => {
+    if (!conexion.enRed) return null;
+    const e = conexion.estado;
+    const duenio = e.jugadores.find((j) => j.id !== conexion.id && j.roles.includes(rol));
+    if (duenio) return duenio.nombre;
+    const usando = Object.entries(conexion.posiciones || {}).find(([id, p]) => id !== conexion.id && p && p.rol === rol);
+    return usando ? (e.jugadores.find((j) => j.id === usando[0])?.nombre || 'otro jugador') : null;
+  };
+  let tiempoEnvio = 0;
   function cambiarA(i) {
     if (i === activo || consola || final) return;
+    const otro = deOtroJugador(TRIPULACION[i].rol);
+    if (otro) { avisar(`Ese astronauta lo maneja <b>${otro}</b>`, 'amable'); efecto('error'); return; }
     const antes = actual().jugador.camara;
     activo = i;
     const cam = actual().jugador.camara;
@@ -159,6 +177,7 @@ export function iniciarPantallaNave(ctx) {
   let ultimoMensaje = estado.mensajes.length ? estado.mensajes[estado.mensajes.length - 1].n : 0;
   const quitarEstado = conexion.alEstado((e) => {
     if (!['viaje', 'llegada', 'fracaso'].includes(e.fase)) { ctx.irA('juego'); return; }
+    bots = e.bots || [];
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
@@ -299,6 +318,8 @@ export function iniciarPantallaNave(ctx) {
       astronautas.forEach((a, i) => {
         const j = a.jugador;
         if (i === activo) { entrada = j.actualizar(dt, true); return; }
+        // Lo maneja otro jugador: sigue su posición recibida por la red
+        if (remotos[a.rol]) { j.seguirRemoto(dt, remotos[a.rol]); return; }
         // Los demás trabajan: si están cerca de su puesto miran la consola y "teclean"
         j.actualizar(dt, false);
         if (!final && j.pies.distanceTo(a.puesto) < 2.5) {
@@ -309,6 +330,9 @@ export function iniciarPantallaNave(ctx) {
       });
       const yo = actual();
       if (consola) yo.jugador.astronauta.mantener('reparar');
+      // MULTIJUGADOR: mi posición (y qué astronauta manejo) unas 10 veces por segundo
+      tiempoEnvio += dt;
+      if (conexion.enRed && tiempoEnvio >= 0.1) { tiempoEnvio = 0; conexion.enviarPosicion({ ...yo.jugador.estadoRed(), rol: yo.rol }); }
       esc.puertas.forEach((p) => p.actualizar(dt, astronautas.map((a) => a.jugador.pies)));
       esc.actualizar(dt, t);
       actualizarSenal(dt);
@@ -378,7 +402,7 @@ export function iniciarPantallaNave(ctx) {
           flecha = `<span class="flecha" style="transform:rotate(${ang.toFixed(2)}rad)">⬆</span>`;
         }
         return `<div class="panel alerta-grande ${e.restante <= 10 ? 'urgente' : ''}" style="border-color:${hexDe(e.rol)}">
-          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : `Pulsa <span class="tecla">${m.tecla}</span> → ${m.corto}${bots.includes(e.rol) ? ' (toma el control del bot 🤖)' : ''}`}</div>
+          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : deOtroJugador(e.rol) ? `Le toca a <b>${deOtroJugador(e.rol)}</b> (${m.corto})` : `Pulsa <span class="tecla">${m.tecla}</span> → ${m.corto}${bots.includes(e.rol) ? ' (toma el control del bot 🤖)' : ''}`}</div>
           <div class="ag-porque">${porQueDe(e.id)} · ⏱ ${e.restante} s</div></div>`;
       }).join('');
       if (html !== alertasPrevias) { $('.alertas').innerHTML = html; alertasPrevias = html; }
@@ -387,7 +411,7 @@ export function iniciarPantallaNave(ctx) {
       if (consola) consola.cerrar();
       window.removeEventListener('keydown', teclaCambio);
       ctx.aprendizaje?.alPoderMostrar(null);
-      hud.remove(); ambiente(false); quitarEstado();
+      hud.remove(); ambiente(false); quitarEstado(); quitarPos();
     }
   };
 }

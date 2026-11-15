@@ -20,7 +20,7 @@ import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
 import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
-import { crearPartidaLocal } from './red/partidaLocal.js';
+import { crearPartidaSolo, crearSalaEnRed, unirseASalaEnRed } from '../red/conexion.js';
 import { abrirMinijuego, nuevaMisionMinijuegos } from './minijuegos/index.js';
 import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
@@ -114,7 +114,7 @@ ctx.irA = irA;
 // "Jugar solo": una sala local de 1 jugador; los otros 3 puestos los ocupan bots.
 ctx.alJugarSolo = async (nombre) => {
   nuevaMisionMinijuegos(); // tiempo extra en el primer intento de cada minijuego
-  const partida = crearPartidaLocal();
+  const partida = crearPartidaSolo();
   await partida.crear(nombre);
   await partida.accion('puesto', { rol: 'comandante' });
   await partida.accion('personaje', { id: 'nova' });
@@ -122,10 +122,30 @@ ctx.alJugarSolo = async (nombre) => {
   ctx.conexionActiva = partida;
   irA(); // → sala
 };
-// "Crear sala" y "Unirse": multijugador (se activa con Firebase, ver README)
-ctx.alCrearSala = async () => ({ error: 'El multijugador todavía no está configurado. Por ahora usa "Jugar solo".' });
-ctx.alUnirse = async () => ({ error: 'El multijugador todavía no está configurado. Por ahora usa "Jugar solo".' });
-ctx.alSalirDeSala = () => { ctx.conexionActiva?.salir?.(); ctx.conexionActiva = null; irA(); };
+// "Crear sala" y "Unirse": multijugador con PeerJS (todo pasa por src/red/conexion.js)
+function entrarEnRed(r) {
+  if (r.error) return r;
+  nuevaMisionMinijuegos();
+  const c = r.conexion;
+  // Si el anfitrión se va o se corta la conexión: todos vuelven al menú con un mensaje
+  c.alFin = (motivo) => {
+    if (ctx.conexionActiva !== c) return;
+    if (window.consolaAbierta) document.querySelector('.consola-cerrar')?.click();
+    ctx.conexionActiva = null;
+    ctx.mensajeMenu = `⚠ ${motivo}`;
+    irA();
+  };
+  ctx.conexionActiva = c;
+  irA(); // → sala
+  return { ok: true };
+}
+ctx.alCrearSala = async (nombre) => {
+  const r = await crearSalaEnRed(nombre);
+  if (!r.error) await r.conexion.accion('dificultad', { nivel: dificultad() });
+  return entrarEnRed(r);
+};
+ctx.alUnirse = async (codigo, nombre) => entrarEnRed(await unirseASalaEnRed(codigo, nombre));
+ctx.alSalirDeSala = () => { const c = ctx.conexionActiva; ctx.conexionActiva = null; c?.salir?.(); irA(); };
 
 const reloj = new THREE.Clock();
 motor.renderer.setAnimationLoop(() => {
