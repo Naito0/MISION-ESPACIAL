@@ -95,6 +95,7 @@ export function retraso(area, terminar, op = {}) {
     t += dt;
     if (llegada !== null && paradoEn === null && t >= llegada) paradoEn = llegada;
     const visto = posReal(Math.max(0, t - D)); // lo que ves en la Tierra: el pasado
+    if (op.pista) Object.assign(op.pista, { lienzo: c, visto, lineaEnvio, enviada: enviada !== null, boton });
     // Dibujo
     g.fillStyle = '#c47a4a'; g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = 'rgba(60,196,110,0.6)'; g.fillRect(zona.a, 120, zona.b - zona.a, 40);
@@ -150,6 +151,7 @@ export function tormenta(area, terminar, op = {}) {
     ang += ((t.s.has('ArrowRight') || t.s.has('KeyD') ? 1 : 0) - (t.s.has('ArrowLeft') || t.s.has('KeyA') ? 1 : 0)) * 40 * dt;
     f = Math.max(0, Math.min(100, f + ((t.s.has('ArrowUp') || t.s.has('KeyW') ? 1 : 0) - (t.s.has('ArrowDown') || t.s.has('KeyS') ? 1 : 0)) * 18 * dt));
     const senal = espectro(f) + azar(-0.04, 0.04);
+    if (op.pista) Object.assign(op.pista, { lienzo: c, antena: ang, antenaBuena: angReal, frecuencia: f, frecuenciaBuena: fReal });
     fuerte = senal > 0.85 ? fuerte + dt : Math.max(0, fuerte - dt);
     // Dibujo: espectro con ruido
     g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);

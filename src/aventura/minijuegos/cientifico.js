@@ -106,6 +106,7 @@ export function equilibrio(area, terminar, op = {}) {
     produccion += (Number(ctrl.value) - produccion) * Math.min(1, dt / retardo);
     nivel += (produccion - act.consumo) * 2.2 * dt;
     nivel = Math.max(0, Math.min(100, nivel));
+    if (op.pista) Object.assign(op.pista, { lienzo: c, control: Number(ctrl.value), consumo: act.consumo, nivel });
     const seguro = nivel > 40 && nivel < 60;
     enZona = seguro ? enZona + dt : enZona;
     // Dibujo

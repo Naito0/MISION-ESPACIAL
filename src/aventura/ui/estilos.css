@@ -112,6 +112,20 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* ---- Consola: objetivo y controles siempre a la vista ---- */
 #hud .consola-objetivo { font-size: var(--t); color: #ffe9b0; background: rgba(255, 209, 102, 0.12); border-radius: 8px; padding: 6px 10px; margin-bottom: 4px; text-align: left; }
 #hud .consola-controles { font-size: var(--tc); color: #d8e6ff; background: rgba(124, 196, 255, 0.12); border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; text-align: left; }
+/* ---- "Cómo se juega" animado (demos.js) ---- */
+#hud .consola-area { position: relative; }
+#hud .consola-area.en-demo .consola-lienzo { outline: 3px dashed #ffd166; }
+#hud .demo-banda { font-size: 22px; font-weight: bold; color: #ffd166; text-align: center; margin-bottom: 6px; animation: parpadeo 1.2s infinite; }
+#hud .demo-teclas { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+#hud .demo-tecla { font-size: 22px; padding: 6px 14px; transition: all 0.1s; }
+#hud .demo-tecla.activa { background: #ffd166; color: #1a1300; transform: scale(1.15); box-shadow: 0 0 16px #ffd166; }
+#hud .demo-mano { position: absolute; font-size: 34px; pointer-events: none; transform: translate(-30%, -10%); transition: left 0.08s linear, top 0.08s linear; filter: drop-shadow(0 0 6px #fff); z-index: 3; }
+#hud .demo-tarjeta { font-size: 21px; text-align: left; line-height: 1.4; }
+#hud .demo-tarjeta p { margin: 8px 0; }
+#hud .demo-tarjeta .fila { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+#hud .consola-botones { display: flex; gap: 8px; justify-content: center; }
+#hud .consola-ayuda { font-size: var(--tc); }
+@keyframes parpadeo { 50% { opacity: 0.55; } }
 /* ---- Modo prueba ---- */
 #hud .prueba { width: min(calc(560px * var(--ancho)), 94vw); max-height: 92vh; overflow-y: auto; }
 #hud .prueba-lista { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }

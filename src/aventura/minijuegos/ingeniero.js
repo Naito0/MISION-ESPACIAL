@@ -48,6 +48,7 @@ export function fuga(area, terminar, op = {}) {
     const dt = Math.min(0.05, (ahora - anterior) / 1000); anterior = ahora;
     tiempo += dt;
     if (sellado < 1) presion -= (op.caidaPresion ?? 2.2) * dt;
+    if (op.pista) Object.assign(op.pista, { lienzo: c, fuga: { x: fx, y: fy }, encontrada });
     if (encontrada && apretando && Math.hypot(mx - fx, my - fy) < 30) sellado += dt / (op.sellar ?? 1.5);
     // Partículas: van hacia la fuga; los ventiladores las empujan hacia afuera
     for (const p of parts) {

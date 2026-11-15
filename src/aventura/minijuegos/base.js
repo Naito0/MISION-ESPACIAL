@@ -1,12 +1,19 @@
 // =============================================================
-// base.js — Marco "holográfico" de las consolas: título, instrucciones,
-// área del minijuego, barra de tiempo y botón para cerrar.
-// Cada minijuego recibe (area, terminar) y llama terminar(true/false).
+// base.js — Marco "holográfico" de las consolas: título, objetivo, controles,
+// área del minijuego, barra de tiempo y botones.
+// Cada minijuego recibe (area, terminar, opciones) y llama terminar(true/false).
+//
+// "CÓMO SE JUEGA": la primera vez que aparece cada minijuego (y siempre con el
+// botón "❓ Ver cómo se juega") se ve una DEMOSTRACIÓN: el minijuego real se
+// juega solo unos segundos (ver demos.js). Después: "▶ Jugar" o "🔁 Ver otra vez".
+// El reloj de la emergencia NO corre durante la demostración.
 // =============================================================
 import { efecto } from '../audio.js';
+import { reproducirDemo, tieneBot } from './demos.js';
 
 /**
- * o = { titulo, instrucciones, color, segundos, iniciar(area, terminar, ctx) → limpiar(), alTerminar(resultado) }
+ * o = { id, titulo, objetivo, controles, gana, color, segundos,
+ *       iniciar(area, terminar, opciones) → limpiar(), opciones, alTerminar(resultado) }
  * resultado: true (logrado), false (falló), null (lo cerró).
  */
 export function abrirConsola(o) {
@@ -23,16 +30,26 @@ export function abrirConsola(o) {
         : `<div class="consola-inst">${o.instrucciones}</div>`}
       <div class="consola-area"></div>
       <div class="consola-tiempo"><div style="background:${o.color}"></div></div>
-      <button class="consola-cerrar">Cerrar (Esc)</button>
+      <div class="consola-botones">
+        ${o.objetivo ? '<button class="consola-ayuda">❓ Ver cómo se juega</button>' : ''}
+        <button class="consola-cerrar">Cerrar (Esc)</button>
+      </div>
     </div>`;
   document.getElementById('hud').appendChild(capa);
   const area = capa.querySelector('.consola-area');
   const barra = capa.querySelector('.consola-tiempo > div');
   let terminado = false;
   let limpiar = null;
-  const inicio = performance.now();
+  let detenerDemo = null;
+  // El tiempo solo corre mientras se JUEGA (no durante la demostración ni la tarjeta)
+  let jugando = false;
+  let transcurrido = 0;
+  let ultimo = performance.now();
   const reloj = setInterval(() => {
-    const f = 1 - (performance.now() - inicio) / 1000 / o.segundos;
+    const ahora = performance.now();
+    if (jugando) transcurrido += (ahora - ultimo) / 1000;
+    ultimo = ahora;
+    const f = 1 - transcurrido / o.segundos;
     barra.style.width = `${Math.max(0, f) * 100}%`;
     if (f <= 0) terminar(false);
   }, 100);
@@ -46,6 +63,7 @@ export function abrirConsola(o) {
     if (resultado === false && !seAcaboElTiempo()) {
       if (limpiar) limpiar();
       limpiar = null;
+      jugando = false;
       efecto('error');
       area.innerHTML = `<div class="consola-resultado">❌ No salió</div>
         ${motivo ? `<p class="consola-motivo">💡 ${motivo}</p>` : ''}
@@ -55,13 +73,15 @@ export function abrirConsola(o) {
     }
     terminar(resultado);
   }
-  const seAcaboElTiempo = () => (performance.now() - inicio) / 1000 >= o.segundos;
+  const seAcaboElTiempo = () => transcurrido >= o.segundos;
 
   function terminar(resultado) {
     if (terminado) return;
     terminado = true;
+    jugando = false;
     clearInterval(reloj);
     window.removeEventListener('keydown', teclaEsc);
+    if (detenerDemo) detenerDemo();
     if (limpiar) limpiar();
     efecto(resultado ? 'exito' : resultado === false ? 'error' : 'clic');
     const aviso = resultado ? '✅ ¡Resuelto!' : resultado === false ? '⏱ Se acabó el tiempo' : '';
@@ -78,30 +98,44 @@ export function abrirConsola(o) {
 
   function empezar() {
     area.innerHTML = '';
+    jugando = true;
     limpiar = o.iniciar(area, intento, o.opciones || {});
   }
 
+  // ---- "Cómo se juega" ----
+  function tarjeta() {
+    area.innerHTML = `<div class="demo-tarjeta">
+      <p>🎯 <b>Objetivo:</b> ${o.objetivo}</p>
+      <p>🎮 <b>Controles:</b> ${o.controles}</p>
+      <p>🏆 <b>Cómo ganas:</b> ${o.gana}</p>
+      <div class="fila">
+        <button class="consola-grande jugar">▶ Jugar</button>
+        <button class="consola-grande secundario otra-vez">🔁 Ver otra vez</button>
+      </div></div>`;
+    area.querySelector('.jugar').onclick = () => { efecto('clic'); empezar(); };
+    area.querySelector('.otra-vez').onclick = () => { efecto('clic'); verDemo(); };
+  }
+  function verDemo() {
+    if (limpiar) { limpiar(); limpiar = null; }
+    jugando = false;
+    if (!tieneBot(o.id)) { tarjeta(); return; } // sin jugador automático: solo la tarjeta
+    window.sinLogros = true; // la demostración no da logros
+    detenerDemo = reproducirDemo(o.id, area, o.iniciar, o.opciones || {}, () => {
+      detenerDemo = null;
+      window.sinLogros = o.sinLogros || false;
+      if (!terminado) tarjeta();
+    });
+  }
+
   capa.querySelector('.consola-cerrar').onclick = () => terminar(null);
-  // La PRIMERA vez que aparece cada minijuego: 3 segundos de demostración con las teclas
-  if (o.demo && !yaVioDemo(o.id)) {
-    marcarDemo(o.id);
-    area.innerHTML = `<div class="demo">
-      <div class="demo-titulo">👀 Así se juega</div>
-      <div class="demo-teclas">${o.demo.teclas.map((t) => `<span class="tecla demo-tecla">${t}</span>`).join('')}</div>
-      <p>${o.demo.texto}</p>
-      <div class="demo-cuenta">3</div></div>`;
-    let n = 3;
-    const cuenta = setInterval(() => {
-      n--;
-      const el = area.querySelector('.demo-cuenta');
-      if (el) el.textContent = n > 0 ? n : '¡Ya!';
-      if (n <= 0) { clearInterval(cuenta); setTimeout(() => { if (!terminado) empezar(); }, 300); }
-    }, 1000);
-  } else empezar();
+  const ayuda = capa.querySelector('.consola-ayuda');
+  if (ayuda) ayuda.onclick = () => { if (!detenerDemo) { efecto('clic'); verDemo(); } };
+  // La PRIMERA vez que aparece cada minijuego: demostración automática
+  if (o.objetivo && !yaVioDemo(o.id)) { marcarDemo(o.id); verDemo(); } else empezar();
   return { cerrar: () => terminar(null), terminar };
 }
 
-const CLAVE_DEMOS = 'misionEspacial.demosVistas';
+const CLAVE_DEMOS = 'misionEspacial.demosVistas2';
 function yaVioDemo(id) {
   try { return JSON.parse(localStorage.getItem(CLAVE_DEMOS) || '[]').includes(id); } catch { return false; }
 }

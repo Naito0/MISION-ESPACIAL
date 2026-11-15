@@ -21,7 +21,7 @@ import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
 import { crearPartidaLocal } from './red/partidaLocal.js';
-import { abrirMinijuego } from './minijuegos/index.js';
+import { abrirMinijuego, nuevaMisionMinijuegos } from './minijuegos/index.js';
 import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
@@ -113,6 +113,7 @@ ctx.irA = irA;
 // ---- Menú principal ----
 // "Jugar solo": una sala local de 1 jugador; los otros 3 puestos los ocupan bots.
 ctx.alJugarSolo = async (nombre) => {
+  nuevaMisionMinijuegos(); // tiempo extra en el primer intento de cada minijuego
   const partida = crearPartidaLocal();
   await partida.crear(nombre);
   await partida.accion('puesto', { rol: 'comandante' });

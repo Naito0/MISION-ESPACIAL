@@ -105,7 +105,7 @@ export function iniciarPantallaMenu(ctx) {
         abrirMinijuego(emergencia, colorDe(j.rol), (r) => {
           panel.style.display = '';
           dibujarPrueba(r === true ? `🏆 ¡Ganaste "${j.nombre}"!` : r === false ? `❌ Perdiste "${j.nombre}". ¡Prueba otra vez!` : `Cerraste "${j.nombre}".`);
-        }, destinoPrueba);
+        }, destinoPrueba, { extraTiempo: 1, sinLogros: true });
       };
     });
   }

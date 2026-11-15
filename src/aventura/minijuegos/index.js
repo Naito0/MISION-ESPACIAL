@@ -72,6 +72,10 @@ export const MINIJUEGOS = {
     gana: 'La barra de señal se pone verde el tiempo pedido.' }
 };
 
+// Minijuegos ya jugados en ESTA misión (para el tiempo extra del primer intento)
+const yaJugados = new Set();
+export const nuevaMisionMinijuegos = () => yaJugados.clear();
+
 /** Minijuegos activos (los desactivados no se usan en emergencias ni en el Modo prueba). */
 export const minijuegosActivos = () => Object.entries(MINIJUEGOS).filter(([, m]) => m.activo !== false).map(([id, m]) => ({ id, ...m }));
 
@@ -90,7 +94,12 @@ export function abrirMinijuego(emergencia, colorHex, alTerminar, destinoId = 'lu
   }
   const valores = configDificultad.minijuegosPorDestino[destinoId] || configDificultad.minijuegosPorDestino.luna;
   const opciones = { ...(valores[emergencia.minijuego] || {}), destinoId };
+  // El PRIMER intento de cada minijuego en una misión tiene +50% de tiempo
+  const extra = o.extraTiempo ?? (yaJugados.has(emergencia.minijuego) ? 1 : 1.5);
+  yaJugados.add(emergencia.minijuego);
+  window.sinLogros = !!o.sinLogros;
   return abrirConsola({
+    sinLogros: !!o.sinLogros,
     id: emergencia.minijuego,
     titulo: emergencia.nombre,
     instrucciones: emergencia.descripcion,
@@ -98,7 +107,7 @@ export function abrirMinijuego(emergencia, colorHex, alTerminar, destinoId = 'lu
     controles: m.controles,
     gana: m.gana,
     color: `#${colorHex.toString(16).padStart(6, '0')}`,
-    segundos: Math.max(20, emergencia.restante) * (o.extraTiempo ?? 1),
+    segundos: Math.max(20, emergencia.restante) * extra,
     iniciar: m.fn,
     opciones,
     alTerminar

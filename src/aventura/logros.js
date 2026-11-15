@@ -47,8 +47,9 @@ export function crearLogros(hud) {
   }
 
   // Minijuegos ganados (los manda cada minijuego): fuga rápida, filtro, golpes de micrometeoritos…
-  window.addEventListener('minijuego-ganado', (e) => revisar({ minijuego: e.detail }));
-  window.addEventListener('impacto-meteorito', () => { stats.golpes++; });
+  // (las demostraciones y el Modo prueba no cuentan: window.sinLogros)
+  window.addEventListener('minijuego-ganado', (e) => { if (!window.sinLogros) revisar({ minijuego: e.detail }); });
+  window.addEventListener('impacto-meteorito', () => { if (!window.sinLogros) stats.golpes++; });
 
   return {
     revisar,

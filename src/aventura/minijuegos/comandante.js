@@ -80,6 +80,7 @@ export function esquivar(area, terminar, op = {}) {
     g.strokeStyle = golpe > 0 ? '#ff5050' : '#5be08a'; g.lineWidth = 3;
     g.beginPath(); g.arc(nx, ny, 18, 0, 7); g.moveTo(nx - 28, ny); g.lineTo(nx - 10, ny); g.moveTo(nx + 10, ny); g.lineTo(nx + 28, ny); g.stroke();
     golpe -= dt;
+    if (op.pista) Object.assign(op.pista, { lienzo: c, mira: { x: nx, y: ny }, peligros: objetos.filter((o) => o.z > 0.25 && Math.hypot(o.tx - nx, o.ty - ny) < (o.meteorito ? 6 : 11) * 2.4 + 18) });
     texto(g, `Escudo ${'❤'.repeat(Math.max(0, escudo))}   ⏱ ${Math.max(0, duracion - tiempo).toFixed(0)} s`, 12, 24, '#fff', 17);
     if (escudo <= 0) return terminar(false, 'Los objetos que vienen hacia el CENTRO de tu mira son los que chocan: muévete solo cuando algo gris o naranja crece justo delante. Las estrellas no hacen daño.');
     if (tiempo >= duracion) return terminar(true);
@@ -123,6 +124,7 @@ export function rumbo(area, terminar, op = {}) {
     const adelante = rx * vx + ry * vy > 0;
     const acierta = adelante && distLinea < 20;
     alineado = acierta ? alineado + dt : Math.max(0, alineado - dt * 2);
+    if (op.pista) Object.assign(op.pista, { lienzo: c, angulo: ang, anguloPlaneta: Math.atan2(py - nave.y, px - nave.x) });
     // Dibujo
     g.fillStyle = '#04101f'; g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = '#d2693c'; g.beginPath(); g.arc(px, py, 20, 0, 7); g.fill();
