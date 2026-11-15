@@ -10,6 +10,7 @@
 // =============================================================
 import { pausar } from '../pausa.js';
 import { efecto } from '../audio.js';
+import { mezclarLista } from '../../compartido/preguntas.js';
 
 let cadena = Promise.resolve(); // fila: cada tarjeta espera a la anterior
 const dominio = (url) => { try { return new URL(url).hostname; } catch { return url || ''; } };
@@ -64,16 +65,17 @@ export function mostrarDiagnostico(d, titulo = 'Diagnóstico') {
   cadena = cadena.then(() => new Promise((listo) => {
     const m = modal('diagnostico');
     const letras = ['A', 'B', 'C', 'D'];
+    const opciones = mezclarLista(d.opciones); // orden al azar: la correcta no es siempre la A
     m.caja.innerHTML = `
       <div class="tm-etiqueta">🔎 ${titulo}: piensa antes de arreglar</div>
       <h3>${d.pregunta}</h3>
-      <div class="dg-opciones">${d.opciones.map((o, i) => `<button class="boton dg-op" data-i="${i}"><b>${letras[i]})</b> ${o.texto}</button>`).join('')}</div>
+      <div class="dg-opciones">${opciones.map((o, i) => `<button class="boton dg-op" data-i="${i}"><b>${letras[i]})</b> ${o.texto}</button>`).join('')}</div>
       <p class="dg-explica"></p>
       <button class="boton tm-ok" hidden>🛠 ¡A arreglarlo!</button>`;
     let intentos = 0;
     m.caja.querySelectorAll('.dg-op').forEach((b) => {
       b.onclick = () => {
-        const o = d.opciones[Number(b.dataset.i)];
+        const o = opciones[Number(b.dataset.i)];
         intentos++;
         const p = m.caja.querySelector('.dg-explica');
         if (o.correcta) {
@@ -104,12 +106,15 @@ export function mostrarDiagnostico(d, titulo = 'Diagnóstico') {
 export function mostrarPrediccion(p) {
   cadena = cadena.then(() => new Promise((listo) => {
     const m = modal('prediccion');
+    // Orden al azar; se recuerda cuál es la correcta por su texto
+    const opciones = mezclarLista(p.opciones);
+    const correcta = opciones.indexOf(p.opciones[p.correcta]);
     m.caja.innerHTML = `
       <div class="tm-etiqueta">🤔 Antes de comprar: ¿qué crees?</div>
       <h3>${p.pregunta}</h3>
-      <div class="pr-opciones">${p.opciones.map((o, i) => `<button class="boton pr-op" data-i="${i}">${o}</button>`).join('')}</div>`;
+      <div class="pr-opciones">${opciones.map((o, i) => `<button class="boton pr-op" data-i="${i}">${o}</button>`).join('')}</div>`;
     m.caja.querySelectorAll('.pr-op').forEach((b) => {
-      b.onclick = () => { m.cerrar(); listo(Number(b.dataset.i) === p.correcta); };
+      b.onclick = () => { m.cerrar(); listo(Number(b.dataset.i) === correcta); };
     });
   }));
   return cadena;

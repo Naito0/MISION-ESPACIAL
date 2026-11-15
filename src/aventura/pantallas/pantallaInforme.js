@@ -20,6 +20,8 @@ import datosAprendizaje from '../../data/aprendizaje.json';
 import dificultadJSON from '../../data/dificultad.json';
 import emergenciasJSON from '../../data/emergencias3d.json';
 import { estrellasMision } from '../../compartido/logros.js';
+import { elegirPreguntas, prepararPregunta } from '../../compartido/preguntas.js';
+import preguntasJSON from '../../data/preguntas.json';
 import { LOGROS, CONFIG_ESTRELLAS } from '../logros.js';
 import componentes from '../../data/componentes.json';
 import configHangar from '../../data/hangar3d.json';
@@ -101,8 +103,13 @@ export function iniciarPantallaInforme(ctx) {
     registro: e.viaje ? e.viaje.registro : [], estados,
     prediccion: ctx.prediccion && ctx.prediccion.destinoId === destino.id ? ctx.prediccion.acerto : undefined
   }, datosAprendizaje);
-  // 3 preguntas rápidas de un toque: una por concepto
-  const preguntas = resumen.map((f) => f.pregunta);
+  // 3 preguntas rápidas al azar del destino (preguntas.json), sin repetir las de la partida
+  // anterior y con las opciones MEZCLADAS (la correcta no está siempre en el mismo lugar)
+  const CLAVE_PREG = `misionEspacial.preguntasUltimas.${destino.id}`;
+  let anteriores = [];
+  try { anteriores = JSON.parse(localStorage.getItem(CLAVE_PREG) || '[]'); } catch { /* sin almacenamiento */ }
+  const preguntas = elegirPreguntas(preguntasJSON[destino.id] || [], 3, anteriores).map((p) => prepararPregunta(p));
+  try { localStorage.setItem(CLAVE_PREG, JSON.stringify(preguntas.map((p) => p.id))); } catch { /* sin almacenamiento */ }
   const ui = document.createElement('div');
   ui.className = 'panel informe';
   // ---- Estrellas y medallas ----
@@ -126,7 +133,7 @@ export function iniciarPantallaInforme(ctx) {
   ui.innerHTML = `
     <h1>${inf.exito ? '📋 ¡Misión cumplida!' : '📋 Informe: misión fallida'}</h1>
     <div class="estrellas">${estrellas}</div>
-    <small class="estrellas-nota">⭐ misión cumplida · ⭐ vida ≥ ${CONFIG_ESTRELLAS.vidaMinima} · ⭐ rapidez o preguntas</small>
+    <small class="estrellas-nota">⭐ misión cumplida · ⭐ vida ≥ ${CONFIG_ESTRELLAS.vidaMinima} · ⭐ rapidez o preguntas (las que respondes con 💡 pista no suman)</small>
     <h3>🏅 Medallas de esta misión</h3>
     <div class="logros-mision"></div>
     <div class="cifras">
@@ -139,7 +146,7 @@ export function iniciarPantallaInforme(ctx) {
     <ul class="causas aprendido">${resumen.map((f) => `<li class="bien"><span class="ap-icono">${f.icono}</span> <b>${f.titulo}:</b> ${f.texto}</li>`).join('')}</ul>
     <h3>❓ 3 preguntas rápidas</h3>
     <div class="repaso">${preguntas.map((p, i) => `<div class="pregunta" data-q="${i}"><p><b>${i + 1}. ${p.texto}</b></p>
-      <div class="fila">${p.opciones.map((o, k) => `<button class="boton respuesta" data-k="${k}">${o}</button>`).join('')}</div><p class="explicacion"></p></div>`).join('')}
+      <div class="fila">${p.opciones.map((o, k) => `<button class="boton respuesta" data-k="${k}">${o}</button>`).join('')}</div><button class="secundario pista">💡 Pista</button><p class="texto-pista"></p><p class="explicacion"></p></div>`).join('')}
       <p class="resultado-repaso"></p></div>
     <h3>Causas y efectos</h3>
     <ul class="causas">${inf.causas.map((c) => `<li class="${c.tipo}"><b>${c.tipo === 'bien' ? '👍' : '⚠'} ${c.causa}</b> → ${c.efecto}</li>`).join('') || '<li>Viaje tranquilo, sin sorpresas.</li>'}</ul>
@@ -154,23 +161,31 @@ export function iniciarPantallaInforme(ctx) {
   // Preguntas: un toque, respuesta inmediata con explicación; el resultado va al diario
   let respondidas = 0;
   let aciertos = 0;
+  let aciertosSinPista = 0; // la pista no quita la respuesta, pero esa pregunta no suma estrellas
   ui.querySelectorAll('.pregunta').forEach((div) => {
     const p = preguntas[div.dataset.q];
+    let usoPista = false;
+    div.querySelector('.pista').onclick = (ev) => {
+      usoPista = true; ev.target.disabled = true; efecto('clic');
+      div.querySelector('.texto-pista').textContent = `💡 ${p.pista}`;
+    };
     div.querySelectorAll('.respuesta').forEach((b) => {
       b.onclick = () => {
         const bien = Number(b.dataset.k) === p.correcta;
+        div.querySelector('.pista').disabled = true;
         div.querySelectorAll('.respuesta').forEach((x) => { x.disabled = true; x.classList.toggle('correcta', Number(x.dataset.k) === p.correcta); });
         if (!bien) b.classList.add('incorrecta');
         div.querySelector('.explicacion').innerHTML = `${bien ? '✅ ¡Correcto!' : '❌ Casi.'} ${p.explicacion}`;
         efecto(bien ? 'exito' : 'error');
         respondidas++;
         if (bien) aciertos++;
+        if (bien && !usoPista) aciertosSinPista++;
         if (respondidas === preguntas.length) {
           ctx.aprendizaje?.guardarRepaso(destino.id, aciertos, preguntas.length);
           ui.querySelector('.resultado-repaso').innerHTML = `🎯 <b>${aciertos} de ${preguntas.length}</b> · guardado en "Lo que aprendí"`;
           window.dispatchEvent(new CustomEvent('repaso-terminado', { detail: { aciertos, total: preguntas.length, destinoId: destino.id } }));
           // Las preguntas también cuentan para las estrellas y las medallas
-          const conPreguntas = { ...datosLogros, aciertos, aprendidos: ctx.aprendizaje?.cantidad || 0 };
+          const conPreguntas = { ...datosLogros, aciertos: aciertosSinPista, aprendidos: ctx.aprendizaje?.cantidad || 0 };
           ctx.logros?.revisar(conPreguntas);
           ui.querySelector('.estrellas').textContent = estrellasHtml(estrellasMision(conPreguntas, CONFIG_ESTRELLAS));
           ui.querySelector('.logros-mision').innerHTML = listaLogros();

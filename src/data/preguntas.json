@@ -1,0 +1,147 @@
+{
+  "_comentario": "Preguntas del informe final. En cada partida salen 3 al azar del destino (sin repetir las de la partida anterior) y las opciones se mezclan. TODA respuesta correcta sale de un dato que ya está en otro JSON: 'dato' dice de dónde (archivo y ruta) y la prueba automática (tests/juego3d.test.js) comprueba que coincide. 'valor' = número que tiene que estar en ese JSON; 'contiene' = texto que tiene que estar en ese JSON; 'enRespuesta' = cómo aparece en la respuesta correcta.",
+  "luna": [
+    {
+      "id": "luna_gravedad", "texto": "¿Cuánto vale la gravedad en la Luna?",
+      "correcta": "1,62 m/s²", "incorrectas": ["3,71 m/s²", "9,81 m/s²", "0,62 m/s²"],
+      "pista": "Es mucho menos que la de la Tierra (9,81 m/s²).",
+      "explicacion": "La gravedad de la Luna es 1,62 m/s², cerca del 17% de la de la Tierra.",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.gravedad", "valor": 1.62 }, "enRespuesta": "1,62"
+    },
+    {
+      "id": "luna_salto", "texto": "¿Dónde saltarías más alto con el mismo impulso?",
+      "correcta": "En la Luna", "incorrectas": ["En la Tierra", "En Marte", "Igual en los tres"],
+      "pista": "Menos gravedad = el salto llega más alto.",
+      "explicacion": "La Luna tiene la gravedad más baja de los tres (1,62 m/s²).",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.gravedad", "menorQue": ["marte.gravedad", "tierra.gravedad"] }, "enRespuesta": "Luna"
+    },
+    {
+      "id": "luna_noche", "texto": "¿Cuánto dura la noche en la Luna?",
+      "correcta": "Casi 15 días terrestres", "incorrectas": ["Unas 12 horas", "Casi 2 días terrestres", "Unos 30 días terrestres"],
+      "pista": "Es mucho más larga que una noche en la Tierra: se cuenta en días.",
+      "explicacion": "El día y la noche lunares duran cada uno casi 15 días terrestres (NASA).",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.armado.nocheTexto", "contiene": "casi 15 días" }, "enRespuesta": "15 días"
+    },
+    {
+      "id": "luna_senal", "texto": "¿Cuánto tarda una señal de radio en llegar de la Luna a la Tierra?",
+      "correcta": "Unos 1,3 segundos", "incorrectas": ["Unos 4 minutos", "Unos 13 segundos", "Unos 24 minutos"],
+      "pista": "La Luna está cerca: menos de dos segundos.",
+      "explicacion": "La luz (y la radio) recorre la distancia Tierra-Luna en 1,3 segundos.",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.armado.fuenteRetraso", "contiene": "1,3 segundos" }, "enRespuesta": "1,3 segundos"
+    },
+    {
+      "id": "luna_atmosfera", "texto": "¿Qué atmósfera tiene la Luna?",
+      "correcta": "Prácticamente ninguna", "incorrectas": ["Una delgada, de CO₂", "Una densa, como la de la Tierra", "Una de oxígeno puro"],
+      "pista": "Por eso al aterrizar no sirve un paracaídas.",
+      "explicacion": "La Luna prácticamente no tiene atmósfera (presión casi 0).",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.atmosfera.presionSuperficieMbar", "valor": 0 }, "enRespuesta": "Prácticamente ninguna"
+    },
+    {
+      "id": "luna_distancia", "texto": "¿A qué distancia promedio está la Luna de la Tierra?",
+      "correcta": "384 400 km", "incorrectas": ["38 440 km", "3 844 000 km", "55 millones de km"],
+      "pista": "Son casi 400 mil kilómetros.",
+      "explicacion": "La distancia promedio Tierra-Luna es 384 400 km.",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.distanciaTierraKm", "valor": 384400 }, "enRespuesta": "384 400"
+    },
+    {
+      "id": "luna_calor", "texto": "En el ecuador lunar, ¿hasta qué temperatura se llega de día?",
+      "correcta": "Unos 117 °C", "incorrectas": ["Unos 57 °C", "Unos 20 °C", "Unos 300 °C"],
+      "pista": "Más caliente que el agua hirviendo.",
+      "explicacion": "Sin atmósfera que la proteja, la superficie llega a unos 117 °C de día.",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.temperatura.maxC", "valor": 117 }, "enRespuesta": "117"
+    },
+    {
+      "id": "luna_frio", "texto": "En el ecuador lunar, ¿hasta qué temperatura se baja de noche?",
+      "correcta": "Unos -173 °C", "incorrectas": ["Unos -89 °C", "Unos -20 °C", "Unos -63 °C"],
+      "pista": "Mucho más frío que el lugar más frío de la Tierra.",
+      "explicacion": "De noche la superficie baja a unos -173 °C.",
+      "dato": { "archivo": "destinos.json", "ruta": "luna.temperatura.minC", "valor": -173 }, "enRespuesta": "-173"
+    },
+    {
+      "id": "luna_apolo11", "texto": "Al bajar a la Luna en el Apolo 11 sonaron alarmas. ¿Qué hizo Armstrong?",
+      "correcta": "Tomó el control manual para pasar un campo de rocas", "incorrectas": ["Abortó y volvió a la órbita", "Dejó todo al piloto automático", "Esperó a que se apagaran las alarmas para bajar"],
+      "pista": "En el lugar elegido había rocas.",
+      "explicacion": "Las alarmas se podían ignorar; Armstrong tomó el control manual y aterrizó con poco combustible.",
+      "dato": { "archivo": "hechos_reales.json", "ruta": "hechos.aterrizaje.frase", "contiene": "control manual" }, "enRespuesta": "control manual"
+    },
+    {
+      "id": "luna_apolo13", "texto": "En el Apolo 13, los filtros cuadrados no entraban en las entradas redondas. ¿Cómo lo resolvieron?",
+      "correcta": "Armaron un adaptador con bolsas de plástico, cartón y cinta", "incorrectas": ["Cortaron los filtros para hacerlos redondos", "Usaron filtros redondos de repuesto", "Abrieron una ventana para cambiar el aire"],
+      "pista": "Lo idearon desde la Tierra con cosas que había a bordo.",
+      "explicacion": "Desde la Tierra idearon un adaptador con bolsas, cartón y cinta, y la tripulación lo armó.",
+      "dato": { "archivo": "hechos_reales.json", "ruta": "hechos.filtro.frase", "contiene": "bolsas de plástico, cartón y cinta" }, "enRespuesta": "cartón y cinta"
+    }
+  ],
+  "marte": [
+    {
+      "id": "marte_gravedad", "texto": "¿Cuánto vale la gravedad en Marte?",
+      "correcta": "3,71 m/s²", "incorrectas": ["1,62 m/s²", "9,81 m/s²", "6,2 m/s²"],
+      "pista": "Más que en la Luna, pero menos de la mitad que en la Tierra.",
+      "explicacion": "La gravedad de Marte es 3,71 m/s², cerca del 38% de la de la Tierra.",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.gravedad", "valor": 3.71 }, "enRespuesta": "3,71"
+    },
+    {
+      "id": "marte_salto", "texto": "¿Dónde saltarías más alto con el mismo impulso: en Marte o en la Tierra?",
+      "correcta": "En Marte", "incorrectas": ["En la Tierra", "Igual en los dos", "Depende del traje"],
+      "pista": "Menos gravedad = el salto llega más alto.",
+      "explicacion": "Marte tiene menos gravedad que la Tierra (3,71 contra 9,81 m/s²).",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.gravedad", "menorQue": ["tierra.gravedad"] }, "enRespuesta": "Marte"
+    },
+    {
+      "id": "marte_senal", "texto": "¿Cuánto tarda un mensaje entre la Tierra y Marte?",
+      "correcta": "Entre 4 y 24 minutos", "incorrectas": ["Unos 1,3 segundos", "Siempre 10 segundos", "Entre 1 y 2 horas"],
+      "pista": "Depende de dónde estén los dos planetas en sus órbitas.",
+      "explicacion": "Unos 4 minutos cuando están más cerca y unos 24 cuando están más lejos (NASA).",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.armado.retrasoMaxSeg", "valor": 1440 }, "enRespuesta": "24 minutos"
+    },
+    {
+      "id": "marte_presion", "texto": "¿Cómo es la presión del aire en Marte comparada con la Tierra?",
+      "correcta": "Cerca de 1/100 de la de la Tierra", "incorrectas": ["Igual a la de la Tierra", "La mitad de la de la Tierra", "El doble de la de la Tierra"],
+      "pista": "El aire de Marte es muy, muy delgado.",
+      "explicacion": "En Marte la presión es de 6 a 10 milibares: 1/100 de la de la Tierra (NASA).",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.armado.fuenteAtmosfera", "contiene": "1/100th" }, "enRespuesta": "1/100"
+    },
+    {
+      "id": "marte_aire", "texto": "¿De qué gas es la delgada atmósfera de Marte?",
+      "correcta": "De dióxido de carbono (CO₂)", "incorrectas": ["De nitrógeno y oxígeno", "De oxígeno puro", "De hidrógeno"],
+      "pista": "Es el gas que exhalamos al respirar.",
+      "explicacion": "Marte tiene una atmósfera muy delgada de CO₂.",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.atmosfera.descripcion", "contiene": "CO2" }, "enRespuesta": "CO₂"
+    },
+    {
+      "id": "marte_noche", "texto": "¿Cuánto dura más o menos la noche en Marte?",
+      "correcta": "Unas 12 horas", "incorrectas": ["Casi 15 días", "Unos 6 meses", "Unos 2 días"],
+      "pista": "El día marciano se parece mucho al de la Tierra (24 h 37 min).",
+      "explicacion": "Un día marciano dura 24 h 37 min, así que la noche dura unas 12 horas.",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.armado.nocheTexto", "contiene": "12 horas" }, "enRespuesta": "12 horas"
+    },
+    {
+      "id": "marte_temperatura", "texto": "¿Cuál es la temperatura promedio en Marte?",
+      "correcta": "Cerca de -63 °C", "incorrectas": ["Cerca de 15 °C", "Cerca de -173 °C", "Cerca de 0 °C"],
+      "pista": "Mucho más frío que un congelador.",
+      "explicacion": "El promedio en Marte es cerca de -63 °C.",
+      "dato": { "archivo": "destinos.json", "ruta": "marte.temperatura.nota", "contiene": "-63 °C" }, "enRespuesta": "-63 °C"
+    },
+    {
+      "id": "marte_unidades", "texto": "¿Por qué se perdió la sonda Mars Climate Orbiter en 1999?",
+      "correcta": "Un equipo usó unidades inglesas y otro, métricas", "incorrectas": ["Chocó con un asteroide", "Se quedó sin combustible", "Una tormenta de polvo la tapó"],
+      "pista": "Fue un error de cuentas, no de la nave.",
+      "explicacion": "Un equipo usó libras y pies, y otro unidades métricas.",
+      "dato": { "archivo": "hechos_reales.json", "ruta": "hechos.unidades.frase", "contiene": "unidades métricas" }, "enRespuesta": "métricas"
+    },
+    {
+      "id": "marte_opportunity", "texto": "¿Por qué el rover Opportunity dejó de comunicarse con la Tierra en 2018?",
+      "correcta": "Una tormenta de polvo cubrió todo Marte", "incorrectas": ["Cayó en un cráter", "Recibió una orden con unidades equivocadas", "Lo golpeó un meteorito"],
+      "pista": "En Marte hay tormentas que cubren todo el planeta.",
+      "explicacion": "Una tormenta de polvo que cubrió todo Marte llegó al lugar del rover.",
+      "dato": { "archivo": "hechos_reales.json", "ruta": "hechos.tormenta.frase", "contiene": "tormenta de polvo" }, "enRespuesta": "tormenta de polvo"
+    },
+    {
+      "id": "marte_insight", "texto": "¿Qué fue reduciendo la energía del módulo InSight en Marte hasta terminar su misión?",
+      "correcta": "El polvo sobre sus paneles solares", "incorrectas": ["Una fuga de aire", "El frío de la noche lunar", "Una antena rota"],
+      "pista": "Sus paneles necesitaban la luz del Sol.",
+      "explicacion": "El polvo que se acumuló sobre los paneles fue reduciendo su energía.",
+      "dato": { "archivo": "hechos_reales.json", "ruta": "hechos.paneles.frase", "contiene": "polvo" }, "enRespuesta": "polvo"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ const seleccionVaciaDe = (s) => seleccionVacia(s.catalogo);
 import { resumenAprendizaje } from '../src/compartido/resumenAprendizaje.js';
 import { estrellasMision, nuevosLogros } from '../src/compartido/logros.js';
 import { parametrosRetraso, dondeFrena } from '../src/compartido/retrasoRover.js';
+import { elegirPreguntas, prepararPregunta } from '../src/compartido/preguntas.js';
 
 const EMERG = JSON.parse(readFileSync(new URL('../src/data/emergencias3d.json', import.meta.url), 'utf8'));
 const datos = { emergencias: EMERG, destinos: [], misionesReales: [] };
@@ -392,7 +393,53 @@ test('puertas con E: la sala guarda cuáles están abiertas (se sincroniza para 
   assert.ok(s.accion('a', 'puerta', { i: 'x', abierta: true }).error);
 });
 
-test('hangar: no deja pasarse del presupuesto', () => { 
+test('preguntas: al menos 8 por destino y cada respuesta correcta coincide con los datos de los JSON', () => {
+  const PREG = leerJSON('preguntas.json');
+  const archivos = { 'destinos.json': leerJSON('destinos.json'), 'hechos_reales.json': leerJSON('hechos_reales.json') };
+  const leer = (archivo, ruta) => {
+    const partes = ruta.split('.');
+    let x = archivos[archivo];
+    if (archivo === 'destinos.json') { const id = partes.shift(); x = x.destinos.find((d) => d.id === id); }
+    for (const k of partes) x = x[k];
+    return x;
+  };
+  const numero = (s) => Number(String(s).replace(/\s/g, '').replace(',', '.'));
+  for (const destino of ['luna', 'marte']) {
+    assert.ok(PREG[destino].length >= 8, `${destino}: ${PREG[destino].length} preguntas`);
+    assert.equal(new Set(PREG[destino].map((p) => p.id)).size, PREG[destino].length, 'ids sin repetir');
+    for (const p of PREG[destino]) {
+      assert.ok(p.pista && p.explicacion && p.incorrectas.length === 3, p.id);
+      assert.ok(!p.incorrectas.includes(p.correcta), `${p.id}: la correcta no puede estar entre las incorrectas`);
+      assert.ok(p.correcta.includes(p.enRespuesta), `${p.id}: la respuesta dice "${p.enRespuesta}"`);
+      const v = leer(p.dato.archivo, p.dato.ruta);
+      assert.ok(v !== undefined, `${p.id}: no existe ${p.dato.ruta}`);
+      if (p.dato.valor !== undefined) {
+        assert.equal(v, p.dato.valor, `${p.id}: el JSON dice ${v}`);
+        if (/\d/.test(p.enRespuesta)) assert.equal(numero(p.enRespuesta.replace(/[^\d,\s-]/g, '')), p.dato.ruta.endsWith('retrasoMaxSeg') ? v / 60 : v, `${p.id}: número de la respuesta`);
+      }
+      if (p.dato.contiene) assert.ok(String(v).toLowerCase().includes(p.dato.contiene.toLowerCase()), `${p.id}: "${p.dato.contiene}" no está en ${p.dato.ruta}`);
+      if (p.dato.menorQue) for (const r of p.dato.menorQue) assert.ok(v < leer(p.dato.archivo, r), `${p.id}: ${p.dato.ruta} < ${r}`);
+    }
+  }
+});
+
+test('preguntas: 3 al azar sin repetir las de la partida anterior y con las opciones mezcladas', () => {
+  const pool = leerJSON('preguntas.json').luna;
+  const primera = elegirPreguntas(pool, 3);
+  assert.equal(primera.length, 3);
+  const segunda = elegirPreguntas(pool, 3, primera.map((p) => p.id));
+  assert.ok(segunda.every((p) => !primera.some((q) => q.id === p.id)), 'no se repiten');
+  // La correcta no queda siempre en el mismo lugar, y siempre se la encuentra
+  const lugares = new Set();
+  for (let i = 0; i < 200; i++) {
+    const q = prepararPregunta(pool[0]);
+    assert.equal(q.opciones[q.correcta], pool[0].correcta);
+    lugares.add(q.correcta);
+  }
+  assert.equal(lugares.size, 4, 'la correcta aparece en las 4 posiciones');
+});
+
+test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120
   s.accion('a', 'comprar', { opcion: 'estr_blindada' }); // 45
