@@ -19,6 +19,7 @@ import { mostrarTarjeta } from '../ui/tarjetas.js';
 import { crearAstronautasFondo } from '../entities/astronautasFondo.js';
 import { colorDe } from '../tripulacion.js';
 import hechosJSON from '../../data/hechos_reales.json';
+import { aviso } from '../ui/avisos.js';
 
 const HECHOS = hechosJSON.hechos;
 
@@ -149,11 +150,7 @@ export function iniciarPantallaSuperficie(ctx) {
     for (const m of e.mensajes) {
       if (m.n > ultimoMensaje) {
         ultimoMensaje = m.n;
-        const d = document.createElement('div');
-        d.className = 'panel aviso-flotante';
-        d.textContent = m.texto;
-        $('.avisos').appendChild(d);
-        setTimeout(() => d.remove(), 3500);
+        aviso(m.texto.replace(/</g, '&lt;')); // aviso pequeño arriba a la derecha
       }
     }
   });

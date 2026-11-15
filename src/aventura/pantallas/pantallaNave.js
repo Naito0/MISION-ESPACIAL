@@ -31,6 +31,7 @@ const PERSONAJES = personajesJSON.personajes;
 
 const HECHOS = hechosJSON.hechos;
 import { retrasoSenal } from '../../compartido/recomendaciones.js';
+import { aviso } from '../ui/avisos.js';
 
 const DIAGNOSTICOS = diagnosticosJSON.diagnosticos;
 
@@ -154,12 +155,9 @@ export function iniciarPantallaNave(ctx) {
   ctx.hud.appendChild(hud);
   const $ = (s) => hud.querySelector(s);
 
-  function avisar(texto, clase = '', ms = 4000) {
-    const d = document.createElement('div');
-    d.className = `panel aviso-flotante ${clase}`;
-    d.innerHTML = texto;
-    $('.avisos').appendChild(d);
-    setTimeout(() => d.remove(), ms);
+  // Avisos pequeños arriba a la derecha (ui/avisos.js): 3 s, máximo 3 a la vez
+  function avisar(texto, clase = '', ms = 3000, largo = false) {
+    aviso(texto, { ms, clase, largo });
   }
 
   // Casilleros, cajones, paneles y ventanas: se abren con E y muestran lo que hay adentro
@@ -168,7 +166,7 @@ export function iniciarPantallaNave(ctx) {
     const abierto = o.alternar();
     efecto(abierto ? 'compra' : 'clic');
     if (!abierto) return;
-    avisar(o.contenido.texto, 'amable', o.contenido.tipo === 'dato' ? 9000 : 4000);
+    avisar(o.contenido.texto, 'amable', o.contenido.tipo === 'dato' ? 9000 : 3000, o.contenido.tipo === 'dato');
     if (o.contenido.tipo === 'brillante' && actual().jugador.astronauta.id === 'tuerca') actual().jugador.astronauta.decir('¡Para mi colección!');
   }
 
