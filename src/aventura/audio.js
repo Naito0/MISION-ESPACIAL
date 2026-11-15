@@ -75,6 +75,8 @@ export function efecto(nombre) {
     case 'alarma': [880, 660, 880, 660].forEach((f, i) => tono(f, 0.15, 'square', 0.12, i * 0.16)); break;
     case 'compra': tono(988, 0.08, 'square', 0.12); tono(1319, 0.15, 'square', 0.12, 0.08); break;
     case 'salto': tono(330, 0.12, 'sine', 0.1); break;
+    case 'fuush': tono(520, 0.1, 'sine', 0.06); tono(320, 0.16, 'sine', 0.05, 0.05); break; // empujón (suave)
+    case 'boing': tono(420, 0.1, 'triangle', 0.08); tono(260, 0.18, 'triangle', 0.07, 0.08); break; // rebote del empujado
     default: break;
   }
 }

@@ -419,3 +419,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Medallas: también pequeñas, debajo de los avisos */
 #hud .logros-avisos { top: auto; bottom: 64px; }
 #hud .logro-aviso { font-size: 14px; padding: 5px 10px; border-radius: 12px; background: rgba(8, 14, 32, 0.78); }
+
+/* Empujón: indicador de recarga (abajo a la derecha, pequeño) */
+#hud .recarga-empujon { position: absolute; right: 12px; bottom: 64px; padding: 4px 10px; font-size: 14px; border-radius: 12px; background: rgba(8, 14, 32, 0.78); color: #c8d2ec; }
+#hud .recarga-empujon.lista { color: #b8f5cc; border-color: rgba(91, 224, 138, 0.6); }

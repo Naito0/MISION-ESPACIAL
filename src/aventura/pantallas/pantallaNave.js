@@ -32,6 +32,8 @@ const PERSONAJES = personajesJSON.personajes;
 const HECHOS = hechosJSON.hechos;
 import { retrasoSenal } from '../../compartido/recomendaciones.js';
 import { aviso } from '../ui/avisos.js';
+import { estaPausado, alCambiarPausa } from '../pausa.js';
+import { reducirMovimiento } from '../ui/movimiento.js';
 
 const DIAGNOSTICOS = diagnosticosJSON.diagnosticos;
 
@@ -147,6 +149,7 @@ export function iniciarPantallaNave(ctx) {
     </div>
     <div class="retratos">${htmlRetratos()}</div>
     <div class="alertas"></div>
+    <div class="panel recarga-empujon"></div>
     <div class="velocidad" hidden></div>
     <div class="panel senal-tierra" hidden></div>
     <div class="panel aviso-e"></div>
@@ -215,36 +218,62 @@ export function iniciarPantallaNave(ctx) {
   // Al que lo recibe: queda mareado 2 s y, si estaba en una consola, se le cierra
   // (para "trollear" las misiones). Una vez cada 4 s por jugador.
   let ultimoEmpujon = -99;
+  let aturdidoHasta = 0;        // mi cámara se tambalea mientras estoy aturdido
+  const empujados = [];         // retrocesos en curso: { a, dx, dz, t }
+  const rayo = new THREE.Raycaster();
+  const ocupado = () => !!consola || estaPausado() || final; // minijuego, pregunta o tarjeta
+  function hayParedEntre(p1, p2) {
+    const origen = new THREE.Vector3(p1.x, 1, p1.z);
+    const hacia = new THREE.Vector3(p2.x - p1.x, 0, p2.z - p1.z);
+    const d = hacia.length(); hacia.normalize();
+    rayo.set(origen, hacia); rayo.far = d - 0.3;
+    if (rayo.intersectObject(esc.colisiones, true).length) return true;
+    return esc.puertas.some((p) => p.cerrada && rayo.ray.intersectsBox(p.bloqueo) && rayo.ray.distanceToPoint(p.centro.clone().setY(1)) < d);
+  }
   function empujar() {
     const ahora = performance.now() / 1000;
-    if (final || ahora - ultimoEmpujon < 4) return;
+    if (ocupado()) return;
+    if (ahora - ultimoEmpujon < 4) { avisar(`👊 Recargando: ${(4 - (ahora - ultimoEmpujon)).toFixed(1)} s`, '', 1200); return; }
     const yoA = actual();
     const pies = yoA.jugador.pies; const ry = yoA.jugador.astronauta.raiz.rotation.y;
     const frente = { x: Math.sin(ry), z: Math.cos(ry) };
+    // Hasta 2,5 m, solo en un cono de 45° hacia adelante, y sin paredes en el medio
     const objetivo = astronautas.filter((a) => a !== yoA).map((a) => {
       const dx = a.jugador.pies.x - pies.x; const dz = a.jugador.pies.z - pies.z; const d = Math.hypot(dx, dz) || 1;
-      return { a, d, delante: (dx * frente.x + dz * frente.z) / d };
-    }).filter((o) => o.d < 1.8 && o.delante > 0.2).sort((p, q) => p.d - q.d)[0];
-    yoA.jugador.astronauta.reproducir('golpear', 0.45);
-    if (!objetivo) { avisar('👊 No hay nadie delante para empujar', 'amable', 1500); return; }
+      return { a, d, coseno: (dx * frente.x + dz * frente.z) / d };
+    }).filter((o) => o.d < 2.5 && o.coseno > Math.cos(Math.PI / 8)).sort((p, q) => p.d - q.d)
+      .find((o) => !hayParedEntre(pies, o.a.jugador.pies));
+    yoA.jugador.astronauta.reproducir('golpear', 0.6);
+    efecto('fuush');
+    if (!objetivo) { avisar('👊 No hay nadie delante para empujar', '', 1500); return; }
+    if (remotos[objetivo.a.rol]?.ocupado) { avisar('🧩 Está en un minijuego o leyendo: ahora no se lo puede empujar', '', 2000); return; }
     ultimoEmpujon = ahora;
-    efecto('clic');
-    conexion.accion('golpe', { rol: objetivo.a.rol });
+    conexion.accion('golpe', { rol: objetivo.a.rol }).then((r) => { if (r && r.error) { ultimoEmpujon = -99; avisar(`👊 ${r.error}`, '', 2000); } });
   }
+  // Al pausarse (tarjeta, pregunta, menú) el juego deja de enviar la posición: se avisa
+  // ENSEGUIDA que estoy ocupado, para que nadie me pueda empujar mientras leo
+  const quitarAvisoPausa = alCambiarPausa(() => { if (conexion.enRed) conexion.enviarPosicion({ ...actual().jugador.estadoRed(), rol: actual().rol, ocupado: ocupado() }, true); });
   let ultimoGolpe = estado.golpe ? estado.golpe.n : 0;
   function recibirGolpe(g) {
     const a = astronautas.find((x) => x.rol === g.rol);
     if (!a) return;
-    a.jugador.astronauta.mareado?.(2);
+    a.jugador.astronauta.mareado?.(1.5);
+    efecto('boing');
+    // Sale disparado un poco hacia atrás (lejos del que empujó). Lo mueve quien lo
+    // controla: yo si es mi personaje, o cada pantalla si es un personaje de fondo.
+    const de = astronautas.find((x) => x.rol === g.deRol);
+    if (de && (a === actual() || !remotos[a.rol])) {
+      const dx = a.jugador.pies.x - de.jugador.pies.x; const dz = a.jugador.pies.z - de.jugador.pies.z; const d = Math.hypot(dx, dz) || 1;
+      empujados.push({ a, dx: dx / d, dz: dz / d, t: 0 });
+    }
     const quien = a.personaje?.nombre || miembro(g.rol).corto;
     if (g.de === conexion.id) { avisar(`👊 ¡Empujón a <b>${quien}</b>!`, 'amable', 2000); return; }
     if (a === actual()) {
-      // ¡Me empujaron a mí! Mareado 2 s y, si estaba en una consola, se cierra
-      const estabaEnConsola = !!consola;
-      if (consola) consola.cerrar();
+      // ¡Me empujaron a mí! Aturdido 1,5 s: no me puedo mover y la cámara se tambalea suave
       a.jugador.bloqueado = true;
-      setTimeout(() => { if (!consola) a.jugador.bloqueado = false; }, 2000);
-      avisar(`💫 ¡<b>${g.deNombre}</b> te dio un empujón!${estabaEnConsola ? ' Se cerró tu consola: vuelve a abrirla con E.' : ''}`, 'amable', 3500);
+      aturdidoHasta = performance.now() / 1000 + 1.5;
+      setTimeout(() => { if (!consola) a.jugador.bloqueado = false; }, 1500);
+      avisar(`💫 ¡<b>${g.deNombre}</b> te dio un empujón!`, 'amable', 2500);
     }
   }
   window.addEventListener('keydown', teclaCambio);
@@ -415,9 +444,24 @@ export function iniciarPantallaNave(ctx) {
       });
       const yo = actual();
       if (consola) yo.jugador.astronauta.mantener('reparar');
+      // Empujones: retroceso de 0,35 s (rápido al principio y frenando)
+      for (let k = empujados.length - 1; k >= 0; k--) {
+        const em = empujados[k]; em.t += dt;
+        const v = 6 * Math.max(0, 1 - em.t / 0.35);
+        em.a.jugador.cuerpo.capsula.translate(new THREE.Vector3(em.dx * v * dt, 0, em.dz * v * dt));
+        em.a.jugador.cuerpo.pies(em.a.jugador.pies);
+        if (em.t >= 0.35) empujados.splice(k, 1);
+      }
+      // Aturdido: la cámara se tambalea y gira SUAVE (sin giros completos ni sacudidas)
+      const ahoraS = performance.now() / 1000;
+      if (ahoraS < aturdidoHasta && !reducirMovimiento()) motor.camara.rotation.z += Math.sin(ahoraS * 4) * 0.05 * ((aturdidoHasta - ahoraS) / 1.5);
+      // Indicador de recarga del empujón
+      const falta = 4 - (ahoraS - ultimoEmpujon);
+      const rec = $('.recarga-empujon');
+      if (rec) { rec.textContent = falta > 0 ? `👊 ${falta.toFixed(1)} s` : '👊 F listo'; rec.classList.toggle('lista', falta <= 0); }
       // MULTIJUGADOR: mi posición (y qué astronauta manejo) unas 10 veces por segundo
       tiempoEnvio += dt;
-      if (conexion.enRed && tiempoEnvio >= 0.1) { tiempoEnvio = 0; conexion.enviarPosicion({ ...yo.jugador.estadoRed(), rol: yo.rol }); }
+      if (conexion.enRed && tiempoEnvio >= 0.1) { tiempoEnvio = 0; conexion.enviarPosicion({ ...yo.jugador.estadoRed(), rol: yo.rol, ocupado: ocupado() }); } // ocupado: no se lo puede empujar
       esc.puertas.forEach((p) => p.actualizar(dt, astronautas.map((a) => a.jugador.pies)));
       // Al pasar por una puerta, a Faro se le traban los cuernos
       for (const a of astronautas) {
@@ -523,7 +567,7 @@ export function iniciarPantallaNave(ctx) {
       if (consola) consola.cerrar();
       window.removeEventListener('keydown', teclaCambio);
       ctx.aprendizaje?.alPoderMostrar(null);
-      hud.remove(); ambiente(false); quitarEstado(); quitarPos();
+      hud.remove(); ambiente(false); quitarEstado(); quitarPos(); quitarAvisoPausa();
     }
   };
 }

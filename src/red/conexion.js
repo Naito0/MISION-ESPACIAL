@@ -218,9 +218,9 @@ export async function unirseASalaEnRed(codigo, nombre) {
     conn.send({ t: 'accion', n: id, tipo, datos });
   });
   let ultimoEnvio = 0;
-  c.enviarPosicion = (p) => {
+  c.enviarPosicion = (p, forzar = false) => { // forzar: enviar ya (por ejemplo, al pausarse)
     const ahora = performance.now();
-    if (ahora - ultimoEnvio < PERIODO || !conn.open) return;
+    if ((!forzar && ahora - ultimoEnvio < PERIODO) || !conn.open) return;
     ultimoEnvio = ahora;
     conn.send({ t: 'pos', p });
   };

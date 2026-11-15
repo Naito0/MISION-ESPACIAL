@@ -516,13 +516,22 @@ test('respuestas INTERCALADAS: la primera no es la A y la correcta cambia de lug
   for (let i = 1; i < secuencia.length; i++) assert.notEqual(secuencia[i], secuencia[i - 1], `dos seguidas en ${secuencia[i]}: ${secuencia.join(' ')}`);
 });
 
-test('empujón: la sala avisa a todos a quién empujaron y quién fue', () => {
+test('empujón: lo valida la sala (solo en la nave, 4 s de espera, inmunidad y nunca a quien está ocupado)', () => {
   const s = new Sala('EMPU', datosCompletos);
-  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  s.unir('a', 'Ana'); s.unir('b', 'Beto'); s.unir('c', 'Caro');
+  s.accion('a', 'puesto', { rol: 'comandante' }); s.accion('b', 'puesto', { rol: 'ingeniero' }); s.accion('c', 'puesto', { rol: 'cientifico' });
+  assert.ok(s.accion('a', 'golpe', { rol: 'ingeniero' }).error, 'fuera de la nave no');
+  s.fase = 'viaje';
   assert.deepEqual(s.accion('a', 'golpe', { rol: 'ingeniero' }), { ok: true });
-  assert.deepEqual(s.estadoPublico().golpe, { n: 1, de: 'a', deNombre: 'Ana', rol: 'ingeniero' });
-  s.accion('b', 'golpe', { rol: 'comandante' });
-  assert.equal(s.estadoPublico().golpe.n, 2, 'cada empujón tiene un número nuevo');
+  assert.deepEqual(s.estadoPublico().golpe, { n: 1, de: 'a', deNombre: 'Ana', deRol: 'comandante', rol: 'ingeniero' });
+  assert.ok(s.accion('a', 'golpe', { rol: 'cientifico' }).error, 'Ana tiene que esperar 4 s');
+  assert.ok(s.accion('c', 'golpe', { rol: 'ingeniero' }).error, 'Beto está aturdido o protegido (inmunidad)');
+  // Caro está en un minijuego (ocupado): no se la puede empujar
+  s.posicion('c', { x: 0, y: 0, z: 0, ocupado: true });
+  assert.ok(s.accion('b', 'golpe', { rol: 'cientifico' }).error, 'ocupada');
+  s.posicion('c', { x: 0, y: 0, z: 0, ocupado: false });
+  assert.deepEqual(s.accion('b', 'golpe', { rol: 'cientifico' }), { ok: true });
+  assert.equal(s.estadoPublico().golpe.n, 2);
   assert.ok(s.accion('a', 'golpe', { rol: 'nadie' }).error);
 });
 

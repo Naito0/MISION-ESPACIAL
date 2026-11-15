@@ -367,7 +367,20 @@ export class Sala {
     /** Empujón (tecla F): el astronauta de ese rol queda mareado 2 s y, si estaba en una consola, se le cierra. */
     golpe(j, { rol }) {
       if (!ROLES_ID.includes(rol)) return { error: 'Rol desconocido.' };
-      this.golpe = { n: ((this.golpe && this.golpe.n) || 0) + 1, de: j.id, deNombre: j.nombre, rol };
+      if (this.fase !== 'viaje') return { error: 'Solo se puede empujar dentro de la nave.' };
+      const ahora = Date.now();
+      this.tiempoGolpes = this.tiempoGolpes || {};
+      this.inmunes = this.inmunes || {};
+      // 4 s de espera entre empujones de un mismo jugador
+      if (ahora - (this.tiempoGolpes[j.id] || 0) < 4000) return { error: 'Espera un poco para volver a empujar.' };
+      // Aturdido (1,5 s) + 3 s de inmunidad: no se lo puede aturdir en cadena
+      if ((this.inmunes[rol] || 0) > ahora) return { error: 'Todavía está aturdido o protegido: espera un poco.' };
+      // No se empuja a quien está en un minijuego o leyendo una tarjeta
+      const duenio = [...this.jugadores.values()].find((x) => x.roles.includes(rol));
+      if (duenio && this.posiciones.get(duenio.id)?.ocupado) return { error: 'Está en un minijuego o leyendo: no se lo puede empujar.' };
+      this.tiempoGolpes[j.id] = ahora;
+      this.inmunes[rol] = ahora + 4500;
+      this.golpe = { n: ((this.golpe && this.golpe.n) || 0) + 1, de: j.id, deNombre: j.nombre, deRol: j.roles[0] || null, rol };
       this.cambio();
       return { ok: true };
     },

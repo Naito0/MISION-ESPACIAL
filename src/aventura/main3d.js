@@ -28,6 +28,8 @@ import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
 import { pausar, reanudar, estaPausado, motivosPausa } from './pausa.js';
 import { confirmarEnJuego } from './ui/confirmar.js';
+import { aviso } from './ui/avisos.js';
+import { alternarReducirMovimiento } from './ui/movimiento.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
 
@@ -65,6 +67,7 @@ const menu = crearMenuPausa(hud, {
   extras: [
     { texto: '📖 Lo que aprendí', accion: () => { pausar('diario'); aprendizaje.abrirDiario(() => reanudar('diario')); } },
     { texto: '🏆 Sala de trofeos', accion: () => { pausar('trofeos'); logros.abrirSala(() => reanudar('trofeos')); } },
+    { texto: '🎢 Reducir movimiento (sí / no)', accion: () => { const si = alternarReducirMovimiento(); aviso(si ? '🎢 Reducir movimiento: SÍ (la cámara no se tambalea)' : '🎢 Reducir movimiento: NO'); } },
     { texto: '🚪 Salir al menú', accion: () => pedirSalida() }
   ]
 });

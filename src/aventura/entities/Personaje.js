@@ -275,7 +275,39 @@ export class Personaje {
   senal() { if (this.id === 'zuri') { this.reaccion = { tipo: 'senal', tiempo: 0, duracion: 2.5 }; this.decir('📡 ¡Señal!'); } }
 
   /** Recibió un empujón: mareado unos segundos, con estrellitas. */
-  mareado(segundos = 2) { if (this.desmayado) return; this.reaccion = { tipo: 'mareado', tiempo: 0, duracion: segundos }; this.decir('💫 ¡Uy!', segundos); }
+  mareado(segundos = 1.5) {
+    if (this.desmayado) return;
+    this.reaccion = { tipo: 'mareado', tiempo: 0, duracion: segundos };
+    if (!this.estrellas) {
+      // Estrellitas y mini planetas que giran alrededor del casco
+      this.estrellas = new THREE.Group();
+      this.estrellas.position.y = this.cabeza.position.y + 0.55;
+      ['⭐', '🪐', '✨'].forEach((e, i) => {
+        const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+        const g = c.getContext('2d'); g.font = '48px serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 32, 36);
+        const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+        const ang = (i / 3) * Math.PI * 2;
+        s.position.set(Math.cos(ang) * 0.5, 0, Math.sin(ang) * 0.5); s.scale.setScalar(0.28);
+        this.estrellas.add(s);
+      });
+      this.raiz.add(this.estrellas);
+    }
+    this.estrellas.visible = true;
+  }
+
+  /** "¡Fuush!": unas bolitas de aire salen hacia adelante y se desvanecen. */
+  soplo() {
+    if (!this.aire) {
+      this.aire = new THREE.Group();
+      const mat = new THREE.MeshBasicMaterial({ color: 0xe8f4ff, transparent: true, opacity: 0.7, depthWrite: false });
+      for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), mat); this.aire.add(m); }
+      this.aire.position.y = 0.75;
+      this.raiz.add(this.aire);
+    }
+    this.aireT = 0;
+    this.aire.visible = true;
+  }
 
   /** Pasó por una puerta: a Faro se le traban los cuernos. */
   puerta() { if (this.id === 'faro' && !this.reaccion) { this.reaccion = { tipo: 'cuernos', tiempo: 0, duracion: 0.9 }; this.decir('¡Ay, mis cuernos!'); } }
@@ -365,8 +397,13 @@ export class Personaje {
         P.brazosX = [-0.9, -1.7 + Math.sin(t * 12) * 0.5];
         if (this.id === 'tuerca') this.llave.visible = true;
       } else if (n === 'golpear') {
-        // Empujón: los dos brazos van hacia adelante de golpe
-        P.brazosX = [-1.5, -1.5]; P.cuerpoX = 0.25; boca = 'feliz';
+        // Empujón: primero se echa hacia atrás (toma impulso, se aplasta) y después
+        // estira los brazos hacia adelante (se estira), con un "¡fuush!"
+        if (tau < 0.25) { P.cuerpoX = -0.3; P.brazosX = [0.8, 0.8]; sy *= 0.9; }
+        else {
+          if (!a.fuush) { a.fuush = true; this.decir('💨 ¡fuush!', 0.8); this.soplo(); }
+          P.brazosX = [-1.6, -1.6]; P.cuerpoX = 0.35; sy *= 1.08; boca = 'feliz';
+        }
       } else if (n === 'recoger') {
         P.cuerpoX = 0.5; P.brazosX = [-0.7, -0.7];
       } else if (n === 'emote:saludar') {
@@ -408,15 +445,25 @@ export class Personaje {
         this.orejas.forEach((o, i) => { o.rotation.y = Math.sin(t * 10 + i) * 0.5; });
         ojos = 1.15; P.cabX = -0.15;
       } else if (r.tipo === 'mareado') {
-        // Mareado: la cabeza da vueltas despacio, ojos chiquitos y brazos sueltos
+        // Aturdido: rebota una vez, la cabeza da vueltas despacio y le giran estrellitas
+        if (r.tiempo < 0.45) by += Math.sin(r.tiempo / 0.45 * Math.PI) * 0.3;
         P.cabZ = Math.sin(t * 5) * 0.3; P.cabY = Math.cos(t * 5) * 0.3; P.cuerpoZ = Math.sin(t * 5) * 0.08;
         P.brazosZ = [-0.6, 0.6]; ojos = 0.35; boca = 'asustado';
+        if (this.estrellas) { this.estrellas.visible = true; this.estrellas.rotation.y = t * 3; }
       } else if (r.tipo === 'cuernos') {
         P.cabZ = Math.sin(t * 25) * 0.25; boca = 'asustado'; ojos = 1.3;
       }
-      if (r.tiempo >= r.duracion) { this.reaccion = null; if (this.orejas) this.orejas.forEach((o) => { o.rotation.y = 0; }); }
+      if (r.tiempo >= r.duracion) { if (this.estrellas) this.estrellas.visible = false; this.reaccion = null; if (this.orejas) this.orejas.forEach((o) => { o.rotation.y = 0; }); }
     }
 
+    // "¡Fuush!": las bolitas de aire avanzan y se desvanecen en 0,5 s
+    if (this.aire && this.aire.visible) {
+      this.aireT += dt;
+      const f = Math.min(1, this.aireT / 0.5);
+      this.aire.children.forEach((m, i) => { m.position.set((i - 2.5) * 0.08, Math.sin(i * 2) * 0.1, 0.4 + f * 0.9); m.scale.setScalar(1 + f * 1.5); });
+      this.aire.children[0].material.opacity = 0.7 * (1 - f);
+      if (f >= 1) this.aire.visible = false;
+    }
     // Kelvin: el casco se congela de a poco (el gag lo limpia)
     if (this.escarcha) this.escarcha.material.opacity = Math.min(0.45, this.escarcha.material.opacity + dt * 0.02);
 
