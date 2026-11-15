@@ -172,7 +172,27 @@ async function pedirSalida() {
 hud.querySelector('.salir-menu').onclick = () => pedirSalida();
 
 const reloj = new THREE.Clock();
-motor.renderer.setAnimationLoop(() => {
+// ---- Usar bien la tarjeta gráfica sin forzar la PC ----
+// - Máximo 60 FPS (las pantallas de 144-166 Hz harían trabajar de más a la GPU)
+// - Con la pestaña oculta no se dibuja nada
+// - En la esquina: FPS y si dibuja la tarjeta gráfica dedicada o la integrada
+const FPS_MAX = 60;
+let ultimoCuadro = 0;
+const tarjeta = (() => {
+  try {
+    const gl = motor.renderer.getContext();
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const nombre = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : '';
+    if (!nombre) return 'GPU ?';
+    if (/swiftshader|llvmpipe|software/i.test(nombre)) return 'sin GPU (software)';
+    return /nvidia|geforce|rtx|gtx|radeon rx|amd radeon(?! graphics)|arc a/i.test(nombre) ? 'GPU dedicada' : 'GPU integrada';
+  } catch { return 'GPU ?'; }
+})();
+window.aventura_gpu = tarjeta;
+motor.renderer.setAnimationLoop((ahora) => {
+  if (document.hidden) { reloj.getDelta(); return; }
+  if (ahora - ultimoCuadro < 1000 / FPS_MAX - 1) return; // límite de 60 FPS
+  ultimoCuadro = ahora;
   const dt = Math.min(reloj.getDelta(), 0.05);
   const t = reloj.elapsedTime;
   // PAUSA REAL: con una tarjeta, una explicación o el menú abiertos, el mundo no se mueve
@@ -180,7 +200,7 @@ motor.renderer.setAnimationLoop(() => {
   finDeCuadro();
   motor.renderer.render(motor.escena, motor.camara);
   cuadros++; acumulado += dt;
-  if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · calidad ${motor.calidad.nombre}`; cuadros = 0; acumulado = 0; }
+  if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · ${tarjeta} · calidad ${motor.calidad.nombre}`; window.aventura_fps = cuadros; cuadros = 0; acumulado = 0; }
 });
 
 window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, mostrarPrediccion, motivosPausa }; // (para probar)

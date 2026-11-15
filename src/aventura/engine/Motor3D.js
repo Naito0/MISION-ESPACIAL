@@ -22,7 +22,9 @@ export class Motor3D {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.shadowMap.enabled = this.calidad.sombras;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Sombras: Medio = simples (más rápidas); Alto = suaves
+    this.renderer.shadowMap.type = nivelCalidad === 'alto' ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+    this.renderer.toneMappingExposure = 1.1; // colores un poco más vivos
     contenedor.appendChild(this.renderer.domElement);
 
     this.escena = new THREE.Scene();
@@ -40,8 +42,10 @@ export class Motor3D {
   ajustarTamano() {
     const ancho = window.innerWidth;
     const alto = window.innerHeight;
+    // Resolución interna máxima: Bajo 1 · Medio 1,5 · Alto 2 (más no se nota y calienta la PC)
+    const tope = this.calidad.pixelRatioMax ?? 1.5;
     const pr = Math.min(window.devicePixelRatio || 1, 2) * this.calidad.escalaResolucion;
-    this.renderer.setPixelRatio(Math.max(0.5, Math.min(pr, 2)));
+    this.renderer.setPixelRatio(Math.max(0.5, Math.min(pr, tope)));
     this.renderer.setSize(ancho, alto);
     this.camara.aspect = ancho / alto;
     this.camara.updateProjectionMatrix();

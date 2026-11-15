@@ -8,6 +8,8 @@ export const NIVELES_CALIDAD = {
   bajo: {
     nombre: 'Bajo',
     escalaResolucion: 0.75, // dibuja a 75% de la resolución y estira (mucho más rápido)
+    pixelRatioMax: 1,
+    bloom: false,
     antialias: false,
     sombras: false,
     tamanoSombra: 512,
@@ -16,6 +18,8 @@ export const NIVELES_CALIDAD = {
   medio: {
     nombre: 'Medio',
     escalaResolucion: 1,
+    pixelRatioMax: 1.5,
+    bloom: false, // en Medio no: baja los FPS
     antialias: true,
     sombras: true,
     tamanoSombra: 1024,
@@ -24,6 +28,8 @@ export const NIVELES_CALIDAD = {
   alto: {
     nombre: 'Alto',
     escalaResolucion: 1.5, // hasta 1,5× en pantallas de alta densidad
+    pixelRatioMax: 2,
+    bloom: true,
     antialias: true,
     sombras: true,
     tamanoSombra: 2048,
