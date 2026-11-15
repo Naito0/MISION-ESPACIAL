@@ -1,4 +1,6 @@
-# Misión Espacial 3D (NASA Space Apps Challenge 2026)
+# Space Garden (NASA Space Apps Challenge 2026)
+
+> Antes se llamaba "Misión Espacial 3D". El repositorio y la carpeta conservan ese nombre.
 
 Juego educativo **3D** para el desafío **"Juego de diseño de misiones espaciales"**. El jugador dirige a **4 astronautas** en una misión a la **Luna** o a **Marte**. Cada astronauta tiene un rol que corresponde a uno de los **4 segmentos de una misión de la NASA**:
 
