@@ -17,7 +17,7 @@ import { NaveModelo } from '../entities/naveModelo.js';
 import { crearAstronauta } from '../entities/fabricaAstronautas.js';
 import { crearEtiqueta } from '../entities/AstronautaRemoto.js';
 import { colorDeJugador } from './pantallaNave.js';
-import { colorDe } from '../tripulacion.js';
+import { colorDe, miembro } from '../tripulacion.js';
 import { crearCatalogo, resumenDiseno } from '../../compartido/hangar.js';
 import { recomendaciones, dependencias } from '../../compartido/recomendaciones.js';
 import componentes from '../../data/componentes.json';
@@ -188,15 +188,23 @@ export function iniciarPantallaHangar(ctx) {
     const rec = r ? recomendaciones(e.seleccion, CATALOGO, destinoObj, r) : {};
     const deps = r ? dependencias(e.seleccion, CATALOGO, destinoObj, r) : [];
     const scroll = tienda.scrollTop; // que la tienda no salte arriba al comprar
-    // Tienda: solo las categorías de mis roles, cada una con su barra mínimo/recomendado/exagerado
-    tienda.innerHTML = `<h2>Tienda de piezas</h2><p class="sub">Viajamos a <b>${destino}</b>. Toca una pieza para comprarla; otra vez para devolverla.</p>` +
-      CATALOGO.filter((c) => misRoles.includes(c.rol)).map((c) => {
+    // Tienda: TODAS las categorías a la vista. Las de mis roles (y las de los bots) primero y se
+    // pueden comprar; las de mis compañeros se ven con candado y lo que eligieron.
+    const rolNombre = (rol) => miembro(rol)?.corto || rol;
+    const duenioDe = (rol) => e.jugadores.find((j) => j.roles.includes(rol));
+    const mias = CATALOGO.filter((c) => misRoles.includes(c.rol));
+    const ajenas = CATALOGO.filter((c) => !misRoles.includes(c.rol));
+    tienda.innerHTML = `<h2>Tienda de piezas</h2><p class="sub">Viajamos a <b>${destino}</b>. Toca una pieza para comprarla; otra vez para devolverla.</p>
+      <p class="tus-categorias">🛒 Tú eliges: <b>${mias.map((c) => c.nombre).join(', ') || '—'}</b>.${ajenas.length ? ' Las demás las eligen tus compañeros (el presupuesto es de todos).' : ''}</p>` +
+      [...mias, ...ajenas].map((c) => {
         const elegidas = e.seleccion[c.id] || [];
-        return `<div class="categoria" data-cat="${c.id}" style="border-color:${hex(colorRol(ROLES.find((x) => x.id === c.rol)))}">
-          <h3>${c.icono} ${c.nombre} ${elegidas.length ? '✅' : '<span class="falta">falta</span>'}</h3>
+        const mia = misRoles.includes(c.rol);
+        const duenio = duenioDe(c.rol);
+        return `<div class="categoria ${mia ? '' : 'ajena'}" data-cat="${c.id}" style="border-color:${hex(colorRol(ROLES.find((x) => x.id === c.rol)))}">
+          <h3>${c.icono} ${c.nombre} ${elegidas.length ? '✅' : '<span class="falta">falta</span>'}${mia ? '' : ` <small class="candado">🔒 La elige ${duenio ? duenio.nombre : 'un compañero'} (${rolNombre(c.rol)})</small>`}</h3>
           <div class="cat-barra">${rec[c.id] ? barraCategoria(rec[c.id]) : ''}</div>
           <div class="opciones">${c.opciones.map((o) => `
-            <button class="opcion ${elegidas.includes(o.id) ? 'elegida' : ''} ${rec[c.id]?.recomendadas.includes(o.nombre) ? 'sugerida' : ''}" data-op="${o.id}">
+            <button class="opcion ${elegidas.includes(o.id) ? 'elegida' : ''} ${rec[c.id]?.recomendadas.includes(o.nombre) ? 'sugerida' : ''}" data-op="${o.id}" ${mia ? '' : 'disabled'}>
               <b>${o.nombre}</b><span>${o.costo} M$ · ${o.masa} kg${o.energia ? ` · ${o.energia > 0 ? '+' : ''}${o.energia} W` : ''}</span>
               <small>${o.tooltip}</small>
             </button>`).join('')}</div></div>`;
