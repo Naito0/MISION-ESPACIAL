@@ -65,7 +65,11 @@ Cuatro animales astronautas originales: **Kelvin** (pingüino friolento), **Faro
 ### Jugar solo
 Escribe tu nombre → **🧑‍🚀 Jugar solo** → elige tu puesto y tu personaje → **¡Listo!** → **Iniciar partida**. Funciona **sin internet**.
 
-En el modo de un jugador (también una sala online con 1 sola persona) manejas **solo a tu personaje** y te llegan **todas las emergencias**: el aviso dice a qué sala ir y una flecha te guía. Los otros 3 personajes trabajan de fondo en sus salas. Cada viaje dura unos 2 minutos, con 5 (Luna) o 6 (Marte) emergencias de roles variados; la primera llega a los pocos segundos.
+En el modo de un jugador (también una sala online con 1 sola persona) manejas **solo a tu personaje** y te llegan **todas las emergencias**: el aviso dice a qué sala ir y una flecha te guía. Los otros 3 personajes trabajan de fondo en sus salas. Cada viaje tiene 5 (Luna) o 6 (Marte) emergencias de roles variados; la primera llega a los pocos segundos y, al resolver la última, la nave llega y pasa directo al aterrizaje.
+
+**Preguntas del informe:** al final salen 3 preguntas al azar del destino (hay 10 de la Luna y 10 de Marte, en `src/data/preguntas.json`, hechas solo con datos de los JSON del juego). Las opciones se mezclan y no se repiten las de la partida anterior. El botón **💡 Pista** ayuda, pero esa pregunta no suma para la estrella.
+
+**Sin destellos:** nada en el juego destella más de 3 veces por segundo (para personas sensibles a los destellos y para proyectar).
 
 ### Jugar con amigos (online, 2 a 4 jugadores)
 1. **Crear sala:** una persona (el *anfitrión*) escribe su nombre y pulsa **✨ Crear sala**. Aparece un código de 4 letras (ej. `MCFS`) y el botón **📋 Copiar código**.
