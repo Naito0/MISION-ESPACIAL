@@ -36,7 +36,7 @@ export const MINIJUEGOS = {
     gana: 'Todos los sistemas vuelven a verde.' },
   paneles: { fn: paneles, rol: 'ingeniero', nombre: 'Paneles con polvo',
     objetivo: 'Llenar la batería antes de que se vacíe.',
-    controles: 'Pasa el mouse sobre un panel para limpiarlo. Clic (o 1-4) para elegir un panel y ← → para girarlo hacia el Sol.',
+    controles: 'Pasa el mouse sobre un panel para limpiarlo. Haz clic en un panel para elegirlo y gíralo hacia el Sol con ← →.',
     gana: 'La batería llega a 100%.' },
   deslizadores: { fn: deslizadores, rol: 'ingeniero', nombre: 'Estabilizar el motor',
     objetivo: 'Poner cada barra sobre su marca amarilla.',

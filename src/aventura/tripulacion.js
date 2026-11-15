@@ -1,7 +1,7 @@
 // =============================================================
 // tripulacion.js — Los 4 astronautas que controla el jugador.
 // Cada uno vive en SU sala de la nave y solo se mueve dentro de ella.
-// La tecla (1-4) sirve para cambiar a ese astronauta.
+// La tecla (1-4) sirve, SOLO en multijugador, para tomar el astronauta de un bot.
 //
 // Los límites son rectángulos en el piso, medidos de las salas que arma
 // escenarios/naveInterior.js (centro de la sala ± la mitad de su tamaño,
