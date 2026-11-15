@@ -367,15 +367,6 @@ export class Sala {
     puerta(j, { i, abierta }) {
       return this.abrirPuerta(i, abierta);
     },
-    /** Saltar: llegar ya al destino cuando no quedan emergencias, o saltar la escena final. */
-    saltar(j) {
-      if (this.fase === 'viaje' && this.viaje && !this.viaje.emergencias.length && this.viaje.lanzadas >= (this.viaje.total ?? 0)) {
-        this.viaje.restante = 0;
-        return { ok: true };
-      }
-      if (this.fase === 'llegada' || this.fase === 'fracaso') { this.esperaFinal = 999; return { ok: true }; }
-      return { error: 'Ahora no se puede saltar.' };
-    },
     resolver(j, { uid, exito }) {
       if (this.fase !== 'viaje' || !this.viaje) return { error: 'No hay viaje en curso.' };
       const r = resolverEmergencia(this.viaje, uid, this.rolesDe(j), !!exito);
