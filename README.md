@@ -63,7 +63,9 @@ Todo corre dentro del navegador: no hace falta servidor ni internet. El juego co
 Cuatro animales astronautas originales: **Kelvin** (pingüino friolento), **Faro** (venado asustadizo), **Zuri** (zorra del desierto con orejas-antena) y **Tuerca** (mapache coleccionista). Cualquiera puede tener cualquier puesto: el traje y la mochila toman el color del puesto. Se eligen en la sala; al elegirlo, se presenta con su frase. Ver [CREDITOS.md](CREDITOS.md).
 
 ### Jugar solo
-Escribe tu nombre → **🧑‍🚀 Jugar solo** → elige tu puesto y tu personaje → **¡Listo!** → **Iniciar partida**. Los otros 3 puestos los ocupan bots. Funciona **sin internet**.
+Escribe tu nombre → **🧑‍🚀 Jugar solo** → elige tu puesto y tu personaje → **¡Listo!** → **Iniciar partida**. Funciona **sin internet**.
+
+En el modo de un jugador (también una sala online con 1 sola persona) manejas **solo a tu personaje** y te llegan **todas las emergencias**: el aviso dice a qué sala ir y una flecha te guía. Los otros 3 personajes trabajan de fondo en sus salas. Cada viaje dura unos 2 minutos, con 5 (Luna) o 6 (Marte) emergencias de roles variados; la primera llega a los pocos segundos.
 
 ### Jugar con amigos (online, 2 a 4 jugadores)
 1. **Crear sala:** una persona (el *anfitrión*) escribe su nombre y pulsa **✨ Crear sala**. Aparece un código de 4 letras (ej. `MCFS`) y el botón **📋 Copiar código**.
@@ -144,11 +146,12 @@ npm test           # pruebas de las reglas (hangar, viaje, recomendaciones, apre
 
 | Acción | Teclado y mouse |
 |---|---|
-| Cambiar de astronauta | **1** Piloto · **2** Ingeniero · **3** Científico · **4** Comunicaciones · **Tab** el siguiente · o **clic en los retratos** |
-| Moverse | **WASD** o **flechas** (cada astronauta solo se mueve en su sala) |
+| Cambiar de astronauta (solo multijugador, para tomar un bot) | **1** Piloto · **2** Ingeniero · **3** Científico · **4** Comunicaciones · **Tab** el siguiente · o **clic en los retratos** |
+| Moverse | **WASD** o **flechas** (en multijugador, cada astronauta se mueve en su sala) |
 | Mirar alrededor | **Clic** en el juego y mover el mouse (Q / R también giran la cámara) |
 | Correr / saltar | **Shift** / **Espacio** |
 | Usar una consola, recoger, analizar, salir por la esclusa | **E** |
+| Abrir y cerrar puertas, casilleros, cajones, paneles y ventanas | **E** (adentro hay datos de la NASA, herramientas o piezas brillantes; en multijugador las puertas se abren para todos) |
 | Aterrizar | Mantener **Espacio** (o **W**, o el botón "Motor") para frenar · **← →** para ir a la zona verde · **I** ignorar una alarma (**O** abortar) |
 | Minijuegos | La primera vez se ve una demostración (el minijuego se juega solo) o una tarjeta con objetivo, controles y cómo ganar; después, botón **❓ Ver cómo se juega** |
 | Tarjetas y diagnóstico | Clic en la respuesta · **"¡Entendido!"** para seguir (mientras tanto el juego está en pausa) |
