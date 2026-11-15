@@ -479,6 +479,31 @@ test('minijuegos: cada rol tiene al menos 3 emergencias con minijuegos distintos
   for (const id of ['acoplamiento', 'termica', 'ejercicio', 'ventana']) assert.ok(EMERG.emergencias.some((e) => e.minijuego === id), id);
 });
 
+test('aterrizaje: solo aterriza el Piloto humano; si el Piloto es un bot, el anfitrión', () => {
+  const PJ = leerJSON('personajes.json').personajes;
+  const armar = (rolA, rolB) => {
+    const s = new Sala('ATER', { ...datosCompletos, personajes: PJ });
+    s.unir('a', 'Ana'); s.unir('b', 'Beto');
+    s.accion('a', 'puesto', { rol: rolA }); s.accion('b', 'puesto', { rol: rolB });
+    s.fase = 'aterrizaje';
+    return s;
+  };
+  // Beto es el Piloto: solo él aterriza, aunque Ana sea la anfitriona
+  let s = armar('ingeniero', 'comandante');
+  assert.equal(s.aterrizadorId(), 'b');
+  assert.equal(s.estadoPublico().aterrizador, 'b');
+  assert.ok(s.accion('a', 'aterrizar', { velocidad: 1 }).error, 'Ana no puede aterrizar');
+  // El Piloto es un bot: aterriza la anfitriona (Ana), no Beto
+  s = armar('ingeniero', 'cientifico');
+  assert.equal(s.aterrizadorId(), 'a');
+  assert.ok(s.accion('b', 'aterrizar', { velocidad: 1 }).error, 'Beto no puede aterrizar');
+  assert.ok(!s.accion('a', 'aterrizar', { velocidad: 1 }).error, 'Ana sí');
+  // Un jugador: siempre aterriza el jugador
+  const solo = new Sala('SOLO', { ...datosCompletos, personajes: PJ });
+  solo.unir('x', 'Xavi'); solo.accion('x', 'puesto', { rol: 'ingeniero' });
+  assert.equal(solo.aterrizadorId(), 'x');
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

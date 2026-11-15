@@ -317,7 +317,7 @@ export class Sala {
     /** Aterrizaje: el Comandante informa la velocidad con la que tocó el suelo. */
     aterrizar(j, { velocidad }) {
       if (this.fase !== 'aterrizaje') return { error: 'No estamos aterrizando.' };
-      if (!this.rolesDe(j).includes('comandante')) return { error: 'El aterrizaje lo pilota el Comandante.' };
+      if (j.id !== this.aterrizadorId()) return { error: 'El aterrizaje lo pilota el Piloto (o el anfitrión si el Piloto es un bot).' };
       const config = this.datos.emergencias.config;
       this.aterrizaje = clasificarAterrizaje(Number(velocidad) || 99, config);
       if (this.aterrizaje === 'choque') this.viaje.vida = Math.max(0, this.viaje.vida - config.danioChoque);
@@ -405,6 +405,16 @@ export class Sala {
     this.cambio('📋 Informe de la misión');
   }
 
+  /**
+   * Quién aterriza la nave: el jugador HUMANO que es Piloto (comandante).
+   * Si el Piloto es un bot, aterriza el anfitrión. En un jugador, siempre el jugador.
+   */
+  aterrizadorId() {
+    const js = [...this.jugadores.values()];
+    const piloto = js.find((j) => j.roles.includes('comandante'));
+    return (piloto || js.find((j) => j.anfitrion) || js[0] || {}).id ?? null;
+  }
+
   /** Puertas de la nave abiertas con E: { índice: true/false } (se sincroniza para todos). */
   abrirPuerta(i, abierta) {
     if (!Number.isInteger(i) || i < 0 || i > 20) return { error: 'Puerta desconocida.' };
@@ -470,6 +480,7 @@ export class Sala {
       informe: this.fase === 'informe' ? this.informe : null,
       bots: this.bots || [],
       puertas: this.puertas || {},
+      aterrizador: this.aterrizadorId(),
       personajesPorRol: this.personajesPorRol(),
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,

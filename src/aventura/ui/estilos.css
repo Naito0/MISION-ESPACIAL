@@ -390,3 +390,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .confirmar-capa { position: absolute; inset: 0; background: rgba(0, 5, 15, 0.6); display: flex; align-items: center; justify-content: center; pointer-events: auto; z-index: 20; }
 #hud .confirmar { width: min(440px, 92vw); text-align: center; }
 #hud .confirmar .fila { display: flex; gap: 10px; justify-content: center; }
+
+/* Aterrizaje: transmisión en vivo para los que no pilotan */
+#hud .en-vivo { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); font-size: var(--t); font-weight: bold; border-color: #e5484d; color: #ffd0d2; white-space: nowrap; }

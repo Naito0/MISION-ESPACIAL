@@ -18,6 +18,9 @@ import { efecto } from '../audio.js';
 import { mostrarTarjeta } from '../ui/tarjetas.js';
 import hechosJSON from '../../data/hechos_reales.json';
 import dificultadJSON from '../../data/dificultad.json';
+import personajesJSON from '../../data/personajes.json';
+
+const PERSONAJES = personajesJSON.personajes;
 
 const HECHOS = hechosJSON.hechos;
 const azar = (a, b) => a + Math.random() * (b - a);
@@ -40,8 +43,12 @@ export function iniciarPantallaAterrizaje(ctx) {
   const k = destino.juego?.frenadoAtmosferico || 0;
   const empuje = g * 2.5; // el motor puede frenar 1,5 veces la gravedad del destino
   const yo = e.jugadores.find((j) => j.id === conexion.id);
-  const soyComandante = !!(yo && [...yo.roles, ...(e.bots || [])].includes('comandante')); // o el Piloto es un bot
-  const comandante = e.jugadores.find((j) => j.roles.includes('comandante'));
+  // Solo UN jugador aterriza: el humano que es Piloto; si el Piloto es un bot, el anfitrión
+  // (sala.aterrizadorId). Los demás ven una TRANSMISIÓN en vivo, sincronizada con el piloto.
+  const soyComandante = !!yo && e.aterrizador === yo.id;
+  const comandante = e.jugadores.find((j) => j.id === e.aterrizador);
+  const pjDe = (j) => PERSONAJES.find((p) => p.id === (j.personaje || (e.personajesPorRol || {})[j.roles[0]]));
+  const quienAterriza = comandante ? `${comandante.nombre} (${pjDe(comandante)?.nombre || ''}${comandante.roles.includes('comandante') ? ' · Piloto' : ' · anfitrión, por el Piloto bot'})` : 'El Piloto';
   const config = emergencias.config;
   const valoresMinijuego = dificultadJSON.minijuegosPorDestino[destino.id] || {};
   // El combustible depende de lo que se compró en el hangar comparado con lo recomendado
@@ -109,9 +116,10 @@ export function iniciarPantallaAterrizaje(ctx) {
       <div class="ha-fila"><span>Combustible</span><div class="hv-barra"><div class="ha-comb"></div></div></div>
       <p class="ha-ayuda">${soyComandante
         ? 'Mantén <span class="tecla">Espacio</span> (o <span class="tecla">W</span>) para encender el motor. Toca el suelo a menos de <b>' + config.aterrizajeSuave + ' m/s</b>.'
-        : `👨‍✈️ <b>${comandante ? comandante.nombre : 'El Comandante'}</b> está pilotando el aterrizaje. ¡Denle ánimo!`}</p>
+        : `📺 <b>${quienAterriza}</b> está aterrizando la nave. ¡Denle ánimo!`}</p>
     </div>
     ${soyComandante ? '<button class="panel boton-motor">🔥 Motor (mantener)</button>' : ''}
+    ${soyComandante ? '' : `<div class="panel en-vivo">🔴 EN VIVO · ${quienAterriza} está aterrizando la nave</div>`}
     <div class="panel alarma-aterrizaje" hidden></div>
     <div class="panel demo-aterrizaje" hidden>
       <div class="demo-titulo">👀 Así se juega</div>
@@ -130,7 +138,7 @@ export function iniciarPantallaAterrizaje(ctx) {
   const quitarPos = conexion.alPosiciones((pos) => {
     if (soyComandante || !comandante) return;
     const p = pos[comandante.id];
-    if (p && p.lander) { altura = p.y; vel = p.v; encendido = !!p.acc; }
+    if (p && p.lander) { altura = p.y; vel = p.v; encendido = !!p.acc; x = p.x; } // la nave se mueve igual que la del piloto
   });
   const quitarEstado = conexion.alEstado((x) => { if (x.fase !== 'aterrizaje') ctx.irA('juego'); });
 
@@ -212,7 +220,7 @@ export function iniciarPantallaAterrizaje(ctx) {
         }
         if (altura <= 0) { altura = 0; tocarSuelo(); }
         tiempoEnvio += dt;
-        if (tiempoEnvio > 1 / 15) { tiempoEnvio = 0; conexion.enviarPosicion({ x: 0, y: +altura.toFixed(2), z: 0, ry: 0, v: +vel.toFixed(2), ap: 0, acc: encendido ? 'motor' : null, lander: 1 }); }
+        if (tiempoEnvio > 1 / 15) { tiempoEnvio = 0; conexion.enviarPosicion({ x: +x.toFixed(2), y: +altura.toFixed(2), z: 0, ry: 0, v: +vel.toFixed(2), ap: 0, acc: encendido ? 'motor' : null, lander: 1 }); }
       }
       // Módulo y llama
       modulo.position.set(x, altura, 0);
