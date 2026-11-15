@@ -218,7 +218,7 @@ export function iniciarPantallaAterrizaje(ctx) {
       modulo.position.set(x, altura, 0);
       modulo.rotation.y += dt * 0.05;
       llama.visible = encendido && !tocado;
-      llama.scale.setScalar(0.8 + Math.random() * 0.4);
+      llama.scale.setScalar(1 + Math.sin(performance.now() / 1000 * 6) * 0.12); // la llama late suave (1 vez por segundo)
       // Cámara: de costado, siguiendo al módulo
       // (se aleja con la altura para que siempre se vean el módulo, las rocas y la zona verde)
       const lejos = 18 + altura * 0.9;

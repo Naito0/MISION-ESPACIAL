@@ -56,27 +56,28 @@ export function crearEfectosViaje(escena, esc, luces, camara, conParticulas) {
     porConsola.set(c.id, { pos, marca, luz, vapor, arr, geo, semillas });
   }
 
-  const sacudida = new THREE.Vector3();
+  let inicioAlarma = null; // cuándo empezó la alarma (para el pulso único)
   return {
     /** emergencias: lista activa del servidor; misRoles: mis roles */
     actualizar(dt, t, emergencias, misRoles) {
+      // SIN DESTELLOS (regla del juego: nada destella más de 3 veces por segundo, por las
+      // personas sensibles y porque se proyecta): al llegar una emergencia hay UN pulso
+      // suave de luz y después queda un brillo fijo y tenue. Sin parpadeos ni sacudidas.
       const efectos = new Set(emergencias.map((e) => e.efecto));
-      const latido = (Math.sin(t * 6) + 1) / 2;
-      alarma.intensity = efectos.has('alarma') || efectos.has('meteoritos') ? 25 * latido : 0;
+      const hayAlarma = efectos.has('alarma') || efectos.has('meteoritos') || efectos.has('reactor');
+      if (hayAlarma && inicioAlarma === null) inicioAlarma = t;
+      if (!hayAlarma) inicioAlarma = null;
+      const k = inicioAlarma === null ? 0 : Math.min(1, (t - inicioAlarma) / 1.2);
+      const pulso = Math.sin(k * Math.PI); // sube y baja UNA vez en 1,2 s
+      alarma.intensity = hayAlarma ? 5 + 15 * pulso : 0;
       alarma.color.setHex(efectos.has('reactor') && !efectos.has('alarma') ? 0xff8a20 : 0xff2020);
-      if (efectos.has('reactor') && !efectos.has('alarma')) alarma.intensity = 22 * latido;
-      // Apagón: las luces bajan y parpadean
+      // Apagón: las luces bajan (fijas, sin parpadear)
       const apagon = efectos.has('apagon');
-      const parpadeo = apagon && Math.random() < 0.06 ? 0.6 : 0.15;
-      luces.hemisferica.intensity = apagon ? base.hemi * parpadeo : base.hemi;
-      luces.sol.intensity = apagon ? base.sol * parpadeo : base.sol;
-      // Tormenta solar: destellos violeta al azar
-      tormenta.intensity = efectos.has('tormenta') && Math.random() < 0.08 ? 60 : Math.max(0, tormenta.intensity - dt * 200);
-      // Meteoritos: la cámara tiembla
-      if (efectos.has('meteoritos')) {
-        sacudida.set((Math.random() - 0.5) * 0.08, (Math.random() - 0.5) * 0.08, 0);
-        camara.position.add(sacudida);
-      }
+      luces.hemisferica.intensity = apagon ? base.hemi * 0.35 : base.hemi;
+      luces.sol.intensity = apagon ? base.sol * 0.35 : base.sol;
+      // Tormenta solar: un brillo violeta suave que cambia muy despacio
+      tormenta.intensity = efectos.has('tormenta') ? 10 + 4 * Math.sin(t * 1.2) : 0;
+      const latido = 0.5; // las luces de las consolas quedan fijas
       for (const [id, o] of porConsola) {
         const e = emergencias.find((x) => x.consola === id);
         o.marca.visible = !!e;

@@ -46,7 +46,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .hud-tareas { position: absolute; right: 12px; top: 60px; width: calc(300px * var(--ancho)); padding: 8px 12px; font-size: var(--tc); }
 #hud .hud-tareas h4 { margin: 0 0 6px; color: #7cf3ff; font-size: var(--t); }
 #hud .tarea { display: flex; gap: 10px; align-items: center; padding: 6px 8px; margin-bottom: 6px; border-radius: 8px; background: rgba(229, 72, 77, 0.22); border: 2px solid #e5484d; }
-#hud .tarea.urgente { animation: latir 0.6s infinite alternate; }
+#hud .tarea.urgente { animation: latir 1.6s ease-in-out infinite alternate; }
 #hud .flecha { display: inline-block; font-size: 32px; color: #ffd166; transition: transform 0.12s linear; }
 #hud .otras { display: block; margin-top: 4px; color: #b8c3e0; }
 #hud .aviso-e { position: absolute; left: 50%; bottom: 200px; transform: translateX(-50%); padding: 12px 22px; font-size: var(--tg); display: none; border-color: #ffd166; white-space: nowrap; }
@@ -115,7 +115,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* ---- "Cómo se juega" animado (demos.js) ---- */
 #hud .consola-area { position: relative; }
 #hud .consola-area.en-demo .consola-lienzo { outline: 3px dashed #ffd166; }
-#hud .demo-banda { font-size: 22px; font-weight: bold; color: #ffd166; text-align: center; margin-bottom: 6px; animation: parpadeo 1.2s infinite; }
+#hud .demo-banda { font-size: 22px; font-weight: bold; color: #ffd166; text-align: center; margin-bottom: 6px; animation: atenuar 1.6s ease-in-out infinite; }
 #hud .demo-teclas { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
 #hud .demo-tecla { font-size: 22px; padding: 6px 14px; transition: all 0.1s; }
 #hud .demo-tecla.activa { background: #ffd166; color: #1a1300; transform: scale(1.15); box-shadow: 0 0 16px #ffd166; }
@@ -125,7 +125,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .demo-tarjeta .fila { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
 #hud .consola-botones { display: flex; gap: 8px; justify-content: center; }
 #hud .consola-ayuda { font-size: var(--tc); }
-@keyframes parpadeo { 50% { opacity: 0.55; } }
+@keyframes atenuar { 50% { opacity: 0.6; } }
 #hud .frase-pj { font-size: var(--t); color: #ffe9b0; margin: 6px 0; }
 #hud .frase-pj:empty { display: none; }
 #hud .frase-pj small { color: #c8d2ec; font-size: var(--tc); }
@@ -209,12 +209,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .retrato .r-icono { font-size: 30px; }
 #hud .retrato b { display: inline-block; min-width: 26px; padding: 0 4px; border: 2px solid #fff; border-radius: 6px; text-align: center; margin-right: 4px; }
 #hud .retrato.activo { opacity: 1; background: rgba(30, 60, 110, 0.95); box-shadow: 0 0 16px rgba(124, 243, 255, 0.7); transform: scale(1.05); }
-#hud .retrato.alerta { animation: parpadeo 0.5s infinite alternate; }
-@keyframes parpadeo { from { background: rgba(6, 12, 30, 0.88); } to { background: rgba(229, 72, 77, 0.85); } }
+/* Emergencia: brillo FIJO (sin parpadeo). Regla del juego: nada destella más de 3 veces por segundo. */
+#hud .retrato.alerta { background: rgba(120, 24, 32, 0.9); box-shadow: 0 0 16px rgba(229, 72, 77, 0.7); }
 /* ---- Avisos grandes de emergencia ---- */
 #hud .alertas { position: absolute; left: 50%; top: 62px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(820px, 62vw); }
-#hud .alerta-grande { width: 100%; padding: 10px 18px; border-width: 3px; background: rgba(60, 10, 16, 0.92); text-align: center; animation: aparecer 0.3s; }
-#hud .alerta-grande.urgente { animation: latir 0.6s infinite alternate; }
+#hud .alerta-grande { width: 100%; padding: 10px 18px; border-width: 3px; background: rgba(60, 10, 16, 0.92); text-align: center; animation: aparecer 0.3s, pulso-unico 1.2s ease-out; }
+@keyframes pulso-unico { 0% { box-shadow: 0 0 0 rgba(229, 72, 77, 0); } 35% { box-shadow: 0 0 28px rgba(229, 72, 77, 0.8); } 100% { box-shadow: 0 0 10px rgba(229, 72, 77, 0.35); } }
+#hud .alerta-grande.urgente { animation: latir 1.6s ease-in-out infinite alternate; } /* pulso lento y suave */
 #hud .ag-titulo { font-size: var(--tg); font-weight: bold; }
 #hud .ag-tecla { font-size: var(--t); font-weight: normal; }
 #hud .ag-porque { font-size: var(--tc); color: #ffe0a0; margin-top: 4px; }
