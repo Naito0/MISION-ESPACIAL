@@ -47,7 +47,7 @@ export function iniciarPantallaMenu(ctx) {
 
   function dibujar(error = '', vistaUnirse = false) {
     panel.innerHTML = `
-      <h1>🌱🚀 Space Garden</h1>
+      <h1>🌱🚀 Garden Space</h1>
       <p class="sub">Diseña, viaja y explora una misión a la Luna o a Marte.</p>
       <label>Tu nombre <input id="nombre" maxlength="14" value="${nombreGuardado}" placeholder="Astronauta"></label>
       <button id="solo">🧑‍🚀 Jugar solo</button>

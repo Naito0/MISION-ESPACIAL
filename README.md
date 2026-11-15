@@ -1,4 +1,4 @@
-# Space Garden (NASA Space Apps Challenge 2026)
+# Garden Space (NASA Space Apps Challenge 2026)
 
 > Antes se llamaba "Misión Espacial 3D". El repositorio y la carpeta conservan ese nombre.
 
