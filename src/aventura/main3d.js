@@ -192,6 +192,23 @@ const tarjeta = (() => {
   } catch { return 'GPU ?'; }
 })();
 window.aventura_gpu = tarjeta;
+// Brillo (bloom) suave en pantallas, luces y propulsores: SOLO en calidad Alta
+// (en Medio baja los FPS). Se carga aparte para no pesar en Bajo y Medio.
+let composer = null;
+if (motor.calidad.bloom) {
+  Promise.all([
+    import('three/addons/postprocessing/EffectComposer.js'), import('three/addons/postprocessing/RenderPass.js'),
+    import('three/addons/postprocessing/UnrealBloomPass.js'), import('three/addons/postprocessing/OutputPass.js')
+  ]).then(([{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }]) => {
+    const c = new EffectComposer(motor.renderer);
+    c.pasoEscena = new RenderPass(motor.escena, motor.camara);
+    c.addPass(c.pasoEscena);
+    c.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.35, 0.4, 0.85));
+    c.addPass(new OutputPass());
+    window.addEventListener('resize', () => c.setSize(window.innerWidth, window.innerHeight));
+    composer = c;
+  }).catch(() => { composer = null; });
+}
 motor.renderer.setAnimationLoop((ahora) => {
   if (document.hidden) { reloj.getDelta(); return; }
   if (ahora - ultimoCuadro < 1000 / FPS_MAX - 1) return; // límite de 60 FPS
@@ -201,7 +218,8 @@ motor.renderer.setAnimationLoop((ahora) => {
   // PAUSA REAL: con una tarjeta, una explicación o el menú abiertos, el mundo no se mueve
   if (!estaPausado() && pantalla) pantalla.actualizar(dt, t);
   finDeCuadro();
-  motor.renderer.render(motor.escena, motor.camara);
+  if (composer) { composer.pasoEscena.scene = motor.escena; composer.pasoEscena.camera = motor.camara; composer.render(); }
+  else motor.renderer.render(motor.escena, motor.camara);
   cuadros++; acumulado += dt;
   if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · ${tarjeta} · calidad ${motor.calidad.nombre}`; window.aventura_fps = cuadros; cuadros = 0; acumulado = 0; }
 });

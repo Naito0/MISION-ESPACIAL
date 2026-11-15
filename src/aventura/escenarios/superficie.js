@@ -53,7 +53,7 @@ export function crearSuperficie(destino, o = {}) {
   const esc = nuevoEscenario();
   const colorSuelo = marte ? 0xb5532c : 0x8d8d8d;
   esc.colorCielo = marte ? 0xd99a62 : 0x000000;
-  esc.niebla = marte ? { color: 0xd99a62, cerca: 45, lejos: 170 } : null; // bruma suave en el horizonte
+  esc.niebla = marte ? { color: 0xc4774a, cerca: 45, lejos: 170 } : null; // bruma rojiza suave en el horizonte
 
   // Suelo (sólido) con un poco de relieve visual
   const suelo = caja(esc, 220, 1, 220, material(colorSuelo, { rugosidad: 1, metal: 0 }), 0, -0.5, 0);

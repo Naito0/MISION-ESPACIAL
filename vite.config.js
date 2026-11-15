@@ -6,7 +6,7 @@ export default defineConfig({
   base: './',
   // Versión visible en el menú (para saber si el navegador muestra la última)
   define: {
-    __VERSION__: JSON.stringify(`v12 · ${new Date().toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' })}`) // hora local del equipo (UTC-5)
+    __VERSION__: JSON.stringify(`v13 · ${new Date().toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' })}`) // hora local del equipo (UTC-5)
   },
   build: {
     outDir: 'dist',

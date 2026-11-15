@@ -37,7 +37,8 @@ function toon(color) {
 const CONTORNO = new THREE.MeshBasicMaterial({ color: 0x15131c, side: THREE.BackSide });
 const NEGRO = new THREE.MeshBasicMaterial({ color: 0x15131c });
 const BLANCO = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const VIDRIO = new THREE.MeshPhongMaterial({ color: 0xd6f1ff, transparent: true, opacity: 0.2, shininess: 140, specular: 0xffffff, depthWrite: false });
+// Vidrio del casco: refleja el entorno (mapa de entorno de la escena)
+const VIDRIO = new THREE.MeshStandardMaterial({ color: 0xd6f1ff, transparent: true, opacity: 0.16, roughness: 0.05, metalness: 0.2, envMapIntensity: 2, depthWrite: false });
 const ESFERA = new THREE.SphereGeometry(1, 20, 14);
 const ESFERA_BAJA = new THREE.SphereGeometry(1, 12, 8);
 const CAPSULA = new THREE.CapsuleGeometry(1, 1, 6, 12);

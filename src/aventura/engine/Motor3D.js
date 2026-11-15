@@ -7,6 +7,7 @@
 // =============================================================
 import * as THREE from 'three';
 import { configCalidad } from './calidad.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export class Motor3D {
   /**
@@ -61,7 +62,19 @@ export class Motor3D {
   cambiarEscena(escena) {
     this.liberar(this.escena);
     this.escena = escena;
+    // Reflejos suaves en cascos y metal: mapa de entorno compartido (se crea una sola vez)
+    if (!escena.environment) { escena.environment = this.entorno(); escena.environmentIntensity = 0.12; }
     this.actualizadores.clear();
+  }
+
+  /** Mapa de entorno para los reflejos (RoomEnvironment pasado por PMREM), uno para todo el juego. */
+  entorno() {
+    if (!this._entorno) {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      this._entorno = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      pmrem.dispose();
+    }
+    return this._entorno;
   }
 
   /** Libera la memoria de la GPU de una escena que ya no se usa. */
