@@ -136,9 +136,9 @@ export function iniciarPantallaSuperficie(ctx) {
   const quitarEstado = conexion.alEstado((e) => {
     if (e.fase !== 'superficie') { ctx.irA('juego'); return; }
     sup = e.superficie;
-    if (sup.muestras.some((m) => m.estado !== 'suelo')) ctx.tutorial?.evento('recogida');
+    if (sup.muestras.some((m) => m.estado !== 'suelo')) ctx.guia?.evento('recogida');
     if (sup.muestras.some((m) => m.estado === 'analizada')) {
-      ctx.tutorial?.evento('analizada');
+      ctx.guia?.evento('analizada');
       ctx.aprendizaje?.evento('superficie:analizada', destino.id);
     }
     for (const m of e.mensajes) {
@@ -209,7 +209,7 @@ export function iniciarPantallaSuperficie(ctx) {
             luzEsclusa.color.setHex(0x5be08a);
             enEsclusa = false;
             jugador.bloqueado = false;
-            ctx.tutorial?.evento('esclusa');
+            ctx.guia?.evento('esclusa');
             panel.remove();
             efecto('exito');
             // La primera vez: tarjeta que explica para qué sirve una esclusa

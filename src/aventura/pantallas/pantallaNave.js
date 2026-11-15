@@ -127,7 +127,7 @@ export function iniciarPantallaNave(ctx) {
     cam.pitch = antes.pitch;
     vuelo = 1.2;                       // …y viaja despacio durante 1,2 s
     efecto('clic');
-    ctx.tutorial?.evento('cambio', actual().rol);
+    ctx.guia?.evento('cambio', actual().rol);
   }
   const teclaCambio = (ev) => {
     if (window.consolaAbierta) return;
@@ -162,7 +162,7 @@ export function iniciarPantallaNave(ctx) {
     // Avisar al tutorial / aprendizaje de lo que se resolvió
     if (antes && viaje) {
       for (const r of viaje.registro.slice(antes.registro.length)) {
-        if (r.resultado === 'resuelta') ctx.tutorial?.evento('resuelta');
+        if (r.resultado === 'resuelta') ctx.guia?.evento('resuelta');
         // Mostrarlo en el mundo: el mensaje a la Tierra viaja con cuenta regresiva
         if (r.resultado === 'resuelta' && r.rol === 'comunicaciones') enviarSenal();
         ctx.alResolver?.(r);
@@ -295,7 +295,7 @@ export function iniciarPantallaNave(ctx) {
       actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];
       efectos.actualizar(dt, t, activas, [yo.rol]);
-      if (activas.length) ctx.tutorial?.evento('emergencia');
+      if (activas.length) ctx.guia?.evento('emergencia');
 
       // El planeta de la ventana se acerca a medida que avanza el viaje
       if (esc.planeta && viaje) {

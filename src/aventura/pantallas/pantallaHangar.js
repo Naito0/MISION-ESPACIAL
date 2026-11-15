@@ -7,7 +7,7 @@
 // - Cada jugador pulsa "¡Listo!". Si la nave no puede despegar, se explica por qué.
 // - Cada categoría tiene una barra Mínimo / Recomendado / Exagerado según el
 //   destino (compartido/recomendaciones.js). Al pasar el mouse sobre una pieza
-//   se ve cómo cambiarían las barras, y Orbi (el consejero) explica el porqué.
+//   se ve cómo cambiarían las barras, y un consejo explica el porqué.
 // =============================================================
 import * as THREE from 'three';
 import { crearLuces } from '../engine/luces.js';
@@ -137,9 +137,9 @@ export function iniciarPantallaHangar(ctx) {
       </div>`;
   }
 
-  let catFoco = null;     // categoría de la que habla Orbi
+  let catFoco = null;     // categoría de la que habla el consejo
   let consejoExtra = '';  // consecuencia de la última compra
-  const textoOrbi = (cat, z, extra = '') => {
+  const textoConsejo = (cat, z, extra = '') => {
     if (!z) return 'Pasa el mouse sobre una pieza y te explico si conviene para este destino.';
     const nombre = CATALOGO.find((c) => c.id === cat)?.nombre || '';
     const recom = z.recomendadas.length ? ` Te recomiendo: <b>${z.recomendadas.join(' o ')}</b>.` : '';
@@ -196,7 +196,7 @@ export function iniciarPantallaHangar(ctx) {
       if (!r) return;
       if (!idOpcion) {
         holograma.querySelector('.hg-barras').innerHTML = barrasHolograma(r, null);
-        holograma.querySelector('.orbi-txt').innerHTML = textoOrbi(catFoco, rec[catFoco], consejoExtra);
+        holograma.querySelector('.consejo-txt').innerHTML = textoConsejo(catFoco, rec[catFoco], consejoExtra);
         tienda.querySelectorAll('.categoria').forEach((div) => { const z = rec[div.dataset.cat]; if (z) div.querySelector('.cat-barra').innerHTML = barraCategoria(z); });
         return;
       }
@@ -209,7 +209,7 @@ export function iniciarPantallaHangar(ctx) {
       if (z2 && div) div.querySelector('.cat-barra').innerHTML = barraCategoria(rec[cat.id], z2.valor);
       const opcion = cat.opciones.find((o) => o.id === idOpcion);
       catFoco = cat.id;
-      if (z2) holograma.querySelector('.orbi-txt').innerHTML = textoOrbi(cat.id, z2, `Con <b>${opcion.nombre}</b>: ${consecuencia(z2, opcion)}`);
+      if (z2) holograma.querySelector('.consejo-txt').innerHTML = textoConsejo(cat.id, z2, `Con <b>${opcion.nombre}</b>: ${consecuencia(z2, opcion)}`);
     };
     tienda.querySelectorAll('[data-op]').forEach((b) => {
       b.onmouseenter = () => vistaPrevia(b.dataset.op);
@@ -220,7 +220,7 @@ export function iniciarPantallaHangar(ctx) {
         if (res.error) { efecto('error'); mensajeError = res.error; dibujar(conexion.estado); return; }
         efecto(res.quitada ? 'clic' : 'compra');
         mensajeError = '';
-        // Se puede comprar fuera de lo recomendado: Orbi explica la consecuencia
+        // Se puede comprar fuera de lo recomendado: el consejo explica la consecuencia
         const e2 = conexion.estado;
         const rNuevo = recomendaciones(e2.seleccion, CATALOGO, destinoObj, e2.resumen);
         const cat = CATALOGO.find((c) => c.opciones.some((o) => o.id === id));
@@ -241,7 +241,7 @@ export function iniciarPantallaHangar(ctx) {
         <div class="hg-barras">${barrasHolograma(r, null)}</div>
         <button id="listo" class="${listo ? 'activo' : ''}">${listo ? '✋ Ya no estoy listo' : '🚀 ¡Listo!'}</button>
         <p class="error">${mensajeError}</p>
-        <div class="orbi"><span class="guia-robot">🤖</span><div class="orbi-txt">${textoOrbi(catFoco, rec[catFoco], consejoExtra)}</div></div>
+        <div class="consejo"><span class="consejo-icono">💡</span><div class="consejo-txt">${textoConsejo(catFoco, rec[catFoco], consejoExtra)}</div></div>
         ${deps.length ? `<h3>🔗 Ojo</h3><ul class="problemas">${deps.map((t) => `<li>${t}</li>`).join('')}</ul>` : ''}
         ${r.problemas.length ? `<h3>⚠ Antes de despegar</h3><ul class="problemas">${r.problemas.map((p) => `<li>${p.texto}</li>`).join('')}</ul>` : '<p class="ok">✅ ¡La nave puede despegar!</p>'}
         <h3>Protecciones para el viaje</h3>
@@ -257,8 +257,8 @@ export function iniciarPantallaHangar(ctx) {
         if (res.error) { efecto('error'); mensajeError = `${res.error} ${(res.problemas || []).join(' ')}`; dibujar(conexion.estado); }
         else { efecto('clic'); ctx.aprendizaje?.evento('hangar:listo', e.destinoId); }
       };
-      // Tutorial: cuando no falta ninguna categoría, pasa al paso "¡Listo!"
-      if (!r.problemas.some((p) => p.texto.startsWith('Falta elegir'))) ctx.tutorial?.evento('completo');
+      // Guía: cuando no falta ninguna categoría, pasa al paso "¡Listo!"
+      if (!r.problemas.some((p) => p.texto.startsWith('Falta elegir'))) ctx.guia?.evento('completo');
       holo.material.color.setHex(r.masa > r.capacidad ? 0xe5484d : 0x5be08a);
       holo.geometry.dispose();
       holo.geometry = new THREE.RingGeometry(4.5, 4.9, 64, 1, 0, Math.max(0.01, Math.min(1, r.masa / r.capacidad)) * Math.PI * 2);

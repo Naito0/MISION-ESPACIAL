@@ -12,13 +12,13 @@ Juego educativo **3D** para el desafío **"Juego de diseño de misiones espacial
 **Una partida dura unos 5 a 8 minutos:**
 
 1. **Sistema solar 3D:** tarjetas con datos de la NASA. Se elige la Luna (dificultad media) o Marte (difícil, paga el doble) y la **dificultad** del viaje (Fácil / Normal).
-2. **Hangar:** primero una **predicción** ("¿necesitarás más o menos paneles?"). Después se compran las piezas: cada categoría muestra una barra **Mínimo / Recomendado / Exagerado** calculada para ese destino, una vista previa al pasar el mouse y los consejos de **Orbi**. En Marte los paneles brillan menos.
+2. **Hangar:** primero una **predicción** ("¿necesitarás más o menos paneles?"). Después se compran las piezas: cada categoría muestra una barra **Mínimo / Recomendado / Exagerado** calculada para ese destino, una vista previa al pasar el mouse y un consejo que explica el porqué. En Marte los paneles brillan menos.
 3. **Viaje:** solo **3 emergencias en la Luna y 4 en Marte**, una por rol, con 30 a 45 segundos de calma entre ellas. Cada una tiene pasos: **aviso** (qué pasó y a quién le toca) → **diagnóstico** (una pregunta para pensar la causa) → **minijuego** → **"📜 Esto pasó de verdad"** → tarjeta **"💡 ¿Qué aprendiste?"**. Mientras se lee una tarjeta, **todo se congela**. Las puertas entre las salas están cerradas con llave.
 4. **Aterrizaje:** el Piloto frena con la gravedad real, esquiva las rocas hasta la zona verde e ignora las alarmas que no son graves.
 5. **Superficie:** se sale por la **esclusa** (despresurización), se recogen 3 muestras y el Científico las analiza. Los otros 3 astronautas trabajan de fondo (taladro, antena y rover).
 6. **Informe:** estrellas, **medallas**, **"Hoy aprendiste 3 cosas"** con 3 preguntas rápidas, causas y efectos y una misión real de la NASA parecida.
 
-La **primera misión a la Luna es un tutorial**: Orbi guía paso a paso con flechas. Lo aprendido queda en el diario **"Lo que aprendí"** y las medallas en la **"Sala de trofeos"** (menú Esc).
+La **primera misión a la Luna es un tutorial**: una línea de texto con una flecha indica qué hacer en cada paso. Lo aprendido queda en el diario **"Lo que aprendí"** y las medallas en la **"Sala de trofeos"** (menú Esc).
 
 > **Este proyecto no está respaldado, patrocinado ni aprobado por la NASA.** Es un trabajo educativo de un equipo del NASA Space Apps Challenge.
 
@@ -146,7 +146,7 @@ mision-espacial/
     ├── aventura/                # todo lo que se ve (Three.js)
     │   ├── main3d.js              # arranque y cambio de pantallas
     │   ├── tripulacion.js         # los 4 astronautas: tecla, sala y límites
-    │   ├── tutorial.js            # Orbi guía la primera misión (Luna)
+    │   ├── guia.js                # indicaciones de la primera misión (línea + flecha)
     │   ├── aprendizaje.js         # tarjetas "¿Qué aprendiste?" y diario
     │   ├── logros.js              # avisos de medallas y Sala de trofeos
     │   ├── pausa.js               # pausa real (tarjetas, diagnósticos, menú)
@@ -175,7 +175,7 @@ mision-espacial/
 | Precios, masas y energía de las piezas | `src/data/componentes.json` |
 | Datos de la Luna y Marte (gravedad, noche, polvo, distancias) | `src/data/destinos.json` |
 | Fórmulas de las recomendaciones | `src/compartido/recomendaciones.js` |
-| Pasos del tutorial | `src/aventura/tutorial.js` |
+| Pasos de la guía de la primera misión | `src/aventura/guia.js` |
 | Tamaños de texto | `src/aventura/ui/estilos.css` (variables al principio) |
 | Un minijuego | `src/aventura/minijuegos/<rol>.js` |
 

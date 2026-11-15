@@ -14,7 +14,7 @@ import configHangar from '../../data/hangar3d.json';
 import { efecto } from '../audio.js';
 import configDificultad from '../../data/dificultad.json';
 import { dificultad, setDificultad } from '../../systems/preferencias.js';
-import { tutorialHecho } from '../tutorial.js';
+import { tutorialHecho } from '../guia.js';
 
 // Solo aspecto visual (colores, tamaño en pantalla y órbita del dibujo): no son datos científicos.
 const CUERPOS = [
@@ -97,7 +97,7 @@ export function iniciarPantallaSistema(ctx) {
   const lista = ui.querySelector('.lista-planetas');
   const tarjeta = ui.querySelector('.tarjeta-planeta');
   // En la primera misión (tutorial) se propone la Luna, que es la más fácil
-  let seleccionado = ctx.tutorial?.activo || !tutorialHecho() ? 'luna' : 'marte';
+  let seleccionado = ctx.guia?.activo || !tutorialHecho() ? 'luna' : 'marte';
   let mensaje = '';
 
   const nombres = [...CUERPOS.slice(0, 3), { id: 'luna', nombre: 'Luna', elegible: true }, ...CUERPOS.slice(3)];
@@ -153,7 +153,7 @@ export function iniciarPantallaSistema(ctx) {
     const ir = tarjeta.querySelector('#ir');
     if (ir) ir.onclick = async () => {
       // El tutorial solo acompaña la misión a la Luna
-      if (d.id === 'luna') ctx.tutorial?.reactivarSiFalta(); else ctx.tutorial?.desactivar();
+      if (d.id === 'luna') ctx.guia?.reactivarSiFalta(); else ctx.guia?.desactivar();
       const r = await conexion.accion('destino', { id: d.id });
       if (r.error) { mensaje = r.error; efecto('error'); dibujarTarjeta(); } else efecto('exito');
     };

@@ -91,7 +91,7 @@ export function iniciarPantallaInforme(ctx) {
   const soyAnfitrion = !!(yo && yo.anfitrion);
   const progreso = soyAnfitrion ? guardarInforme(inf) : null;
   // La primera misión a la Luna era el tutorial: queda marcado como hecho
-  if (e.destinoId === 'luna' && ctx.tutorial?.activo) ctx.tutorial.terminar();
+  if (e.destinoId === 'luna' && ctx.guia?.activo) ctx.guia.terminar();
   // "Hoy aprendiste 3 cosas": los 3 conceptos de la misión conectados con lo que pasó
   const resumenHangar = resumenDiseno(e.seleccion || {}, CATALOGO, destino, configHangar);
   const zonas = recomendaciones(e.seleccion || {}, CATALOGO, destino, resumenHangar);

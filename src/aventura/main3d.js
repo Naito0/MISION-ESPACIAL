@@ -20,7 +20,7 @@ import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
 import { iniciarPantallaSuperficie } from './pantallas/pantallaSuperficie.js';
 import { crearPartidaLocal } from './red/partidaLocal.js';
 import { abrirMinijuego } from './minijuegos/index.js';
-import { crearTutorial } from './tutorial.js';
+import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
 import { pausar, reanudar, estaPausado } from './pausa.js';
@@ -85,15 +85,15 @@ function irA() {
   else if (['viaje', 'llegada', 'fracaso'].includes(fase)) pantalla = iniciarPantallaNave(ctx);
   else pantalla = iniciarPantallaSistema(ctx);
   window.aventura.pantalla = pantalla;
-  // El tutorial (Orbi) muestra los pasos de esta pantalla
+  // La guía (una línea con flecha) muestra los pasos de esta pantalla
   const nombreTutorial = { sistema: 'sistema', hangar: 'hangar', viaje: 'viaje', llegada: 'viaje', fracaso: 'viaje', aterrizaje: 'aterrizaje', superficie: 'superficie', informe: 'informe' }[fase];
-  if (nombreTutorial && nombreTutorial !== ultimaPantallaTutorial) ctx.tutorial.pantalla(nombreTutorial);
+  if (nombreTutorial && nombreTutorial !== ultimaPantallaTutorial) ctx.guia.pantalla(nombreTutorial);
   ultimaPantallaTutorial = nombreTutorial;
   // El mouse solo se captura donde se camina (nave y superficie)
   window.capturarMouse = !!pantalla.jugador;
   hud.querySelector('.ayuda').style.display = window.capturarMouse ? '' : 'none';
 }
-ctx.tutorial = crearTutorial(hud);
+ctx.guia = crearGuia(hud);
 ctx.aprendizaje = aprendizaje;
 ctx.logros = logros;
 // Cada emergencia resuelta puede enseñar un concepto (ej. 'resuelta:oxigeno')

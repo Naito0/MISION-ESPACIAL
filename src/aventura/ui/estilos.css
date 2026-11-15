@@ -145,14 +145,14 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .informe .respuesta.correcta { background: #2f9e5b; }
 #hud .informe .respuesta.incorrecta { background: #8a2a30; }
 #hud .informe .respuesta:disabled { cursor: default; }
-/* ---- Tutorial (Orbi, el robot guía) ---- */
-#hud .guia { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); width: min(760px, 56vw); display: flex; gap: 12px; align-items: center;
-  padding: 10px 16px; font-size: var(--t); border-color: #ffd166; border-width: 3px; box-shadow: 0 0 22px rgba(255, 209, 102, 0.45); z-index: 5; }
+/* ---- Guía de la primera misión: una línea, una flecha y el objeto resaltado ---- */
+#hud .guia { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); max-width: min(760px, 70vw); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 8px 18px; font-size: var(--t); border-color: #ffd166; border-width: 3px; box-shadow: 0 0 18px rgba(255, 209, 102, 0.4); z-index: 5; }
 /* En el hangar la guía va arriba, en el hueco entre la tienda y el holograma */
-#hud .guia[data-pantalla="hangar"] { top: 64px; bottom: auto; width: 300px; flex-direction: column; text-align: center; }
-#hud .guia-robot { font-size: 44px; animation: flotar 1.6s ease-in-out infinite alternate; }
+#hud .guia[data-pantalla="hangar"] { top: 64px; bottom: auto; max-width: 300px; white-space: normal; text-align: center; }
 #hud .flecha-guia { position: fixed; font-size: 40px; color: #ffd166; text-shadow: 0 0 10px #000; z-index: 6; pointer-events: none; animation: rebote 0.6s ease-in-out infinite alternate; }
-@keyframes flotar { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+#hud .resaltado-guia { outline: 4px solid #ffd166 !important; outline-offset: 3px; box-shadow: 0 0 22px rgba(255, 209, 102, 0.8) !important; animation: brillo-guia 0.8s ease-in-out infinite alternate; }
+@keyframes brillo-guia { from { outline-color: #ffd166; } to { outline-color: #fff4c0; } }
 @keyframes rebote { from { transform: translateY(-8px); } to { transform: translateY(4px); } }
 /* ---- Retratos de la tripulación (cambiar de astronauta) ---- */
 #hud .retratos { position: absolute; left: 12px; top: 130px; display: flex; flex-direction: column; gap: 8px; }
@@ -296,8 +296,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 #hud .hg-barra .fantasma { background: rgba(124, 243, 255, 0.45); }
 #hud .previa { color: #7cf3ff; font-weight: bold; }
 #hud .previa.mal { color: #ff8080; }
-#hud .orbi { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; padding: 8px 10px; border: 2px solid #ffd166; border-radius: 10px; background: rgba(40, 32, 8, 0.6); font-size: var(--tc); }
-#hud .orbi .guia-robot { font-size: 36px; }
+#hud .consejo { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; padding: 8px 10px; border: 2px solid #ffd166; border-radius: 10px; background: rgba(40, 32, 8, 0.6); font-size: var(--tc); }
+#hud .consejo-icono { font-size: 28px; }
 #hud .holograma h3 { margin: 12px 0 4px; font-size: var(--t); color: #9dd0ff; }
 #hud .hg-dato { display: flex; justify-content: space-between; gap: 6px; margin-top: 8px; }
 #hud .hg-barra { height: 14px; background: #1a2342; border-radius: 7px; overflow: hidden; }
