@@ -148,6 +148,35 @@ export class Sala {
     return this.jugadores.size > 0 && this.rolesLibres().length === 0;
   }
 
+  /** Sala con bots: ¿todos los humanos eligieron un puesto y están listos? */
+  puedeEmpezarConBots() {
+    const js = [...this.jugadores.values()];
+    return js.length > 0 && js.every((j) => j.roles.length > 0 && j.listo);
+  }
+
+  /**
+   * Roles que un jugador puede usar: los suyos y los de los BOTS.
+   * (Cuando hay una emergencia del rol de un bot, un humano toma ese astronauta.)
+   */
+  rolesDe(j) {
+    return [...new Set([...j.roles, ...(this.bots || [])])];
+  }
+
+  /** Personaje de cada rol: el que eligió su jugador o, si es un bot, uno libre por defecto. */
+  personajesPorRol() {
+    const lista = this.datos.personajes || [];
+    const out = {};
+    const usados = new Set();
+    for (const j of this.jugadores.values()) for (const r of j.roles) { out[r] = j.personaje || null; if (j.personaje) usados.add(j.personaje); }
+    for (const r of ROLES_ID) {
+      if (out[r]) continue;
+      const libre = lista.find((p) => p.rolPorDefecto === r && !usados.has(p.id)) || lista.find((p) => !usados.has(p.id));
+      out[r] = libre ? libre.id : null;
+      if (libre) usados.add(libre.id);
+    }
+    return out;
+  }
+
   // ---------- Acciones de los jugadores ----------
   /** Punto de entrada único: devuelve { ok } o { error }. */
   accion(id, tipo, datos = {}) {
@@ -178,6 +207,44 @@ export class Sala {
       if (this.fase !== 'lobby') return { error: 'Ya empezó.' };
       j.roles.push(...this.rolesLibres());
       this.cambio();
+      return { ok: true };
+    },
+    /** Sala: elegir UN puesto (rol). No se puede repetir: si otro lo tiene, error. */
+    puesto(j, { rol }) {
+      if (this.fase !== 'lobby') return { error: 'Ya no se pueden cambiar los puestos.' };
+      if (!ROLES_ID.includes(rol)) return { error: 'Puesto desconocido.' };
+      const duenio = [...this.jugadores.values()].find((o) => o !== j && o.roles.includes(rol));
+      if (duenio) return { error: `Ese puesto ya lo tiene ${duenio.nombre}.` };
+      j.roles = [rol];
+      j.listo = false;
+      this.cambio();
+      return { ok: true };
+    },
+    /** Sala: elegir un personaje (no se puede repetir entre jugadores). */
+    personaje(j, { id }) {
+      if (this.fase !== 'lobby') return { error: 'Ya empezó.' };
+      if (this.datos.personajes && !this.datos.personajes.some((p) => p.id === id)) return { error: 'Personaje desconocido.' };
+      const duenio = [...this.jugadores.values()].find((o) => o !== j && o.personaje === id);
+      if (duenio) return { error: `Ese personaje ya lo eligió ${duenio.nombre}.` };
+      j.personaje = id;
+      this.cambio();
+      return { ok: true };
+    },
+    /** Sala: "¡Listo!" (o ya no). Hace falta un puesto elegido. */
+    listoSala(j) {
+      if (this.fase !== 'lobby') return { error: 'Ya empezó.' };
+      if (!j.roles.length) return { error: 'Primero elige un puesto.' };
+      j.listo = !j.listo;
+      this.cambio();
+      return { ok: true };
+    },
+    /** El anfitrión inicia: los puestos libres los ocupan BOTS. */
+    empezarConBots(j) {
+      if (!j.anfitrion) return { error: 'Solo el anfitrión puede iniciar la partida.' };
+      if (!this.puedeEmpezarConBots()) return { error: 'Todos tienen que elegir un puesto y pulsar "¡Listo!".' };
+      this.bots = this.rolesLibres();
+      this.fase = 'sistema';
+      this.cambio(this.bots.length ? `🤖 ${this.bots.length} bot${this.bots.length > 1 ? 's' : ''} completan la tripulación` : '🪐 Elijan el destino de la misión');
       return { ok: true };
     },
     /** El anfitrión empieza la partida (con los 4 roles cubiertos). */
@@ -216,7 +283,7 @@ export class Sala {
     /** Hangar: comprar, cambiar o quitar una pieza (solo las de tus roles). */
     comprar(j, { opcion }) {
       if (this.fase !== 'hangar') return { error: 'Ahora no se puede comprar.' };
-      const r = comprar(this.seleccion, this.catalogo, j.roles, opcion, this.destino, this.configHangar);
+      const r = comprar(this.seleccion, this.catalogo, this.rolesDe(j), opcion, this.destino, this.configHangar);
       if (r.ok) { this.listos.clear(); this.cambio(); } // si cambia la nave, todos revisan de nuevo
       return r;
     },
@@ -247,7 +314,7 @@ export class Sala {
     /** Aterrizaje: el Comandante informa la velocidad con la que tocó el suelo. */
     aterrizar(j, { velocidad }) {
       if (this.fase !== 'aterrizaje') return { error: 'No estamos aterrizando.' };
-      if (!j.roles.includes('comandante')) return { error: 'El aterrizaje lo pilota el Comandante.' };
+      if (!this.rolesDe(j).includes('comandante')) return { error: 'El aterrizaje lo pilota el Comandante.' };
       const config = this.datos.emergencias.config;
       this.aterrizaje = clasificarAterrizaje(Number(velocidad) || 99, config);
       if (this.aterrizaje === 'choque') this.viaje.vida = Math.max(0, this.viaje.vida - config.danioChoque);
@@ -268,7 +335,7 @@ export class Sala {
     /** Superficie: analizar una muestra (solo el Científico). */
     analizar(j, { i, exito }) {
       if (this.fase !== 'superficie') return { error: 'No estamos en la superficie.' };
-      const r = analizarMuestra(this.superficie, i, j.roles, !!exito);
+      const r = analizarMuestra(this.superficie, i, this.rolesDe(j), !!exito);
       if (r.ok && exito) {
         this.cambio(`🔬 Muestra analizada (${analizadas(this.superficie)} de 3)`);
         if (analizadas(this.superficie) === 3) this.terminarExploracion();
@@ -304,7 +371,7 @@ export class Sala {
     },
     resolver(j, { uid, exito }) {
       if (this.fase !== 'viaje' || !this.viaje) return { error: 'No hay viaje en curso.' };
-      const r = resolverEmergencia(this.viaje, uid, j.roles, !!exito);
+      const r = resolverEmergencia(this.viaje, uid, this.rolesDe(j), !!exito);
       if (r.ok && exito) this.cambio(`✅ ${j.nombre} resolvió una emergencia`);
       return r;
     }
@@ -395,6 +462,8 @@ export class Sala {
       resumen: this.fase === 'hangar' ? this.resumen() : null,
       nivel: this.nivel,
       informe: this.fase === 'informe' ? this.informe : null,
+      bots: this.bots || [],
+      personajesPorRol: this.personajesPorRol(),
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
       viaje: this.viaje && {
