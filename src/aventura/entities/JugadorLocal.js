@@ -120,11 +120,12 @@ export class JugadorLocal {
     a.raiz.position.copy(this.pies);
     const vel = Math.hypot(this.cuerpo.velocidad.x, this.cuerpo.velocidad.z);
     let giro = 0;
-    if (vel > 0.2) {
-      const objetivo = Math.atan2(this.cuerpo.velocidad.x, this.cuerpo.velocidad.z);
+    // Gira SUAVE hacia donde quiere caminar (no hacia donde lo empujan), igual a cualquier FPS
+    if (vel > 0.2 && d.lengthSq() > 0.01) {
+      const objetivo = Math.atan2(d.x, d.z);
       let dif = objetivo - a.raiz.rotation.y;
       dif = Math.atan2(Math.sin(dif), Math.cos(dif));
-      a.raiz.rotation.y += dif * Math.min(1, 10 * dt);
+      a.raiz.rotation.y += dif * (1 - Math.exp(-10 * dt));
       giro = (a.raiz.rotation.y - this.anguloAnterior) / Math.max(dt, 1e-3);
     }
     this.anguloAnterior = a.raiz.rotation.y;

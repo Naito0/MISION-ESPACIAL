@@ -444,13 +444,20 @@ export function iniciarPantallaNave(ctx) {
       });
       const yo = actual();
       if (consola) yo.jugador.astronauta.mantener('reparar');
-      // Empujones: retroceso de 0,35 s (rápido al principio y frenando)
-      for (let k = empujados.length - 1; k >= 0; k--) {
-        const em = empujados[k]; em.t += dt;
-        const v = 6 * Math.max(0, 1 - em.t / 0.35);
-        em.a.jugador.cuerpo.capsula.translate(new THREE.Vector3(em.dx * v * dt, 0, em.dz * v * dt));
-        em.a.jugador.cuerpo.pies(em.a.jugador.pies);
-        if (em.t >= 0.35) empujados.splice(k, 1);
+      // Empujones: se les da un IMPULSO físico (la física lo frena y lo para en las paredes)
+      while (empujados.length) { const em = empujados.pop(); em.a.jugador.cuerpo.empujar(em.dx * 5, em.dz * 5); }
+      // Los personajes no se atraviesan: si dos cápsulas se tocan, se separan (solo se mueven
+      // las que maneja esta computadora: la mía y las de fondo; las de otros jugadores las mueve su dueño)
+      for (let i = 0; i < astronautas.length; i++) for (let k = i + 1; k < astronautas.length; k++) {
+        const A1 = astronautas[i]; const B1 = astronautas[k];
+        const dx = B1.jugador.pies.x - A1.jugador.pies.x; const dz = B1.jugador.pies.z - A1.jugador.pies.z;
+        const d = Math.hypot(dx, dz);
+        if (d >= 0.7 || d < 1e-4 || Math.abs(B1.jugador.pies.y - A1.jugador.pies.y) > 1.2) continue;
+        const muevoA = !remotos[A1.rol]; const muevoB = !remotos[B1.rol];
+        if (!muevoA && !muevoB) continue;
+        const falta = 0.7 - d; const parte = muevoA && muevoB ? falta / 2 : falta;
+        if (muevoA) { A1.jugador.cuerpo.capsula.translate(new THREE.Vector3(-dx / d * parte, 0, -dz / d * parte)); A1.jugador.cuerpo.pies(A1.jugador.pies); }
+        if (muevoB) { B1.jugador.cuerpo.capsula.translate(new THREE.Vector3(dx / d * parte, 0, dz / d * parte)); B1.jugador.cuerpo.pies(B1.jugador.pies); }
       }
       // Aturdido: la cámara se tambalea y gira SUAVE (sin giros completos ni sacudidas)
       const ahoraS = performance.now() / 1000;

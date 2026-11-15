@@ -41,6 +41,14 @@ export class CuerpoJugador {
     this.velocidadCaminar = 3.4;
     this.velocidadCorrer = 6.5;
     this.fuerzaSalto = 5.2;
+    // Impulso externo (empujón): velocidad que se suma y se apaga sola; choca con las paredes
+    this.impulso = new THREE.Vector3();
+  }
+
+  /** Empujón: velocidad horizontal que se apaga en ~0,4 s (nunca atraviesa paredes). */
+  empujar(vx, vz, saltito = 2) {
+    this.impulso.set(vx, 0, vz);
+    if (this.apoyado) { this.velocidad.y = saltito; this.tiempoEnAire = 0.2; } // rebote pequeño
   }
 
   /** Posición de los pies (para dibujar al astronauta). */
@@ -83,7 +91,16 @@ export class CuerpoJugador {
       // La gravedad actúa SIEMPRE: así la cápsula sigue tocando el piso y sabemos que está apoyada
       this.velocidad.y -= this.mundo.gravedad * paso;
       this.capsula.translate(this.velocidad.clone().multiplyScalar(paso));
-      if (this.resolverColisiones()) tocoPiso = true;
+      if (this.impulso.lengthSq() > 1e-4) {
+        this.capsula.translate(this.impulso.clone().multiplyScalar(paso));
+        this.impulso.multiplyScalar(Math.exp(-6 * paso)); // se frena solo
+      }
+      // Varias pasadas: en las esquinas toca dos paredes a la vez (así no queda trabado)
+      for (let k = 0; k < 3; k++) {
+        const r = this.resolverColisiones(deseo);
+        if (r === null) break;
+        if (r) tocoPiso = true;
+      }
     }
     this.enSuelo = tocoPiso;
     this.tiempoEnAire = this.enSuelo ? 0 : this.tiempoEnAire + dt;
@@ -113,19 +130,36 @@ export class CuerpoJugador {
     }
   }
 
-  /** Empuja la cápsula fuera de lo que esté tocando. Devuelve true si tocó un PISO. */
-  resolverColisiones() {
+  /**
+   * Empuja la cápsula fuera de lo que esté tocando.
+   * Devuelve true si tocó un PISO, false si tocó otra cosa, null si no tocó nada.
+   */
+  resolverColisiones(deseo = null) {
     this.resolverDinamicos();
     const r = this.mundo.octree.capsuleIntersect(this.capsula);
-    if (!r) return false;
+    if (!r) return null;
     const esPiso = r.normal.y > 0.5; // superficie casi horizontal = piso (también rampas suaves)
     if (esPiso) {
       if (this.velocidad.y < 0) this.velocidad.y = 0;
     } else {
-      // Pared o techo: se pierde la velocidad que iba "hacia" la superficie
+      // ESCALÓN: si camina contra un borde bajo (hasta 0,3 m) y arriba hay lugar, lo sube sin saltar
+      if (this.enSuelo && Math.abs(r.normal.y) < 0.3 && deseo && deseo.lengthSq() > 0.01 && this.subirEscalon(r.normal)) return true;
+      // Pared o techo: se pierde la velocidad que iba "hacia" la superficie (así se DESLIZA por la pared)
       this.velocidad.addScaledVector(r.normal, -r.normal.dot(this.velocidad));
+      this.impulso.addScaledVector(r.normal, -r.normal.dot(this.impulso)); // el empujón tampoco atraviesa
     }
-    if (r.depth >= 1e-10) this.capsula.translate(r.normal.multiplyScalar(r.depth));
+    // Sin temblores: los toques mínimos no mueven la cápsula
+    if (r.depth >= 1e-4) this.capsula.translate(r.normal.multiplyScalar(r.depth));
     return esPiso;
+  }
+
+  /** Intenta subir un escalón de hasta 0,3 m: prueba la cápsula más arriba y un poco adelante. */
+  subirEscalon(normal) {
+    const subir = new THREE.Vector3(-normal.x * 0.08, 0.3, -normal.z * 0.08);
+    const prueba = this.capsula.clone();
+    prueba.translate(subir);
+    if (this.mundo.octree.capsuleIntersect(prueba)) return false; // arriba también hay pared: no es un escalón
+    this.capsula.translate(subir);
+    return true;
   }
 }
