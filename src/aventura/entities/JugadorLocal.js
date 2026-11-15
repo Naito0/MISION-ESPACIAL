@@ -29,7 +29,7 @@ export class JugadorLocal {
     this.astronauta.gravedad = mundo.gravedad; // Luna y Marte: saltos flotantes
     escena.add(this.astronauta.raiz);
     this.cuerpo = new CuerpoJugador(mundo, escenario.puntoInicio);
-    this.camara = new CamaraTercera(camara, escenario.colisiones);
+    this.camara = new CamaraTercera(camara, escenario.colisiones, { interior: !!escenario.interior, puertas: escenario.puertas || [] });
     this.camara.distancia = escenario.interior ? 3.6 : 5;
     this.control = control;
     this.bloqueado = false; // true mientras usa una consola (no camina)
@@ -131,7 +131,12 @@ export class JugadorLocal {
     a.actualizar(dt, { velocidad: vel, apoyado: this.cuerpo.apoyado, velocidadVertical: this.cuerpo.velocidad.y, giro });
 
     this._cabeza.copy(this.pies).y += 1.55;
-    if (activo) this.camara.actualizar(dt, this._cabeza);
+    if (activo) {
+      this.camara.actualizar(dt, this._cabeza);
+      // Si la cámara queda muy cerca del personaje, el personaje se vuelve transparente
+      const c = this.camara.cercania;
+      this.astronauta.transparencia?.(c < 0.7 ? 0.15 : c < 1.2 ? 0.5 : 1);
+    } else this.astronauta.transparencia?.(1);
     return e;
   }
 }

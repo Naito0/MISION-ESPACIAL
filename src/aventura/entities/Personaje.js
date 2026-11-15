@@ -275,6 +275,31 @@ export class Personaje {
   /** Llegó una señal: las orejas de Zuri giran como antenas. */
   senal() { if (this.id === 'zuri') { this.reaccion = { tipo: 'senal', tiempo: 0, duracion: 2.5 }; this.decir('📡 ¡Señal!'); } }
 
+  /**
+   * Transparencia (cuando la cámara queda muy cerca): alfa 1 = normal.
+   * Los materiales son compartidos entre personajes, así que se clonan solo para este
+   * personaje la primera vez que hace falta, y se devuelven los originales al volver a 1.
+   */
+  transparencia(alfa) {
+    if (alfa === (this._alfa ?? 1)) return;
+    this._alfa = alfa;
+    if (alfa >= 1) {
+      if (this._originales) for (const [m, mat] of this._originales) { m.material.dispose(); m.material = mat; }
+      this._originales = null;
+      return;
+    }
+    if (!this._originales) {
+      this._originales = new Map();
+      this.raiz.traverse((o) => {
+        if (!o.isMesh || Array.isArray(o.material)) return;
+        this._originales.set(o, o.material);
+        o.material = o.material.clone();
+        o.material.transparent = true; o.material.depthWrite = false;
+      });
+    }
+    for (const [m, mat] of this._originales) m.material.opacity = (mat.opacity ?? 1) * alfa;
+  }
+
   /** Recibió un empujón: mareado unos segundos, con estrellitas. */
   mareado(segundos = 1.5) {
     if (this.desmayado) return;
