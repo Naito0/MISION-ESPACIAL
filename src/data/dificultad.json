@@ -11,18 +11,48 @@
       "factorDanio": 0.6,
       "factorPresupuesto": 1.35,
       "minijuegos": {
-        "trayectoria": { "segundos": 1 },
-        "ritmo": { "aciertos": 2 },
-        "esquivar": { "segundos": 5, "escudo": 4 },
-        "cables": { "cables": 3 },
-        "soldar": { "grietas": 3, "clics": 2 },
-        "deslizadores": { "barras": 2, "tolerancia": 8 },
-        "nivel": { "segundos": 3 },
-        "secuencia": { "largo": 3 },
-        "regar": { "segundos": 5, "plantas": 4 },
-        "sintonizar": { "segundos": 1, "tolerancia": 0.3 },
-        "apuntar": { "segundos": 1.2, "radio": 36 },
-        "ordenar": { "paquetes": 4 }
+        "trayectoria": {
+          "segundos": 1
+        },
+        "ritmo": {
+          "aciertos": 2
+        },
+        "esquivar": {
+          "segundos": 5,
+          "escudo": 4
+        },
+        "cables": {
+          "cables": 3
+        },
+        "soldar": {
+          "grietas": 3,
+          "clics": 2
+        },
+        "deslizadores": {
+          "barras": 2,
+          "tolerancia": 8
+        },
+        "nivel": {
+          "segundos": 3
+        },
+        "secuencia": {
+          "largo": 3
+        },
+        "regar": {
+          "segundos": 5,
+          "plantas": 4
+        },
+        "sintonizar": {
+          "segundos": 1,
+          "tolerancia": 0.3
+        },
+        "apuntar": {
+          "segundos": 1.2,
+          "radio": 36
+        },
+        "ordenar": {
+          "paquetes": 4
+        }
       }
     },
     "normal": {
@@ -34,54 +64,218 @@
       "factorDanio": 1,
       "factorPresupuesto": 1.1,
       "minijuegos": {
-        "trayectoria": { "segundos": 1.5 },
-        "ritmo": { "aciertos": 3 },
-        "esquivar": { "segundos": 8, "escudo": 3 },
-        "cables": { "cables": 4 },
-        "soldar": { "grietas": 5, "clics": 3 },
-        "deslizadores": { "barras": 3, "tolerancia": 5 },
-        "nivel": { "segundos": 5 },
-        "secuencia": { "largo": 4 },
-        "regar": { "segundos": 8, "plantas": 6 },
-        "sintonizar": { "segundos": 1.5, "tolerancia": 0.18 },
-        "apuntar": { "segundos": 2, "radio": 26 },
-        "ordenar": { "paquetes": 6 }
+        "trayectoria": {
+          "segundos": 1.5
+        },
+        "ritmo": {
+          "aciertos": 3
+        },
+        "esquivar": {
+          "segundos": 8,
+          "escudo": 3
+        },
+        "cables": {
+          "cables": 4
+        },
+        "soldar": {
+          "grietas": 5,
+          "clics": 3
+        },
+        "deslizadores": {
+          "barras": 3,
+          "tolerancia": 5
+        },
+        "nivel": {
+          "segundos": 5
+        },
+        "secuencia": {
+          "largo": 4
+        },
+        "regar": {
+          "segundos": 8,
+          "plantas": 6
+        },
+        "sintonizar": {
+          "segundos": 1.5,
+          "tolerancia": 0.18
+        },
+        "apuntar": {
+          "segundos": 2,
+          "radio": 26
+        },
+        "ordenar": {
+          "paquetes": 6
+        }
       }
     }
   },
   "_minijuegosPorDestino": "Pasos y tiempos de los minijuegos SEGÚN EL DESTINO: la Luna es media y Marte es difícil. Estos valores son los que usan los minijuegos nuevos (los de 'niveles' quedan para los minijuegos viejos).",
   "minijuegosPorDestino": {
     "luna": {
-      "aterrizaje": { "alarmas": 2, "distanciaZona": [8, 11] },
-      "esquivar": { "segundos": 15, "escudo": 3, "velocidad": 1.0, "basura": 0.9, "apuntados": 0.3 },
-      "rumbo": { "combustible": 100, "deriva": 0.35, "segundos": 2, "giro": 1.2 },
-      "fuga": { "caidaPresion": 2.2, "ventiladores": 1, "sellar": 1.5 },
-      "interruptores": { "buses": 6, "fallas": 1 },
-      "paneles": { "paneles": 3, "descarga": 4.5, "polvo": 0.85 },
-      "deslizadores": { "barras": 3, "tolerancia": 5 },
-      "filtro": { "distractores": 3, "subidaCO2": 2.4 },
-      "equilibrio": { "segundos": 12, "cambios": 2, "retardo": 0.6 },
-      "huerto": { "plantas": 2, "segundos": 8 },
-      "secuencia": { "largoMin": 5, "largoMax": 6 },
-      "unidades": { "rondas": 2 },
-      "retraso": { "rondas": 1 },
-      "tormenta": { "picosFalsos": 2, "segundos": 2 }
+      "aterrizaje": {
+        "alarmas": 2,
+        "distanciaZona": [
+          8,
+          11
+        ]
+      },
+      "esquivar": {
+        "segundos": 15,
+        "escudo": 3,
+        "velocidad": 1,
+        "basura": 0.9,
+        "apuntados": 0.3
+      },
+      "rumbo": {
+        "combustible": 100,
+        "deriva": 0.35,
+        "segundos": 2,
+        "giro": 1.2
+      },
+      "fuga": {
+        "caidaPresion": 2.2,
+        "ventiladores": 1,
+        "sellar": 1.5
+      },
+      "interruptores": {
+        "buses": 6,
+        "fallas": 1
+      },
+      "paneles": {
+        "paneles": 3,
+        "descarga": 4.5,
+        "polvo": 0.85
+      },
+      "deslizadores": {
+        "barras": 3,
+        "tolerancia": 5
+      },
+      "filtro": {
+        "distractores": 3,
+        "subidaCO2": 2.4
+      },
+      "equilibrio": {
+        "segundos": 12,
+        "cambios": 2,
+        "retardo": 0.6
+      },
+      "huerto": {
+        "plantas": 2,
+        "segundos": 8
+      },
+      "secuencia": {
+        "largoMin": 5,
+        "largoMax": 6
+      },
+      "unidades": {
+        "rondas": 2
+      },
+      "retraso": {
+        "rondas": 1
+      },
+      "tormenta": {
+        "picosFalsos": 2,
+        "segundos": 2
+      },
+      "acoplamiento": {
+        "velocidadMax": 14,
+        "deriva": 4
+      },
+      "termica": {
+        "segundos": 12,
+        "calor": 1
+      },
+      "ejercicio": {
+        "pulsos": 14,
+        "aciertos": 9,
+        "periodo": 1.3
+      },
+      "ventana": {
+        "segundos": 16
+      }
     },
     "marte": {
-      "aterrizaje": { "alarmas": 3, "distanciaZona": [11, 15] },
-      "esquivar": { "segundos": 20, "escudo": 3, "velocidad": 1.3, "basura": 1.15, "apuntados": 0.38 },
-      "rumbo": { "combustible": 70, "deriva": 0.55, "segundos": 2.5, "giro": 1.0 },
-      "fuga": { "caidaPresion": 3.2, "ventiladores": 2, "sellar": 2 },
-      "interruptores": { "buses": 9, "fallas": 2 },
-      "paneles": { "paneles": 4, "descarga": 6.5, "polvo": 1 },
-      "deslizadores": { "barras": 3, "tolerancia": 4 },
-      "filtro": { "distractores": 5, "subidaCO2": 3.6 },
-      "equilibrio": { "segundos": 16, "cambios": 4, "retardo": 1.3 },
-      "huerto": { "plantas": 3, "segundos": 10 },
-      "secuencia": { "largoMin": 6, "largoMax": 7 },
-      "unidades": { "rondas": 3 },
-      "retraso": { "rondas": 1 },
-      "tormenta": { "picosFalsos": 4, "segundos": 3 }
+      "aterrizaje": {
+        "alarmas": 3,
+        "distanciaZona": [
+          11,
+          15
+        ]
+      },
+      "esquivar": {
+        "segundos": 20,
+        "escudo": 3,
+        "velocidad": 1.3,
+        "basura": 1.15,
+        "apuntados": 0.38
+      },
+      "rumbo": {
+        "combustible": 70,
+        "deriva": 0.55,
+        "segundos": 2.5,
+        "giro": 1
+      },
+      "fuga": {
+        "caidaPresion": 3.2,
+        "ventiladores": 2,
+        "sellar": 2
+      },
+      "interruptores": {
+        "buses": 9,
+        "fallas": 2
+      },
+      "paneles": {
+        "paneles": 4,
+        "descarga": 6.5,
+        "polvo": 1
+      },
+      "deslizadores": {
+        "barras": 3,
+        "tolerancia": 4
+      },
+      "filtro": {
+        "distractores": 5,
+        "subidaCO2": 3.6
+      },
+      "equilibrio": {
+        "segundos": 16,
+        "cambios": 4,
+        "retardo": 1.3
+      },
+      "huerto": {
+        "plantas": 3,
+        "segundos": 10
+      },
+      "secuencia": {
+        "largoMin": 6,
+        "largoMax": 7
+      },
+      "unidades": {
+        "rondas": 3
+      },
+      "retraso": {
+        "rondas": 1
+      },
+      "tormenta": {
+        "picosFalsos": 4,
+        "segundos": 3
+      },
+      "acoplamiento": {
+        "velocidadMax": 12,
+        "deriva": 6
+      },
+      "termica": {
+        "segundos": 15,
+        "calor": 1.15
+      },
+      "ejercicio": {
+        "pulsos": 14,
+        "aciertos": 10,
+        "periodo": 1.15
+      },
+      "ventana": {
+        "segundos": 14
+      }
     }
   }
 }

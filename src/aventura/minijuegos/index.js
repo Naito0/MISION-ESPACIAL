@@ -15,6 +15,7 @@ import { esquivar, rumbo } from './comandante.js';
 import { fuga, interruptores, paneles, deslizadores } from './ingeniero.js';
 import { filtro, equilibrio, huerto, secuencia } from './cientifico.js';
 import { unidades, retraso, tormenta } from './comunicaciones.js';
+import { acoplamiento, termica, ejercicio, ventana } from './nuevos.js';
 import configDificultad from '../../data/dificultad.json';
 
 export const MINIJUEGOS = {
@@ -69,7 +70,24 @@ export const MINIJUEGOS = {
   tormenta: { fn: tormenta, rol: 'comunicaciones', nombre: 'Contacto perdido',
     objetivo: 'Que la antena del satélite vuelva a hablar con la Tierra.',
     controles: 'Paso 1: ← → giran la antena hasta que el rayo (verde) apunte a la Tierra. Paso 2: ↑ ↓ llevan la aguja a la zona verde. 3 intentos.',
-    gana: 'La barra 📶 Señal se llena.' }
+    gana: 'La barra 📶 Señal se llena.' },
+  // ---- Nuevos (v10): uno por rol, cortos ----
+  acoplamiento: { fn: acoplamiento, rol: 'comandante', nombre: 'Acoplarse a la estación',
+    objetivo: 'Llegar al puerto de la estación ALINEADO y DESPACIO.',
+    controles: '↑ ↓ alinean la nave con la cruz del puerto. ← frena y → acelera. 3 intentos.',
+    gana: 'La nave toca el puerto con la cruz verde y la velocidad en verde.' },
+  termica: { fn: termica, rol: 'ingeniero', nombre: 'Control térmico',
+    objetivo: 'Mantener la temperatura en la zona verde del termómetro.',
+    controles: 'Espacio (o el botón) abre o cierra los radiadores: abiertos enfrían, cerrados guardan el calor.',
+    gana: 'La temperatura queda en verde el tiempo pedido.' },
+  ejercicio: { fn: ejercicio, rol: 'cientifico', nombre: 'Ejercicio de la tripulación',
+    objetivo: 'Que la tripulación haga su ejercicio siguiendo el ritmo.',
+    controles: 'Pulsa Espacio (o haz clic) cuando el círculo rosa está DENTRO del aro.',
+    gana: 'La barra 💪 Músculos y huesos se llena.' },
+  ventana: { fn: ventana, rol: 'comunicaciones', nombre: 'Ventana de contacto',
+    objetivo: 'Enviar los datos más importantes (★★★) mientras se ve la estación terrena.',
+    controles: 'Haz clic en un paquete para ponerlo en la fila de envío. No alcanza el tiempo para todos.',
+    gana: 'Los 3 paquetes ★★★ llegan antes de que termine el contacto.' }
 };
 
 // Minijuegos ya jugados en ESTA misión (para el tiempo extra del primer intento)

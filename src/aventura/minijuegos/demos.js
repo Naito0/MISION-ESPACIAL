@@ -52,6 +52,30 @@ export const BOTS = {
     if (p.boton) { const r = p.boton.getBoundingClientRect(); io.cursorPantalla(r.left + r.width / 2, r.top + r.height / 2); }
     if (!p.enviada && p.visto >= p.lineaEnvio) io.pulsar('Space');
   },
+  acoplamiento(p, io) {
+    if (p.y === undefined) return;
+    io.mantener('ArrowUp', p.y > p.yPuerto + 3); io.mantener('ArrowDown', p.y < p.yPuerto - 3);
+    io.mantener('ArrowLeft', p.v > p.vMax - 4);
+  },
+  termica(p, io, t) {
+    if (p.temp === undefined || t - (p.ultimo || 0) < 0.6) return;
+    if (p.boton) { const r = p.boton.getBoundingClientRect(); io.cursorPantalla(r.left + r.width / 2, r.top + r.height / 2); }
+    if ((p.temp > 23 && !p.abiertos) || (p.temp < 20 && p.abiertos)) { p.ultimo = t; io.pulsar('Space'); }
+  },
+  ejercicio(p, io, t) {
+    if (p.distancia === undefined) return;
+    if (p.distancia < 9 && t - (p.ultimo || 0) > 0.4) { p.ultimo = t; io.pulsar('Space'); }
+  },
+  ventana(p, io, t) {
+    if (!p.lista || t < 0.8 || p.hecho) return;
+    // Hace clic, de a uno, en los paquetes ★★★
+    const b = [...p.lista.querySelectorAll('[data-id]:not([disabled])')].find((x) => x.textContent.trim().startsWith('★★★'));
+    if (!b) { p.hecho = true; return; }
+    if (t - (p.ultimo || 0) < 0.7) return;
+    p.ultimo = t;
+    const r = b.getBoundingClientRect(); io.cursorPantalla(r.left + 30, r.top + r.height / 2); io.marcar('Clic', true); setTimeout(() => io.marcar('Clic', false), 250);
+    b.click();
+  },
   tormenta(p, io) {
     if (p.antena === undefined) return;
     const da = p.antenaBuena - p.antena;
@@ -65,7 +89,8 @@ export const BOTS = {
 const NOMBRE_TECLA = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Space: 'Espacio', Clic: '🖱 Clic' };
 const TECLAS_DE = {
   esquivar: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'], rumbo: ['ArrowLeft', 'ArrowRight'],
-  fuga: ['Clic'], equilibrio: ['ArrowUp', 'ArrowDown'], retraso: ['Space'], tormenta: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+  fuga: ['Clic'], equilibrio: ['ArrowUp', 'ArrowDown'], retraso: ['Space'],
+  acoplamiento: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'], termica: ['Space'], ejercicio: ['Space'], ventana: ['Clic'], tormenta: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
 };
 
 /**
@@ -75,13 +100,17 @@ const TECLAS_DE = {
  * Devuelve detener().
  */
 // Demos que necesitan más tiempo para verse completas (el rover y el satélite)
-const DURACION = { retraso: 15, tormenta: 11 };
+const DURACION = { retraso: 15, tormenta: 11, acoplamiento: 17, termica: 16, ejercicio: 15, ventana: 12 };
 
 export function reproducirDemo(id, area, iniciar, opciones, alTerminar, segundos = 7) {
   const bot = BOTS[id];
   segundos = DURACION[id] ?? segundos;
   // El rover se muestra con el retraso de la Luna (corto) para que se vea entero
   if (id === 'retraso') opciones = { ...opciones, destinoId: 'luna', rondas: 1 };
+  if (id === 'acoplamiento') opciones = { ...opciones, inicioX: 240 }; // la nave empieza más cerca para que la demo se vea entera
+  if (id === 'termica') opciones = { ...opciones, segundos: 8 };
+  if (id === 'ejercicio') opciones = { ...opciones, aciertos: 6 };
+  if (id === 'ventana') opciones = { ...opciones, velocidad: 2.2 };
   area.innerHTML = '';
   area.classList.add('en-demo');
   const banda = document.createElement('div');

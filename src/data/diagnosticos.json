@@ -252,6 +252,78 @@
           "porque": "Faltarían datos y el resto seguiría desordenado: primero hay que ordenarlos y revisarlos."
         }
       ]
+    },
+    "acoplamiento": {
+      "pregunta": "Te acercas al puerto de la estación. ¿Cómo debes llegar?",
+      "opciones": [
+        {
+          "texto": "Despacio y alineado con el puerto",
+          "correcta": true,
+          "porque": "Así la nave toca suave y el enganche puede cerrarse."
+        },
+        {
+          "texto": "Rápido, para no perder tiempo",
+          "porque": "Un golpe fuerte puede dañar las dos naves o hacer rebotar la tuya."
+        },
+        {
+          "texto": "Alineado, sin importar la velocidad",
+          "porque": "Aunque esté alineada, si llega rápido choca y rebota."
+        }
+      ]
+    },
+    "termica": {
+      "pregunta": "La temperatura de la nave sube. ¿Qué haces con los radiadores?",
+      "opciones": [
+        {
+          "texto": "Abrirlos para expulsar el calor al espacio",
+          "correcta": true,
+          "porque": "Los radiadores sacan el calor de la nave hacia el espacio."
+        },
+        {
+          "texto": "Cerrarlos para que no entre calor",
+          "porque": "Cerrados guardan el calor adentro: la temperatura seguiría subiendo."
+        },
+        {
+          "texto": "Apagar los ventiladores de la cabina",
+          "porque": "Eso solo mueve menos aire: el calor sigue dentro de la nave."
+        }
+      ]
+    },
+    "ejercicio": {
+      "pregunta": "¿Por qué los astronautas hacen ejercicio todos los días en el espacio?",
+      "opciones": [
+        {
+          "texto": "Para no perder músculo ni hueso sin gravedad",
+          "correcta": true,
+          "porque": "Sin gravedad el cuerpo trabaja menos y los músculos y huesos se debilitan."
+        },
+        {
+          "texto": "Para no aburrirse durante el viaje",
+          "porque": "Puede ayudar, pero la razón principal es cuidar músculos y huesos."
+        },
+        {
+          "texto": "Para gastar el oxígeno que sobra",
+          "porque": "El ejercicio usa más oxígeno; no se hace para gastar lo que sobra."
+        }
+      ]
+    },
+    "ventana": {
+      "pregunta": "Solo hay unos minutos de contacto con la Tierra. ¿Qué envías primero?",
+      "opciones": [
+        {
+          "texto": "Los datos más importantes",
+          "correcta": true,
+          "porque": "Si no alcanza el tiempo, lo importante ya llegó."
+        },
+        {
+          "texto": "Los archivos más chicos",
+          "porque": "Llegan rápido, pero pueden no ser los importantes."
+        },
+        {
+          "texto": "Todo en el orden en que se guardó",
+          "porque": "Lo importante podría quedar al final y no alcanzar a enviarse."
+        }
+      ]
     }
   }
 }

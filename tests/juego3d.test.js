@@ -466,6 +466,13 @@ test('TODAS las preguntas de opción múltiple: mostradas 30 veces, la correcta 
   if (process.env.CONTEO) console.log(filas.join('\n'));
 });
 
+test('minijuegos: cada rol tiene al menos 3 emergencias con minijuegos distintos (se eligen al azar sin repetir seguido)', () => {
+  const porRol = {};
+  for (const e of EMERG.emergencias) (porRol[e.rol] ||= new Set()).add(e.minijuego);
+  for (const rol of ['comandante', 'ingeniero', 'cientifico', 'comunicaciones']) assert.ok(porRol[rol].size >= 3, rol + ': ' + [...porRol[rol]]);
+  for (const id of ['acoplamiento', 'termica', 'ejercicio', 'ventana']) assert.ok(EMERG.emergencias.some((e) => e.minijuego === id), id);
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

@@ -93,6 +93,9 @@ Arriba en la sala se ve el estado: **⏳ Conectando…**, **🟢 Conectado** o *
 
 Si el online falla en la demo, usen **Jugar solo**: no depende de internet.
 
+### Minijuegos
+Cada rol tiene 3 o 4 emergencias, cada una con su minijuego; en cada viaje se eligen al azar y el mismo rol no repite la misma dos veces seguidas. Nuevos en la v10 (cortos, de 30 a 45 s): **Acoplarse a la estación** (Piloto), **Control térmico** con radiadores (Ingeniero), **Ejercicio de la tripulación**, un juego de ritmo (Científico) y **Ventana de contacto** (Comunicaciones). Sus hechos reales vienen de páginas de la NASA; las citas están marcadas "verificar" en `src/data/hechos_reales.json` hasta confirmar el texto exacto.
+
 ### Modo prueba (minijuegos)
 **🧪 Modo prueba** en el menú: abre cualquier minijuego en Luna o Marte, sin penalización. La tabla para anotar los resultados está en [PRUEBAS.md](PRUEBAS.md).
 

@@ -20,6 +20,10 @@ Prueba cada minijuego **en Luna y en Marte**, y escribe ✅ / ❌ / ⚠ (más o 
 | Unidades mezcladas | Comunicaciones | | | | |
 | Orden con retraso | Comunicaciones | | | | |
 | Contacto perdido | Comunicaciones | | | | |
+| Acoplarse a la estación (nuevo) | Piloto | | | | |
+| Control térmico (nuevo) | Ingeniero | | | | |
+| Ejercicio de la tripulación (nuevo) | Científico | | | | |
+| Ventana de contacto (nuevo) | Comunicaciones | | | | |
 
 ## Si un minijuego no funciona
 
