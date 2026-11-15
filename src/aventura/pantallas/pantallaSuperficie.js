@@ -68,11 +68,14 @@ export function iniciarPantallaSuperficie(ctx) {
   const luzEsclusa = new THREE.PointLight(0xffb020, 6, 6);
   luzEsclusa.position.set(0, 2.3, 2.6);
   escena.add(luzEsclusa);
-  const vapor = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(60 * 3), 3)),
-    new THREE.PointsMaterial({ color: 0xeef4ff, size: 0.25, transparent: true, opacity: 0.7, depthWrite: false }));
+  // Vapor de la despresurización: MUY suave (antes eran 60 partículas grises grandes justo
+  // delante de la cámara, que llenaban la pantalla de gris y mareaban). Ahora son pocas,
+  // chicas, casi transparentes y salen solo junto a la escotilla.
+  const vapor = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(20 * 3), 3)),
+    new THREE.PointsMaterial({ color: 0xdfefff, size: 0.12, transparent: true, opacity: 0.25, depthWrite: false }));
   vapor.visible = false;
   escena.add(vapor);
-  const semillasVapor = Array.from({ length: 60 }, () => [Math.random() * 6.28, Math.random()]);
+  const semillasVapor = Array.from({ length: 20 }, () => [Math.random() * 6.28, Math.random()]);
   const afuera = destino.id === 'luna' ? 'el vacío de la Luna' : 'el aire muy delgado de Marte';
   ctx.aprendizaje?.alPoderMostrar(() => !enEsclusa); // primero se sale; después, las tarjetas
   const CLAVE_ESCLUSA = 'misionEspacial.esclusaExplicada';
@@ -202,9 +205,9 @@ export function iniciarPantallaSuperficie(ctx) {
             <small>Se saca el aire de la esclusa hasta igualar ${afuera}.</small>`;
           vapor.visible = true;
           const arr = vapor.geometry.attributes.position.array;
-          semillasVapor.forEach(([a, s], i) => { const k = (f * 2 + s) % 1; arr[i * 3] = Math.cos(a) * k * 2; arr[i * 3 + 1] = 0.5 + s * 2 + k; arr[i * 3 + 2] = 2.4 + Math.sin(a) * k * 2; });
+          semillasVapor.forEach(([a, s], i) => { const k = (f + s) % 1; arr[i * 3] = Math.cos(a) * (0.3 + k * 0.5); arr[i * 3 + 1] = 0.6 + s * 1.4 + k * 0.4; arr[i * 3 + 2] = 2.0 + Math.sin(a) * 0.2; });
           vapor.geometry.attributes.position.needsUpdate = true;
-          luzEsclusa.intensity = 6 + Math.sin(t * 12) * 4;
+          luzEsclusa.intensity = 6; // luz fija (antes latía)
           if (despresurizando <= 0) {
             escotilla.position.y = 3.2; // la escotilla se abre
             vapor.visible = false;

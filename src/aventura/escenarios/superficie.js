@@ -53,7 +53,7 @@ export function crearSuperficie(destino, o = {}) {
   const esc = nuevoEscenario();
   const colorSuelo = marte ? 0xb5532c : 0x8d8d8d;
   esc.colorCielo = marte ? 0xd99a62 : 0x000000;
-  esc.niebla = marte ? { color: 0xd99a62, cerca: 25, lejos: 120 } : null;
+  esc.niebla = marte ? { color: 0xd99a62, cerca: 45, lejos: 170 } : null; // bruma suave en el horizonte
 
   // Suelo (sólido) con un poco de relieve visual
   const suelo = caja(esc, 220, 1, 220, material(colorSuelo, { rugosidad: 1, metal: 0 }), 0, -0.5, 0);
@@ -119,7 +119,8 @@ export function crearSuperficie(destino, o = {}) {
   }
 
   // Polvo que vuela (solo Marte)
-  const polvo = marte ? particulas(esc, { cantidad: o.particulas === false ? 80 : 260, centro: new THREE.Vector3(0, 3, 0), tamano: new THREE.Vector3(70, 6, 70), velocidad: 1.6, color: 0xe0a070, tam: 0.12, opacidad: 0.5 }) : null;
+  // Polvo de Marte: pocas partículas, lentas y tenues (antes 260 rápidas: mareaban)
+  const polvo = marte ? particulas(esc, { cantidad: o.particulas === false ? 40 : 110, centro: new THREE.Vector3(0, 3, 0), tamano: new THREE.Vector3(70, 6, 70), velocidad: 0.6, color: 0xe0a070, tam: 0.1, opacidad: 0.3 }) : null;
 
   // Módulo de aterrizaje (sólido) y mesa de laboratorio a su lado
   const modulo = crearModulo();

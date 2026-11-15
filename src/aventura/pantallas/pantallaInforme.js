@@ -73,13 +73,13 @@ export function iniciarPantallaInforme(ctx) {
   nave.piezas.forEach((p) => { p.t = 1; p.grupo.scale.setScalar(1); });
   nave.raiz.scale.setScalar(0.45);
   escena.add(nave.raiz);
-  // Humo si fracasó
+  // Humo (tenue) si fracasó
   let humo = null;
   if (!inf.exito) {
     const n = 60;
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
-    humo = { puntos: new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x777777, size: 0.5, transparent: true, opacity: 0.6, depthWrite: false })), semillas: Array.from({ length: n }, () => Math.random()) };
+    humo = { puntos: new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x777777, size: 0.35, transparent: true, opacity: 0.3, depthWrite: false })), semillas: Array.from({ length: n }, () => Math.random()) };
     escena.add(humo.puntos);
   }
   motor.cambiarEscena(escena);
