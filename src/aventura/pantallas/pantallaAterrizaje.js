@@ -40,7 +40,7 @@ export function iniciarPantallaAterrizaje(ctx) {
   const k = destino.juego?.frenadoAtmosferico || 0;
   const empuje = g * 2.5; // el motor puede frenar 1,5 veces la gravedad del destino
   const yo = e.jugadores.find((j) => j.id === conexion.id);
-  const soyComandante = !!(yo && yo.roles.includes('comandante'));
+  const soyComandante = !!(yo && [...yo.roles, ...(e.bots || [])].includes('comandante')); // o el Piloto es un bot
   const comandante = e.jugadores.find((j) => j.roles.includes('comandante'));
   const config = emergencias.config;
   const valoresMinijuego = dificultadJSON.minijuegosPorDestino[destino.id] || {};

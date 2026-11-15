@@ -14,6 +14,8 @@ import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
 import { iniciarPantallaNave } from './pantallas/pantallaNave.js';
 import { iniciarPantallaHangar } from './pantallas/pantallaHangar.js';
+import { iniciarPantallaMenu } from './pantallas/pantallaMenu.js';
+import { iniciarPantallaSala } from './pantallas/pantallaSala.js';
 import { iniciarPantallaSistema } from './pantallas/pantallaSistema.js';
 import { iniciarPantallaInforme } from './pantallas/pantallaInforme.js';
 import { iniciarPantallaAterrizaje } from './pantallas/pantallaAterrizaje.js';
@@ -78,7 +80,9 @@ function irA() {
   capa.innerHTML = '';
   // La pantalla que corresponde a la fase actual de la partida
   const fase = ctx.conexionActiva?.estado?.fase;
-  if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
+  if (!ctx.conexionActiva) pantalla = iniciarPantallaMenu(ctx);
+  else if (fase === 'lobby') pantalla = iniciarPantallaSala(ctx);
+  else if (fase === 'hangar') pantalla = iniciarPantallaHangar(ctx);
   else if (fase === 'informe') pantalla = iniciarPantallaInforme(ctx);
   else if (fase === 'aterrizaje') pantalla = iniciarPantallaAterrizaje(ctx);
   else if (fase === 'superficie') pantalla = iniciarPantallaSuperficie(ctx);
@@ -106,6 +110,22 @@ ctx.alResolver = (r) => {
 let ultimaPantallaTutorial = null;
 ctx.irA = irA;
 
+// ---- Menú principal ----
+// "Jugar solo": una sala local de 1 jugador; los otros 3 puestos los ocupan bots.
+ctx.alJugarSolo = async (nombre) => {
+  const partida = crearPartidaLocal();
+  await partida.crear(nombre);
+  await partida.accion('puesto', { rol: 'comandante' });
+  await partida.accion('personaje', { id: 'nova' });
+  await partida.accion('dificultad', { nivel: dificultad() });
+  ctx.conexionActiva = partida;
+  irA(); // → sala
+};
+// "Crear sala" y "Unirse": multijugador (se activa con Firebase, ver README)
+ctx.alCrearSala = async () => ({ error: 'El multijugador todavía no está configurado. Por ahora usa "Jugar solo".' });
+ctx.alUnirse = async () => ({ error: 'El multijugador todavía no está configurado. Por ahora usa "Jugar solo".' });
+ctx.alSalirDeSala = () => { ctx.conexionActiva?.salir?.(); ctx.conexionActiva = null; irA(); };
+
 const reloj = new THREE.Clock();
 motor.renderer.setAnimationLoop(() => {
   const dt = Math.min(reloj.getDelta(), 0.05);
@@ -126,15 +146,9 @@ window.aventura = { motor, THREE, irA, ctx, abrirMinijuego };
   const hayModelo = await prepararModelos((f) => progresoCarga(0.45 + f * 0.35, 'Cargando los astronautas…'));
   window.aventura.modeloGLB = hayModelo;
   progresoCarga(0.85, 'Preparando la misión…');
-  const partida = crearPartidaLocal();
-  await partida.crear('Tripulación');
-  await partida.accion('tomarLibres');  // el jugador tiene los 4 roles
-  await partida.accion('dificultad', { nivel: dificultad() });
-  await partida.accion('empezar');      // directo al sistema solar
-  ctx.conexionActiva = partida;
   // Si el jugador cambia la dificultad (menú o sistema solar), se avisa a la partida
-  window.addEventListener('cambio-dificultad', () => partida.accion('dificultad', { nivel: dificultad() }));
-  irA();
+  window.addEventListener('cambio-dificultad', () => ctx.conexionActiva?.accion('dificultad', { nivel: dificultad() }));
+  irA(); // menú principal
   progresoCarga(0.95, 'Encendiendo los motores…');
   motor.renderer.compile(motor.escena, motor.camara); // prepara los gráficos para que no se trabe al empezar
   progresoCarga(1, '¡Listo!');

@@ -167,7 +167,7 @@ export function iniciarPantallaHangar(ctx) {
 
   function dibujar(e) {
     const yo = e.jugadores.find((j) => j.id === conexion.id);
-    const misRoles = yo ? yo.roles : [];
+    const misRoles = yo ? [...yo.roles, ...(e.bots || [])] : []; // los míos y los de los bots
     const r = e.resumen;
     const destino = e.destinoId === 'luna' ? 'la Luna' : 'Marte';
     const destinoObj = DESTINOS.find((d) => d.id === e.destinoId);

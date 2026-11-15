@@ -318,6 +318,28 @@ test('logros: estrellas por vida, tiempo y preguntas; medallas por buenas decisi
   assert.deepEqual(nuevosLogros({ minijuego: { id: 'filtro' } }, L.logros, ['apolo13']), []);
 });
 
+test('sala con bots: puestos y personajes sin repetir, listos, y los bots ocupan los puestos libres', () => {
+  const PJ = leerJSON('personajes.json').personajes;
+  const s = new Sala('BOTS', { ...datosCompletos, personajes: PJ });
+  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  assert.deepEqual(s.accion('a', 'puesto', { rol: 'ingeniero' }), { ok: true });
+  assert.ok(s.accion('b', 'puesto', { rol: 'ingeniero' }).error, 'puesto repetido');
+  s.accion('b', 'puesto', { rol: 'cientifico' });
+  s.accion('a', 'personaje', { id: 'kai' });
+  assert.ok(s.accion('b', 'personaje', { id: 'kai' }).error, 'personaje repetido');
+  assert.ok(s.accion('a', 'empezarConBots').error, 'faltan listos');
+  s.accion('a', 'listoSala'); s.accion('b', 'listoSala');
+  assert.ok(s.accion('b', 'empezarConBots').error, 'solo el anfitrión inicia');
+  assert.deepEqual(s.accion('a', 'empezarConBots'), { ok: true });
+  assert.deepEqual(s.bots.sort(), ['comandante', 'comunicaciones']);
+  // Un humano puede usar los roles de los bots (por ejemplo, el aterrizaje del Piloto bot)
+  assert.ok(s.rolesDe(s.jugadores.get('b')).includes('comandante'));
+  // Cada rol tiene un personaje y no se repiten
+  const pj = Object.values(s.personajesPorRol());
+  assert.equal(new Set(pj).size, 4);
+  assert.equal(s.personajesPorRol().ingeniero, 'kai');
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

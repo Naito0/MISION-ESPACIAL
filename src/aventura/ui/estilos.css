@@ -109,6 +109,15 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 /* Aterrizaje con alarmas */
 #hud .alarma-aterrizaje { position: absolute; left: 50%; top: 120px; transform: translateX(-50%); padding: 12px 18px; font-size: var(--t); border-color: #e5484d; text-align: center; max-width: 560px; }
 #hud .demo-aterrizaje { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 16px 24px; text-align: center; border-color: #ffd166; }
+/* ---- Menú principal y sala ---- */
+#hud .menu-principal { width: min(calc(440px * var(--ancho)), 92vw); }
+#hud .sala { width: min(calc(480px * var(--ancho)), 94vw); }
+#hud .personajes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#hud .lobby .personaje { margin: 0; display: flex; align-items: center; gap: 8px; text-align: left; background: #111a33; font-size: var(--t); }
+#hud .lobby .personaje.activo { background: #1f4a3a; box-shadow: 0 0 12px rgba(91, 224, 138, 0.5); }
+#hud .pj-color { display: inline-block; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; flex: none; }
+#hud .lobby .copiar { margin-top: 4px; }
+#hud .retrato .r-quien { display: block; font-size: 15px; color: #c8d2ec; }
 /* ---- Menos espera: cuenta regresiva, viaje acelerado ---- */
 #hud .hv-proxima { color: #ffd166; font-size: var(--tc); min-height: 22px; }
 #hud .rumbo-directo { position: absolute; left: 50%; top: 64px; transform: translateX(-50%); padding: 8px 14px; display: flex; gap: 12px; align-items: center; font-size: var(--t); border-color: #5be08a; }

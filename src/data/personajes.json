@@ -1,0 +1,9 @@
+{
+  "_comentario": "Personajes para elegir en la sala. Son originales (no copian personajes de series, películas ni videojuegos). Cualquier personaje puede tener cualquier rol. 'color' = color del traje. 'modelo' = archivo GLB en public/models/ (null = el astronauta hecho con formas). 'rolPorDefecto' = rol que toma si queda como bot. Para cambiar a animales: poner aquí el nombre, el color y el modelo, y anotar los créditos en CREDITOS.md.",
+  "personajes": [
+    { "id": "nova", "nombre": "Nova", "color": "#ff8c42", "modelo": null, "rolPorDefecto": "comandante" },
+    { "id": "kai", "nombre": "Kai", "color": "#4cc9f0", "modelo": null, "rolPorDefecto": "ingeniero" },
+    { "id": "lumi", "nombre": "Lumi", "color": "#8ee26b", "modelo": null, "rolPorDefecto": "cientifico" },
+    { "id": "rocco", "nombre": "Rocco", "color": "#f15bb5", "modelo": null, "rolPorDefecto": "comunicaciones" }
+  ]
+}

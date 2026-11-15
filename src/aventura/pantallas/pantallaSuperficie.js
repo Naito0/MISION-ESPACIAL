@@ -31,7 +31,7 @@ export function iniciarPantallaSuperficie(ctx) {
   const e0 = conexion.estado;
   const destino = DESTINOS.find((d) => d.id === e0.destinoId);
   const yo = e0.jugadores.find((j) => j.id === conexion.id);
-  const misRoles = yo ? yo.roles : [];
+  const misRoles = yo ? [...yo.roles, ...(e0.bots || [])] : []; // los míos y los de los bots
   const soyCientifico = misRoles.includes('cientifico');
 
   const esc = crearSuperficie(destino, { particulas: motor.calidad.sombras });
