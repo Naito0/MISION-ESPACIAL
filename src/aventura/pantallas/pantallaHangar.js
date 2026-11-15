@@ -17,6 +17,7 @@ import { NaveModelo } from '../entities/naveModelo.js';
 import { crearAstronauta } from '../entities/fabricaAstronautas.js';
 import { crearEtiqueta } from '../entities/AstronautaRemoto.js';
 import { colorDeJugador } from './pantallaNave.js';
+import { colorDe } from '../tripulacion.js';
 import { crearCatalogo, resumenDiseno } from '../../compartido/hangar.js';
 import { recomendaciones, dependencias } from '../../compartido/recomendaciones.js';
 import componentes from '../../data/componentes.json';
@@ -88,6 +89,17 @@ export function iniciarPantallaHangar(ctx) {
     a.raiz.add(et);
     escena.add(a.raiz);
     tripulacion.push({ id: j.id, a });
+  });
+  // Los personajes que nadie eligió (los de los bots) también están, trabajando en la nave
+  (conexion.estado.bots || []).forEach((rol, k) => {
+    const id = (conexion.estado.personajesPorRol || {})[rol];
+    if (!id) return;
+    const a = crearAstronauta(colorDe(rol), id);
+    const ang = -Math.PI * 0.35 - k * 0.55;
+    a.raiz.position.set(Math.sin(ang) * 4.6, 0, Math.cos(ang) * 4.6);
+    a.raiz.rotation.y = ang + Math.PI; // mira a la nave
+    escena.add(a.raiz);
+    tripulacion.push({ id: `bot-${rol}`, a, bot: true });
   });
 
   // ---- Interfaz ----
@@ -316,6 +328,7 @@ export function iniciarPantallaHangar(ctx) {
       holo.material.opacity = 0.45 + Math.sin(t * 3) * 0.15;
       for (const tr of tripulacion) {
         if (tr.listo) tr.a.mantener('interactuar');
+    if (tr.bot) tr.a.mantener('reparar'); // los de los bots trabajan en la nave
         tr.a.actualizar(dt, { velocidad: 0, apoyado: true, velocidadVertical: 0, giro: 0 });
       }
     },

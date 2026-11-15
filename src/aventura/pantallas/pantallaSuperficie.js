@@ -52,7 +52,7 @@ export function iniciarPantallaSuperficie(ctx) {
   // En la superficie el jugador controla al CIENTÍFICO (analiza las muestras);
   // los otros 3 trabajan de fondo (astronautasFondo.js)
   const jugador = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, soyCientifico ? colorDe('cientifico') : colorDeJugador(yo),
-    soyCientifico ? (e0.personajesPorRol || {}).cientifico : (yo.personaje || (e0.personajesPorRol || {})[yo.roles[0]]));
+    yo.personaje || (e0.personajesPorRol || {})[yo.roles[0]]); // siempre TU personaje
   ambiente(true);
   ctx.aprendizaje?.evento('superficie:llegada', destino.id); // en Marte: tormentas de polvo
 
@@ -78,7 +78,8 @@ export function iniciarPantallaSuperficie(ctx) {
   const CLAVE_ESCLUSA = 'misionEspacial.esclusaExplicada';
 
   // ---- Los otros 3 astronautas trabajan de fondo (sin física: no bloquean) ----
-  const fondo = crearAstronautasFondo(escena);
+  // De fondo, solo los personajes de los BOTS (cada personaje aparece una sola vez)
+  const fondo = crearAstronautasFondo(escena, (e0.bots || []).map((rol) => ({ rol, id: (e0.personajesPorRol || {})[rol] })).filter((p) => p.id));
 
   // ---- Muestras (cristales que brillan) ----
   const mallas = e0.superficie.muestras.map((m) => {

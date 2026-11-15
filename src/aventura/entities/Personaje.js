@@ -88,6 +88,7 @@ export class Personaje {
     this.id = this.datos.id;
     const C = this.datos.colores;
     this.raiz = new THREE.Group();
+    this.raiz.userData.personaje = this.id; // para comprobar que cada personaje aparece una sola vez
     this.cuerpo = new THREE.Group(); // se estira y se aplasta desde los pies
     this.raiz.add(this.cuerpo);
     const traje = colorRol;
