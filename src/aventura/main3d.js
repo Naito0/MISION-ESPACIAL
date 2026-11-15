@@ -8,7 +8,7 @@
 //  pantallaNaveRed.js, red/conexion.js y server/.)
 // =============================================================
 import * as THREE from 'three';
-import { Motor3D } from './engine/Motor3D.js';
+import { Motor3D, crearReloj } from './engine/Motor3D.js';
 import { crearControlTeclado, finDeCuadro } from './engine/entrada.js';
 import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
@@ -174,7 +174,7 @@ async function pedirSalida() {
 }
 hud.querySelector('.salir-menu').onclick = () => pedirSalida();
 
-const reloj = new THREE.Clock();
+const reloj = crearReloj();
 // ---- Usar bien la tarjeta gráfica sin forzar la PC ----
 // - Máximo 60 FPS (las pantallas de 144-166 Hz harían trabajar de más a la GPU)
 // - Con la pestaña oculta no se dibuja nada

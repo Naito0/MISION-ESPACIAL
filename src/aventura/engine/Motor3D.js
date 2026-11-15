@@ -9,6 +9,15 @@ import * as THREE from 'three';
 import { configCalidad } from './calidad.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
+/** Reloj simple (THREE.Clock está obsoleto y avisa en la consola). */
+export function crearReloj() {
+  let antes = performance.now();
+  return {
+    elapsedTime: 0,
+    getDelta() { const ahora = performance.now(); const dt = (ahora - antes) / 1000; antes = ahora; this.elapsedTime += dt; return dt; }
+  };
+}
+
 export class Motor3D {
   /**
    * @param contenedor elemento HTML donde va el canvas
@@ -30,7 +39,7 @@ export class Motor3D {
 
     this.escena = new THREE.Scene();
     this.camara = new THREE.PerspectiveCamera(60, 1, 0.1, 400);
-    this.reloj = new THREE.Clock();
+    this.reloj = crearReloj();
     this.actualizadores = new Set();
     this.pausado = false;
 

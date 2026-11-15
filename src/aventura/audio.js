@@ -10,7 +10,10 @@ let ctx = null;
 let general = null;
 let zumbido = null;
 
-function asegurar() {
+let huboGesto = false; // el navegador no deja crear el audio antes del primer clic o tecla (avisa en la consola)
+function asegurar(ev) {
+  if (ev && ev.isTrusted !== false) huboGesto = true;
+  if (!huboGesto) return null;
   if (!ctx) {
     const C = window.AudioContext || window.webkitAudioContext;
     if (!C) return null;
@@ -24,13 +27,16 @@ function asegurar() {
 }
 
 alCambiarPreferencias((p) => { if (general) general.gain.value = p.silencio ? 0 : 0.5; });
-window.addEventListener('pointerdown', asegurar);
-window.addEventListener('keydown', asegurar);
+function alGesto(ev) { asegurar(ev); if (ambientePendiente && ctx) ambiente(true); }
+window.addEventListener('pointerdown', alGesto);
+window.addEventListener('keydown', alGesto);
 
 /** Zumbido de fondo de la nave (se puede encender o apagar). */
+let ambientePendiente = false; // pedido antes del primer clic: suena apenas se pueda
 export function ambiente(encendido = true) {
   const c = asegurar();
-  if (!c) return;
+  if (!c) { ambientePendiente = encendido; return; }
+  ambientePendiente = false;
   if (!encendido) { if (zumbido) { zumbido.forEach((n) => n.stop?.()); zumbido = null; } return; }
   if (zumbido) return;
   const bajo = c.createOscillator();
