@@ -2,7 +2,7 @@
 // pantallaNave.js — EL VIAJE dentro de la nave (un jugador, 4 astronautas).
 // - Hay 4 astronautas, cada uno en su sala: Piloto (cabina), Ingeniero
 //   (ingeniería), Científico (laboratorio) y Comunicaciones.
-// - Multijugador: el jugador toma el astronauta de un bot con 1, 2, 3, 4 o Tab;
+// - Cada jugador maneja SOLO a su personaje (sin cambiar con teclas);
 //   la cámara "vuela" suavemente hasta el elegido.
 // - Los que no controlas trabajan en sus consolas.
 // - Cada emergencia es de UN rol: un aviso grande dice qué pasó, a quién le
@@ -92,7 +92,9 @@ export function iniciarPantallaNave(ctx) {
     esc.puntoInicio = puesto;
     const pj = pjDe(m.rol);
     const j = new JugadorLocal(escena, mundo, esc, motor.camara, ctx.control, colorDe(m.rol), pj?.id); // traje del color del ROL
-    j.limitarA(modoSolo && esMio(m.rol) ? null : m.limites); // solo: tu personaje recorre toda la nave
+    // Tu personaje recorre TODA la nave (también en multijugador, para visitar a los
+    // compañeros); los que no maneja nadie se quedan trabajando en su sala.
+    j.limitarA(esMio(m.rol) ? null : m.limites);
     j.astronauta.raiz.rotation.y = Math.atan2(-haciaCentro.x, -haciaCentro.z); // mira a la consola
     j.anguloAnterior = j.astronauta.raiz.rotation.y;
     j.camara.yaw = j.astronauta.raiz.rotation.y + Math.PI; // la cámara empieza detrás
@@ -151,9 +153,6 @@ export function iniciarPantallaNave(ctx) {
     <div class="vineta"></div>`;
   ctx.hud.appendChild(hud);
   const $ = (s) => hud.querySelector(s);
-  // Barra de controles: "1-4 tomar un bot" solo en multijugador (en un jugador no se cambia de personaje)
-  const ayudaCambio = document.querySelector('.ayuda-cambio');
-  if (ayudaCambio) ayudaCambio.hidden = modoSolo;
 
   function avisar(texto, clase = '', ms = 4000) {
     const d = document.createElement('div');
@@ -206,12 +205,10 @@ export function iniciarPantallaNave(ctx) {
     efecto('clic');
     ctx.guia?.evento('cambio', actual().rol);
   }
-  const teclaCambio = (ev) => {
-    if (window.consolaAbierta) return;
-    const n = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4'].indexOf(ev.code);
-    if (n >= 0) cambiarA(n % 4);
-    if (ev.code === 'Tab') { ev.preventDefault(); cambiarA((activo + 1) % 4); }
-  };
+  // Ya no se cambia de astronauta con teclas (ni en un jugador ni en multijugador):
+  // cada uno maneja SOLO a su personaje. Las emergencias de los bots las resuelve
+  // cualquier jugador que vaya a esa consola.
+  const teclaCambio = (ev) => { if (ev.code === 'Tab' && !window.consolaAbierta) ev.preventDefault(); };
   window.addEventListener('keydown', teclaCambio);
 
   // ---- Estado de la partida ----
@@ -393,7 +390,7 @@ export function iniciarPantallaNave(ctx) {
       (esc.objetos || []).forEach((o) => o.actualizar(dt));
       actualizarSenal(dt);
       const activas = !final && viaje ? viaje.emergencias : [];
-      efectos.actualizar(dt, t, activas, modoSolo ? TRIPULACION.map((m) => m.rol) : [yo.rol]);
+      efectos.actualizar(dt, t, activas, modoSolo ? TRIPULACION.map((m) => m.rol) : [yo.rol, ...bots]);
       if (activas.length) ctx.guia?.evento('emergencia');
 
       // El planeta de la ventana se acerca con cada emergencia superada;
@@ -407,7 +404,9 @@ export function iniciarPantallaNave(ctx) {
       }
 
       // ¿Este astronauta está cerca de una consola con una emergencia SUYA? → E
-      const mias = activas.filter((e) => modoSolo || e.rol === yo.rol); // solo: todas son tuyas
+      // Mías: en un jugador, todas; en multijugador, las de mi rol y las de los bots
+      const esDeMi = (e) => modoSolo || e.rol === yo.rol || bots.includes(e.rol);
+      const mias = activas.filter(esDeMi);
       let cercana = null;
       for (const e of mias) {
         const p = efectos.posicionConsola(e.consola);
@@ -435,9 +434,9 @@ export function iniciarPantallaNave(ctx) {
         if (cercana) abrir(cercana);
         else if (abrible) abrible.fn();
         else {
-          // Astronauta equivocado: se le dice con amabilidad a quién le toca
-          const otra = !modoSolo && activas.find((e) => e.rol !== yo.rol);
-          if (otra) { const m = miembro(otra.rol); avisar(`Esa tarea le toca a <b>${m.corto}</b>: pulsa <span class="tecla">${m.tecla}</span>`, 'amable'); efecto('clic'); }
+          // Tarea de OTRO jugador: se le dice con amabilidad a quién le toca
+          const ajena = activas.find((e) => !esDeMi(e) && (() => { const p = efectos.posicionConsola(e.consola); return p && Math.hypot(p.x - yo.jugador.pies.x, p.z - yo.jugador.pies.z) < DISTANCIA_CONSOLA; })());
+          if (ajena) { const m = miembro(ajena.rol); avisar(`Esta tarea le toca a <b>${deOtroJugador(ajena.rol) || m.corto}</b> (${m.corto})`, 'amable'); efecto('clic'); }
         }
       }
 
@@ -467,7 +466,7 @@ export function iniciarPantallaNave(ctx) {
       derecha.set(-adelante.z, 0, adelante.x);
       const html = activas.map((e) => {
         const m = miembro(e.rol);
-        const esMia = modoSolo || e.rol === yo.rol;
+        const esMia = esDeMi(e);
         let flecha = '';
         if (esMia) {
           const p = efectos.posicionConsola(e.consola);
@@ -476,7 +475,7 @@ export function iniciarPantallaNave(ctx) {
           flecha = `<span class="flecha" style="transform:rotate(${ang.toFixed(2)}rad)">⬆</span>`;
         }
         return `<div class="panel alerta-grande ${e.restante <= 10 ? 'urgente' : ''}" style="border-color:${hexDe(e.rol)}">
-          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a ${modoSolo ? `<b>${m.sala}</b>, ` : ''}a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : deOtroJugador(e.rol) ? `Le toca a <b>${deOtroJugador(e.rol)}</b> (${m.corto})` : `Pulsa <span class="tecla">${m.tecla}</span> → ${m.corto}${bots.includes(e.rol) ? ' (toma el control del bot 🤖)' : ''}`}</div>
+          <div class="ag-titulo">⚠ ¡${e.nombre}! ${esMia ? `${flecha} <span class="ag-tecla">Ve a ${modoSolo || e.rol !== yo.rol ? `<b>${m.sala}</b>, ` : ''}${bots.includes(e.rol) && !modoSolo ? '(puesto de un bot: puede ir cualquiera) ' : ''}a la consola con <span class="tecla">!</span> y pulsa <span class="tecla">E</span></span>` : `Le toca a <b>${deOtroJugador(e.rol) || m.corto}</b> (${m.corto})`}</div>
           <div class="ag-porque">${porQueDe(e.id)} · ⏱ ${e.restante} s</div></div>`;
       }).join('');
       if (html !== alertasPrevias) { $('.alertas').innerHTML = html; alertasPrevias = html; }
@@ -486,7 +485,6 @@ export function iniciarPantallaNave(ctx) {
       window.removeEventListener('keydown', teclaCambio);
       ctx.aprendizaje?.alPoderMostrar(null);
       hud.remove(); ambiente(false); quitarEstado(); quitarPos();
-      if (ayudaCambio) ayudaCambio.hidden = true;
     }
   };
 }

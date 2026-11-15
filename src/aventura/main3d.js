@@ -26,7 +26,7 @@ import { mostrarDiagnostico, mostrarPrediccion } from './ui/tarjetas.js';
 import { crearGuia } from './guia.js';
 import { crearAprendizaje } from './aprendizaje.js';
 import { crearLogros } from './logros.js';
-import { pausar, reanudar, estaPausado } from './pausa.js';
+import { pausar, reanudar, estaPausado, motivosPausa } from './pausa.js';
 import { confirmarEnJuego } from './ui/confirmar.js';
 import { calidad3D, dificultad } from '../systems/preferencias.js';
 import { MARTE } from './datos3d.js';
@@ -49,7 +49,7 @@ hud.innerHTML = `
   <div class="panel ayuda">
     Clic + mouse: cámara · <span class="tecla">WASD</span> moverse ·
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
-    <span class="tecla">E</span> usar · <span class="ayuda-cambio" hidden><span class="tecla">1-4</span> tomar un bot · </span><span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">Esc</span> menú
+    <span class="tecla">E</span> usar · <span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">Esc</span> menú
   </div>
   <div class="fps"></div>
   <button class="panel salir-menu" hidden>🚪 Salir al menú</button>`;
@@ -97,7 +97,9 @@ function irA() {
   window.aventura.pantalla = pantalla;
   // La guía (una línea con flecha) muestra los pasos de esta pantalla
   const nombreTutorial = { sistema: 'sistema', hangar: 'hangar', viaje: 'viaje', llegada: 'viaje', fracaso: 'viaje', aterrizaje: 'aterrizaje', superficie: 'superficie', informe: 'informe' }[fase];
-  if (nombreTutorial && nombreTutorial !== ultimaPantallaTutorial) ctx.guia.pantalla(nombreTutorial);
+  // La guía del aterrizaje ("Mantén Espacio…") solo para quien aterriza; los demás miran la transmisión
+  const soloMira = fase === 'aterrizaje' && ctx.conexionActiva?.estado?.aterrizador !== ctx.conexionActiva?.id;
+  if (nombreTutorial && !soloMira && nombreTutorial !== ultimaPantallaTutorial) ctx.guia.pantalla(nombreTutorial);
   ultimaPantallaTutorial = nombreTutorial;
   // El mouse solo se captura donde se camina (nave y superficie)
   window.capturarMouse = !!pantalla.jugador;
@@ -181,7 +183,7 @@ motor.renderer.setAnimationLoop(() => {
   if (acumulado >= 1) { fps.textContent = `${cuadros} FPS · calidad ${motor.calidad.nombre}`; cuadros = 0; acumulado = 0; }
 });
 
-window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, mostrarPrediccion }; // (para probar)
+window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, mostrarPrediccion, motivosPausa }; // (para probar)
 
 // ---- Arranque: modelos → partida → primera pantalla ----
 (async () => {

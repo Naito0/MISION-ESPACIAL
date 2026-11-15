@@ -148,7 +148,7 @@ export function paneles(area, terminar, op = {}) {
   const tecla = (e) => {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') teclaGiro = e.type === 'keydown' ? -1 : 0;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') teclaGiro = e.type === 'keydown' ? 1 : 0;
-    if (e.type === 'keydown' && /Digit[1-4]/.test(e.code)) elegido = Math.min(n - 1, Number(e.code.slice(-1)) - 1);
+    if (e.type === 'keydown' && /Digit[1234]/.test(e.code)) elegido = Math.min(n - 1, Number(e.code.slice(-1)) - 1);
   };
   window.addEventListener('keydown', tecla); window.addEventListener('keyup', tecla);
   let anterior = performance.now();
