@@ -274,6 +274,9 @@ export class Personaje {
   /** Llegó una señal: las orejas de Zuri giran como antenas. */
   senal() { if (this.id === 'zuri') { this.reaccion = { tipo: 'senal', tiempo: 0, duracion: 2.5 }; this.decir('📡 ¡Señal!'); } }
 
+  /** Recibió un empujón: mareado unos segundos, con estrellitas. */
+  mareado(segundos = 2) { if (this.desmayado) return; this.reaccion = { tipo: 'mareado', tiempo: 0, duracion: segundos }; this.decir('💫 ¡Uy!', segundos); }
+
   /** Pasó por una puerta: a Faro se le traban los cuernos. */
   puerta() { if (this.id === 'faro' && !this.reaccion) { this.reaccion = { tipo: 'cuernos', tiempo: 0, duracion: 0.9 }; this.decir('¡Ay, mis cuernos!'); } }
 
@@ -361,6 +364,9 @@ export class Personaje {
       } else if (n === 'reparar') {
         P.brazosX = [-0.9, -1.7 + Math.sin(t * 12) * 0.5];
         if (this.id === 'tuerca') this.llave.visible = true;
+      } else if (n === 'golpear') {
+        // Empujón: los dos brazos van hacia adelante de golpe
+        P.brazosX = [-1.5, -1.5]; P.cuerpoX = 0.25; boca = 'feliz';
       } else if (n === 'recoger') {
         P.cuerpoX = 0.5; P.brazosX = [-0.7, -0.7];
       } else if (n === 'emote:saludar') {
@@ -401,6 +407,10 @@ export class Personaje {
       } else if (r.tipo === 'senal') {
         this.orejas.forEach((o, i) => { o.rotation.y = Math.sin(t * 10 + i) * 0.5; });
         ojos = 1.15; P.cabX = -0.15;
+      } else if (r.tipo === 'mareado') {
+        // Mareado: la cabeza da vueltas despacio, ojos chiquitos y brazos sueltos
+        P.cabZ = Math.sin(t * 5) * 0.3; P.cabY = Math.cos(t * 5) * 0.3; P.cuerpoZ = Math.sin(t * 5) * 0.08;
+        P.brazosZ = [-0.6, 0.6]; ojos = 0.35; boca = 'asustado';
       } else if (r.tipo === 'cuernos') {
         P.cabZ = Math.sin(t * 25) * 0.25; boca = 'asustado'; ojos = 1.3;
       }

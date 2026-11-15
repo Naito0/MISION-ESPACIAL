@@ -49,7 +49,7 @@ hud.innerHTML = `
   <div class="panel ayuda">
     Clic + mouse: cámara · <span class="tecla">WASD</span> moverse ·
     <span class="tecla">Shift</span> correr · <span class="tecla">Espacio</span> saltar ·
-    <span class="tecla">E</span> usar · <span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">Esc</span> menú
+    <span class="tecla">E</span> usar · <span class="tecla">5-8</span> saludar, bailar, reír, gag · <span class="tecla">F</span> empujar · <span class="tecla">Esc</span> menú
   </div>
   <div class="fps"></div>
   <button class="panel salir-menu" hidden>🚪 Salir al menú</button>`;

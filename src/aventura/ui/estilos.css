@@ -393,3 +393,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; fon
 
 /* Aterrizaje: transmisión en vivo para los que no pilotan */
 #hud .en-vivo { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); font-size: var(--t); font-weight: bold; border-color: #e5484d; color: #ffd0d2; white-space: nowrap; }
+
+/* Hangar: categorías de los compañeros (se ven, pero las elige su rol) */
+#hud .tus-categorias { font-size: var(--t); color: #ffe9b0; background: rgba(255, 209, 102, 0.12); border-radius: 8px; padding: 6px 10px; }
+#hud .categoria.ajena { opacity: 0.6; }
+#hud .categoria.ajena .opcion:not(.elegida) { filter: grayscale(0.6); }
+#hud .categoria .candado { font-size: var(--tc); color: #c8d2ec; font-weight: normal; }

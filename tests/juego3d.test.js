@@ -516,6 +516,16 @@ test('respuestas INTERCALADAS: la primera no es la A y la correcta cambia de lug
   for (let i = 1; i < secuencia.length; i++) assert.notEqual(secuencia[i], secuencia[i - 1], `dos seguidas en ${secuencia[i]}: ${secuencia.join(' ')}`);
 });
 
+test('empujón: la sala avisa a todos a quién empujaron y quién fue', () => {
+  const s = new Sala('EMPU', datosCompletos);
+  s.unir('a', 'Ana'); s.unir('b', 'Beto');
+  assert.deepEqual(s.accion('a', 'golpe', { rol: 'ingeniero' }), { ok: true });
+  assert.deepEqual(s.estadoPublico().golpe, { n: 1, de: 'a', deNombre: 'Ana', rol: 'ingeniero' });
+  s.accion('b', 'golpe', { rol: 'comandante' });
+  assert.equal(s.estadoPublico().golpe.n, 2, 'cada empujón tiene un número nuevo');
+  assert.ok(s.accion('a', 'golpe', { rol: 'nadie' }).error);
+});
+
 test('hangar: no deja pasarse del presupuesto', () => {  
   const s = salaEnHangar();
   s.accion('b', 'comprar', { opcion: 'sv_reciclaje' }); // 120

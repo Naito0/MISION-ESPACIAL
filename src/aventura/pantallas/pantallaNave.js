@@ -208,7 +208,47 @@ export function iniciarPantallaNave(ctx) {
   // Ya no se cambia de astronauta con teclas (ni en un jugador ni en multijugador):
   // cada uno maneja SOLO a su personaje. Las emergencias de los bots las resuelve
   // cualquier jugador que vaya a esa consola.
-  const teclaCambio = (ev) => { if (ev.code === 'Tab' && !window.consolaAbierta) ev.preventDefault(); };
+  const teclaCambio = (ev) => {
+    if (window.consolaAbierta) return;
+    if (ev.code === 'Tab') ev.preventDefault();
+    if (ev.code === 'KeyF' && !ev.repeat) empujar();
+  };
+  // ---- EMPUJÓN (tecla F): al compañero que está delante, a menos de 1,8 m ----
+  // Al que lo recibe: queda mareado 2 s y, si estaba en una consola, se le cierra
+  // (para "trollear" las misiones). Una vez cada 4 s por jugador.
+  let ultimoEmpujon = -99;
+  function empujar() {
+    const ahora = performance.now() / 1000;
+    if (final || ahora - ultimoEmpujon < 4) return;
+    const yoA = actual();
+    const pies = yoA.jugador.pies; const ry = yoA.jugador.astronauta.raiz.rotation.y;
+    const frente = { x: Math.sin(ry), z: Math.cos(ry) };
+    const objetivo = astronautas.filter((a) => a !== yoA).map((a) => {
+      const dx = a.jugador.pies.x - pies.x; const dz = a.jugador.pies.z - pies.z; const d = Math.hypot(dx, dz) || 1;
+      return { a, d, delante: (dx * frente.x + dz * frente.z) / d };
+    }).filter((o) => o.d < 1.8 && o.delante > 0.2).sort((p, q) => p.d - q.d)[0];
+    yoA.jugador.astronauta.reproducir('golpear', 0.45);
+    if (!objetivo) { avisar('👊 No hay nadie delante para empujar', 'amable', 1500); return; }
+    ultimoEmpujon = ahora;
+    efecto('clic');
+    conexion.accion('golpe', { rol: objetivo.a.rol });
+  }
+  let ultimoGolpe = estado.golpe ? estado.golpe.n : 0;
+  function recibirGolpe(g) {
+    const a = astronautas.find((x) => x.rol === g.rol);
+    if (!a) return;
+    a.jugador.astronauta.mareado?.(2);
+    const quien = a.personaje?.nombre || miembro(g.rol).corto;
+    if (g.de === conexion.id) { avisar(`👊 ¡Empujón a <b>${quien}</b>!`, 'amable', 2000); return; }
+    if (a === actual()) {
+      // ¡Me empujaron a mí! Mareado 2 s y, si estaba en una consola, se cierra
+      const estabaEnConsola = !!consola;
+      if (consola) consola.cerrar();
+      a.jugador.bloqueado = true;
+      setTimeout(() => { if (!consola) a.jugador.bloqueado = false; }, 2000);
+      avisar(`💫 ¡<b>${g.deNombre}</b> te dio un empujón!${estabaEnConsola ? ' Se cerró tu consola: vuelve a abrirla con E.' : ''}`, 'amable', 3500);
+    }
+  }
   window.addEventListener('keydown', teclaCambio);
 
   // ---- Estado de la partida ----
@@ -219,6 +259,7 @@ export function iniciarPantallaNave(ctx) {
   const quitarEstado = conexion.alEstado((e) => {
     if (!['viaje', 'llegada', 'fracaso'].includes(e.fase)) { ctx.irA('juego'); return; }
     bots = e.bots || [];
+    if (e.golpe && e.golpe.n > ultimoGolpe) { ultimoGolpe = e.golpe.n; recibirGolpe(e.golpe); }
     // Puertas abiertas o cerradas por cualquier jugador
     esc.puertas.forEach((p, i) => { if (p.manual) p.abierta = !!(e.puertas || {})[i]; });
     for (const m of e.mensajes) {

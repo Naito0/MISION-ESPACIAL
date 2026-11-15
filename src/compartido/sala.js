@@ -364,6 +364,13 @@ export class Sala {
       return { ok: true };
     },
     /** Abrir o cerrar una puerta de la nave con E (todos la ven igual). */
+    /** Empujón (tecla F): el astronauta de ese rol queda mareado 2 s y, si estaba en una consola, se le cierra. */
+    golpe(j, { rol }) {
+      if (!ROLES_ID.includes(rol)) return { error: 'Rol desconocido.' };
+      this.golpe = { n: ((this.golpe && this.golpe.n) || 0) + 1, de: j.id, deNombre: j.nombre, rol };
+      this.cambio();
+      return { ok: true };
+    },
     puerta(j, { i, abierta }) {
       return this.abrirPuerta(i, abierta);
     },
@@ -481,6 +488,7 @@ export class Sala {
       bots: this.bots || [],
       puertas: this.puertas || {},
       aterrizador: this.aterrizadorId(),
+      golpe: this.golpe || null,
       personajesPorRol: this.personajesPorRol(),
       aterrizaje: this.aterrizaje || null,
       superficie: this.fase === 'superficie' && this.superficie ? { restante: Math.ceil(this.superficie.restante), muestras: this.superficie.muestras } : null,
