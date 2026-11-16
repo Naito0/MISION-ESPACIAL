@@ -9,6 +9,7 @@
 // =============================================================
 import * as THREE from 'three';
 import { Motor3D, crearReloj } from './engine/Motor3D.js';
+import { mostrarIntro, introActiva, introYaVista, entraConSala } from './intro.js';
 import { crearControlTeclado, finDeCuadro } from './engine/entrada.js';
 import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
@@ -120,6 +121,8 @@ ctx.alResolver = (r) => {
 };
 let ultimaPantallaTutorial = null;
 ctx.irA = irA;
+// Botón "Ver intro" del menú principal (el clic ya permite el sonido: va directo al video)
+ctx.verIntro = () => mostrarIntro({ portada: false });
 
 // ---- Menú principal ----
 // "Jugar solo": una sala local de 1 jugador; los otros 3 puestos los ocupan bots.
@@ -210,7 +213,7 @@ if (motor.calidad.bloom) {
   }).catch(() => { composer = null; });
 }
 motor.renderer.setAnimationLoop((ahora) => {
-  if (document.hidden) { reloj.getDelta(); return; }
+  if (document.hidden || introActiva()) { reloj.getDelta(); return; } // pestaña oculta o intro en video: no se dibuja el 3D
   if (ahora - ultimoCuadro < 1000 / FPS_MAX - 1) return; // límite de 60 FPS
   ultimoCuadro = ahora;
   const dt = Math.min(reloj.getDelta(), 0.05);
@@ -238,5 +241,7 @@ window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, 
   progresoCarga(0.95, 'Encendiendo los motores…');
   motor.renderer.compile(motor.escena, motor.camara); // prepara los gráficos para que no se trabe al empezar
   progresoCarga(1, '¡Listo!');
+  // Intro en video: la primera vez, salvo que entre con un enlace o código de sala
+  if (!introYaVista() && !entraConSala()) mostrarIntro({ portada: true });
   setTimeout(() => { carga.style.opacity = '0'; setTimeout(() => carga.remove(), 600); }, 250);
 })();

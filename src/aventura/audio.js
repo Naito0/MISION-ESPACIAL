@@ -10,10 +10,11 @@ let ctx = null;
 let general = null;
 let zumbido = null;
 
+let audioPausado = false; // true mientras se ve la intro (intro.js)
 let huboGesto = false; // el navegador no deja crear el audio antes del primer clic o tecla (avisa en la consola)
 function asegurar(ev) {
   if (ev && ev.isTrusted !== false) huboGesto = true;
-  if (!huboGesto) return null;
+  if (!huboGesto || audioPausado) return null;
   if (!ctx) {
     const C = window.AudioContext || window.webkitAudioContext;
     if (!C) return null;
@@ -24,6 +25,14 @@ function asegurar(ev) {
   }
   if (ctx.state === 'suspended') ctx.resume();
   return ctx;
+}
+
+/** Pausa (true) o reactiva (false) todos los sonidos del juego (se usa durante la intro en video). */
+export function pausarAudio(pausado) {
+  audioPausado = pausado;
+  if (!ctx) return;
+  if (pausado) ctx.suspend();
+  else if (huboGesto) ctx.resume();
 }
 
 alCambiarPreferencias((p) => { if (general) general.gain.value = p.silencio ? 0 : 0.5; });
