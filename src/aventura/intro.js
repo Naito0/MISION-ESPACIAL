@@ -7,6 +7,8 @@
 //    Espacio también saltan).
 // 3) Al terminar (o al saltar): fundido corto a negro → menú, y el <video> se
 //    saca de la página.
+// Sale SIEMPRE al abrir el juego (salvo con enlace de sala). En localStorage solo
+// queda anotado que ya se vio (introYaVista), por si se usa más adelante.
 // Mientras se ve, main3d.js no dibuja la escena 3D y el audio del juego se pausa.
 // Si el video falla o no carga, se va directo al menú (nunca queda en negro).
 // Los archivos están en public/intro/ (se copian tal cual a dist/intro/).

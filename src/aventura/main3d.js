@@ -9,7 +9,7 @@
 // =============================================================
 import * as THREE from 'three';
 import { Motor3D, crearReloj } from './engine/Motor3D.js';
-import { mostrarIntro, introActiva, introYaVista, entraConSala } from './intro.js';
+import { mostrarIntro, introActiva, entraConSala } from './intro.js';
 import { crearControlTeclado, finDeCuadro } from './engine/entrada.js';
 import { prepararModelos } from './entities/fabricaAstronautas.js';
 import { crearMenuPausa } from './ui/menuPausa.js';
@@ -241,7 +241,8 @@ window.aventura = { motor, THREE, irA, ctx, abrirMinijuego, mostrarDiagnostico, 
   progresoCarga(0.95, 'Encendiendo los motores…');
   motor.renderer.compile(motor.escena, motor.camara); // prepara los gráficos para que no se trabe al empezar
   progresoCarga(1, '¡Listo!');
-  // Intro en video: la primera vez, salvo que entre con un enlace o código de sala
-  if (!introYaVista() && !entraConSala()) mostrarIntro({ portada: true });
+  // Intro en video: SIEMPRE al abrir el juego (portada con "Ver intro" y "Saltar"),
+  // salvo que entre con un enlace o código de sala
+  if (!entraConSala()) mostrarIntro({ portada: true });
   setTimeout(() => { carga.style.opacity = '0'; setTimeout(() => carga.remove(), 600); }, 250);
 })();
